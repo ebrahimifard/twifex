@@ -13,7 +13,6 @@ Install datacube in a new virtual environment to avoid dependency issues:
 ```
 git clone https://gitlab.tudelft.nl/steelelab/datacube.git
 cd datacube
-conda env create --name datacube --file environment.yml
-conda activate datacube
-pip install --editable .
+conda env create -f environment.yml
+conda activate twifex
 ```

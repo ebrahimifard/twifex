@@ -3,16 +3,18 @@ channels:
   - conda-forge
   - anaconda
   - defaults
-dependencies
-  - urlextract
+dependencies:
   - textstat
   - networkx
   - emoji
   - numpy
-  - vaderSentiment
-  - hatesonar
   - pandas
   - textblob
   - tqdm
   - nltk
-  - wordninja
+  - pip
+  - pip:
+      - wordninja
+      - urlextract
+      - hatesonar
+      - vaderSentiment
