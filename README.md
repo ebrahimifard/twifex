@@ -11,8 +11,7 @@ Prerequisites:
 
 Install datacube in a new virtual environment to avoid dependency issues:
 ```
-git clone https://gitlab.tudelft.nl/steelelab/datacube.git
-cd datacube
-conda env create -f environment.yml
+git clone https://github.com/ebrahimifard/twifex.git twifex
+cd twifex
+conda env create --name twifex --file environment.yml
 conda activate twifex
-```
