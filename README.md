@@ -9,7 +9,7 @@ Prerequisites:
 - Python 3.7 or 3.8
 - Anaconda
 
-Install datacube in a new virtual environment to avoid dependency issues:
+Install TwiFEx in a new virtual environment to avoid dependency issues:
 ```
 git clone https://github.com/ebrahimifard/twifex.git twifex
 cd twifex
