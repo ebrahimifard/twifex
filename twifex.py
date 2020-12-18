@@ -5,6 +5,7 @@
 
 ############################################# Packages #############################################
 import json
+import copy
 import requests
 from pprint import pprint
 from urlextract import URLExtract
@@ -397,6 +398,7 @@ class temporalFeatures:
                         temporal_tweets[time_frame].append(tweet)
 
         return temporal_tweets
+
 class placeFeatures:
     def __init__(self):
         """
@@ -457,6 +459,8 @@ class placeFeatures:
 
 class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
     # def __init__(self, tweets):
+    #     self.tweets = tweets
+    #     self.nodes = self.tweets_period()
     def tweet_complexity_change(self, nodes, unit="word"):
         """
         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
@@ -513,6 +517,7 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                                                                "automated_readability_index, coleman_liau_index, linsear_write_formula," \
                                                                "or dale_chall_readability_score."
 
+
         readability = {}
         for time_frame, tweets in nodes.items():
             readability[time_frame] = []
@@ -549,6 +554,8 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
 
         assert (unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
 
+
+
         tweet_length = {}
         for time_frame, tweets in nodes.items():
             tweet_length[time_frame] = []
@@ -583,6 +590,8 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
         The key-value pair in this dictionary corresponds to the timestamps and
         the statistical metrics of the tweet count in all the tweets that are posted within every timestamp.
         """
+
+
         tweet_count = {}
         for time_frame, tweets in nodes.items():
             tweet_count[time_frame] = len(tweets)
@@ -601,7 +610,7 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
 
         assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech", "vad"]), "The sentiment_engine has to be" \
                                                                                          "textblob, vader, nrc," \
-                                                                                         "hate_speech or vad"
+                                                                                 "hate_speech or vad"
         sentiments = {}
         for time_frame, tweets in nodes.items():
             sentiments[time_frame] = {}
@@ -621,6 +630,7 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                 sentiments[time_frame][score]["stdev"] = np.nanstd(scores)
                 sentiments[time_frame][score]["median"] = np.nanmedian(scores)
         return sentiments
+
 class timeDependentLocationIndependentUserMassFeatures(temporalFeatures):
     # def __init__(self, tweets):
     def users_role_change(self, nodes):
@@ -1427,7 +1437,7 @@ class network():
     def get_network(self):
         return self.network
 
-class retweetNetwork(network):
+class retweetNetwork(network): #node should change to nodes in order to call a particular node
     def building_network(self):
         """
         This function builds the retweet network.
@@ -1476,11 +1486,11 @@ class retweetNetwork(network):
         for tweet_id, tweet in self.tweets.items():
             trf = tweet.is_retweeted()
             if trf == True:
-                self.network.node[tweet.get_retweeted().get_id()][
+                self.network.nodes[tweet.get_retweeted().get_id()][
                     "character_count"] = tweet.get_retweeted().text_length(unit="sentence")
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
+                self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
             elif trf == False:
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
+                self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
     def word_complexity_layer(self):
         """
         This function add the word complexity of each tweet as a property to every node.
