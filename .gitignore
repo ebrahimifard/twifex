@@ -1,3 +1,4 @@
 tests/*
 resource/*
 outputs/*
+__pycache__/*

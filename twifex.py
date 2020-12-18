@@ -184,9 +184,9 @@ class collectiveTweets:
         return massBasedFeatures(self.tweets)
     def topology_based_features(self):
         """
-        :return: a topologyBasedAttributes object which comprises the singleTweet objects
+        :return: a topologyBasedFeatures object which comprises the singleTweet objects
         """
-        return topologyBasedAttributes(self.tweets) # Shouldn't this be topologyBasedFeatures?
+        return topologyBasedFeatures(self.tweets) # Shouldn't this be topologyBasedFeatures?
 
 
 ############################################# mass features #############################################
@@ -3249,19 +3249,4 @@ class quoteClass(singleTweet):
 
 
         # return self.tweet["extended_tweet"]["full_text"] if self.tweet["truncated"] else self.tweet["text"]
-
-
-
-############ Tests ###########
-twix = Twix()
-tweets = []
-for file in tqdm([i for i in os.listdir("./test_case/") if os.path.isfile("./test_case/"+i)]):
-    tweets.append(twix.single_tweet("./test_case/"+file))
-
-
-print("@")
-#
-# g = temporalFeatures(tweets).tweets_in_periods()
-# s = twix.collective_tweets(tweets).mass_based_features().time_dependent_features().time_dependent_location_independent_mass_features().tweet_features().
-# print("#")
 
