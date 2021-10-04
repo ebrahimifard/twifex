@@ -34,8 +34,9 @@ from bs4 import BeautifulSoup
 
 import wordninja
 from itertools import combinations
-############################################# Packages #############################################
 
+
+############################################# Packages #############################################
 
 
 ############################################# Notes and Comments #############################################
@@ -57,8 +58,20 @@ from itertools import combinations
 #     - components number is only implemented for undircedted graph! See, how much it influences the whole model
 #     - In the user network you should take into account the difference between an account with only one single tweet and account with mu;ltiple tweet
 #     - Adding botometer to User?
-############################################# Notes and Comments #############################################
+#     - Remove whatever that is related to hatesonar
+#     - Add some dictionaries/models on state of the art of hate speech/offensive language/toxicity
+#     - Add dictionaries/models related to sarcasm/humour/irony detection
+#     - Add dictionaries/models related to patriotism detection
+#     - Add dictionaries/models related to patriotism detection
+#     - Add dictionaries/models related to patronizing and condescending language detection
+#     - Add dictionaries/models related to aspect-based sentiment analysis
+#     - Add dictionaries/models related to persuasive language detection
+#     - Add dictionaries/models related to metaphor detection
+# memotion (meme emotion)?
+#       - the spatial units of analysis are place and country. How are they different? Explain what is "place"?
 
+
+############################################# Notes and Comments #############################################
 
 
 class TwixUtility:
@@ -97,17 +110,21 @@ class TwixUtility:
                         [distance_mat[text1_ind - 1][text2_ind - 1], distance_mat[text1_ind][text2_ind - 1],
                          distance_mat[text1_ind - 1][text2_ind]]) + 1
 
-        x, y = distance_mat.shape[0]-1, distance_mat.shape[1]-1
+        x, y = distance_mat.shape[0] - 1, distance_mat.shape[1] - 1
         return distance_mat[x][y]
+
 
 class Twix:
     def __init__(self):
         """
         This function builds a Twix object and load the necessary modules and dictionaries
         """
-        address_book = {"nrc": "./resource/NRC.txt", "vad": "./resource/BRM-emot-submit.csv", "vul": "./resource/vulgar.txt",
-                        "abb": "./resource/abbr.txt", "emot": "./resource/emoticons.txt", "stone_stopwords": "./resource/stopwords(Stone).txt",
-                        "nltk_stopwords": "./resource/stopwords(nltk).txt", "corenlp_stopwords": "./resource/stopwords(corenlp).txt",
+        address_book = {"nrc": "./resource/NRC.txt", "vad": "./resource/BRM-emot-submit.csv",
+                        "vul": "./resource/vulgar.txt",
+                        "abb": "./resource/abbr.txt", "emot": "./resource/emoticons.txt",
+                        "stone_stopwords": "./resource/stopwords(Stone).txt",
+                        "nltk_stopwords": "./resource/stopwords(nltk).txt",
+                        "corenlp_stopwords": "./resource/stopwords(corenlp).txt",
                         "glascow_stopwords": "./resource/stopwords(glascow).txt"}
 
         stopwords_dic = {"stone": [word.strip() for word in open(address_book["stone_stopwords"]).readlines()],
@@ -115,16 +132,16 @@ class Twix:
                          "corenlp": [word.strip() for word in open(address_book["corenlp_stopwords"]).readlines()],
                          "glascow": [word.strip() for word in open(address_book["glascow_stopwords"]).readlines()]}
 
-        #Initialization of VADER sentiment analysis
+        # Initialization of VADER sentiment analysis
         analyser = SentimentIntensityAnalyzer()
 
-        #Initialization of sonar sentiment analysis
-        sonar = Sonar()
+        # Initialization of sonar sentiment analysis
+        # sonar = Sonar()
 
-        #Initialization of SpaCy
+        # Initialization of SpaCy
         nlp = en_core_web_sm.load()
 
-        #Initialization of NRC sentiment analysis
+        # Initialization of NRC sentiment analysis
         nrc_raw = open(address_book["nrc"]).readlines()
         nrc_dic = {}
         for i in nrc_raw:
@@ -137,7 +154,7 @@ class Twix:
             else:
                 nrc_dic[lemma] = {sentiment: int(score)}
 
-        #Initialization of VAD sentiment analysis
+        # Initialization of VAD sentiment analysis
         # emotions = pd.DataFrame.from_csv(address_book["vad"]) # This is depreciated
         emotions = pd.read_csv(address_book["vad"])
         emotions = emotions[["Word", "V.Mean.Sum", "A.Mean.Sum", "D.Mean.Sum"]]
@@ -147,24 +164,30 @@ class Twix:
         emotions = emotions.drop(["word"], axis="index")
         vad_dic = pd.DataFrame.to_dict(emotions)
 
-        #Initialization of Vulgar dictionary
+        # Initialization of Vulgar dictionary
         vulgar_words_list = [term.strip() for term in open(address_book["vul"]).readlines()]
 
-        #Initialization of abbreviations dictionary
+        # Initialization of abbreviations dictionary
         abbreviation_list = [term.strip() for term in open(address_book["abb"]).readlines()]
 
-        #Initialization of Emoticon dictionary
+        # Initialization of Emoticon dictionary
         emoticons_dict = [term.strip() for term in open(address_book["emot"]).readlines()]
 
-        self.params = {"vader": analyser, "nrc": nrc_dic, "sonar": sonar, "vad": vad_dic,
+        # self.params = {"vader": analyser, "nrc": nrc_dic, "sonar": sonar, "vad": vad_dic,
+        #                "vulgar": vulgar_words_list, "abbr": abbreviation_list, "stopwords": stopwords_dic,
+        #                "spacy": nlp, "emoticons": emoticons_dict}
+
+        self.params = {"vader": analyser, "nrc": nrc_dic, "vad": vad_dic,
                        "vulgar": vulgar_words_list, "abbr": abbreviation_list, "stopwords": stopwords_dic,
                        "spacy": nlp, "emoticons": emoticons_dict}
+
     def single_tweet(self, path):
         """
         :param path: The path to a tweet json
         :return: A singleTweet object for the tweet json
         """
         return singleTweet(path, self.params)
+
     def collective_tweets(self, tweets):
         """
         :param tweets: a list of singleTweet objects
@@ -172,22 +195,25 @@ class Twix:
         """
         return collectiveTweets({tweet.get_id(): tweet for tweet in tweets})
 
+
 class collectiveTweets:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def mass_based_features(self):
         """
         :return: a massBasedFeatures object which comprises the singleTweet objects
         """
         return massBasedFeatures(self.tweets)
+
     def topology_based_features(self):
         """
         :return: a topologyBasedFeatures object which comprises the singleTweet objects
         """
-        return topologyBasedFeatures(self.tweets) # Shouldn't this be topologyBasedFeatures?
+        return topologyBasedFeatures(self.tweets)  # Shouldn't this be topologyBasedFeatures?
 
 
 ############################################# mass features #############################################
@@ -198,100 +224,127 @@ class massBasedFeatures:
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def time_dependent_features(self):
         """
         :return: an object of massTweetFeatures which comprises the singleTweet objects
         """
         return timeDependentMassFeatures(self.tweets)
+
     def time_independent_features(self):
         """
         :return: an object of massUserFeatures which comprises the singleTweet objects
         """
         return timeIndependentMassFeatures(self.tweets)
+
+
 class timeIndependentMassFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def time_independent_location_dependent_mass_features(self):
         return timeIndependentLocationDependentMassFeatures(self.tweets)
+
     def time_independent_location_independent_mass_features(self):
         return timeIndependentLocationIndependentMassFeatures(self.tweets)
+
+
 class timeDependentMassFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def time_dependent_location_dependent_mass_features(self):
         return timeDependentLocationDependentMassFeatures(self.tweets)
+
     def time_dependent_location_independent_mass_features(self):
         return timeDependentLocationIndependentMassFeatures(self.tweets)
+
+
 class timeDependentLocationDependentMassFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweet_features(self):
         """
         :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
         """
         return timeDependentLocationDependentTweetMassFeatures(self.tweets)
+
     def user_features(self):
         """
         :return: an object of timeDependentUserMassFeatures which comprises the singleTweet objects
         """
         return timeDependentLocationDependentUserMassFeatures(self.tweets)
+
+
 class timeDependentLocationIndependentMassFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweet_features(self):
         """
         :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
         """
         return timeDependentLocationIndependentTweetMassFeatures(self.tweets)
+
     def user_features(self):
         """
         :return: an object of timeDependentUserMassFeatures which comprises the singleTweet objects
         """
         return timeDependentLocationIndependentUserMassFeatures(self.tweets)
+
+
 class timeIndependentLocationDependentMassFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweet_features(self):
         """
         :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
         """
         return timeIndependentLocationDependentTweetMassFeatures(self.tweets)
+
     def user_features(self):
         """
         :return: an object of timeDependentUserMassFeatures which comprises the singleTweet objects
         """
         return timeIndependentLocationDependentUserMassFeatures(self.tweets)
+
+
 class timeIndependentLocationIndependentMassFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweet_features(self):
         """
         :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
         """
         return timeIndependentLocationIndependentTweetMassFeatures(self.tweets)
+
     def user_features(self):
         """
         :return: an object of timeDependentUserMassFeatures which comprises the singleTweet objects
         """
         return timeIndependentLocationIndependentUserMassFeatures(self.tweets)
+
 
 class temporalFeatures:
     def __init__(self, tweets):
@@ -299,6 +352,7 @@ class temporalFeatures:
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweets_period(self):
         """
         :return: a sorted list of tweets creation time
@@ -307,6 +361,7 @@ class temporalFeatures:
         for tweet in self.tweets:
             tweet_dates.append(self.tweets[tweet].get_creation_time())
         return sorted(tweet_dates)
+
     def tweets_in_periods(self, resolution="year", frequency=1):
         """
         :param resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
@@ -320,7 +375,6 @@ class temporalFeatures:
                                                                                              "should be year, month, " \
                                                                                              "week, day, hour, minute," \
                                                                                              " or second"
-
 
         sorted_tweet_times = self.tweets_period()
         time_frame = sorted_tweet_times[0]
@@ -399,18 +453,21 @@ class temporalFeatures:
 
         return temporal_tweets
 
+
 class placeFeatures:
-    def __init__(self):
+    def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweets_with_place(self):
         """
         This function filters out all tweets without geo location.
         :return: a dictionary that maps every geotagged tweet_id to its corresponding singleTweet object
         """
-        return {p:q for p,q in self.tweets.items() if q.get_place() != None}
+        return {p: q for p, q in self.tweets.items() if q.get_place() != None}
+
     def tweets_distinct_countries(self):
         """
         This function finds all countries that the tweets in the dataset are comming from.
@@ -422,7 +479,8 @@ class placeFeatures:
             place = tweet.get_place()
             places.add(place["country"])
         return list(places)
-    def tweets_distinct_places(self,  coordinates=True):
+
+    def tweets_distinct_places(self, coordinates=True):
         """
         This function finds all places that the tweets in the dataset are comming from.
         :return: return a list of distinct places.
@@ -436,6 +494,7 @@ class placeFeatures:
             return places_coordinates
         else:
             return list(places_coordinates.keys())
+
     def countries_with_tweets(self):
         """
         This function mapped all the geotagged tweets to their country of origin.
@@ -444,8 +503,10 @@ class placeFeatures:
         tweetsWithPlaces = self.tweets_with_place()
         countries_dict = {}
         for tweet_id, tweet in tweetsWithPlaces.items():
-            countries_dict[tweet.get_place()["country"]] = countries_dict.get(tweet.get_place()["country"], []) + [tweet]
+            countries_dict[tweet.get_place()["country"]] = countries_dict.get(tweet.get_place()["country"], []) + [
+                tweet]
         return countries_dict
+
     def places_with_tweets(self):
         """
         This function mapped all the geotagged tweets to their origin.
@@ -456,6 +517,9 @@ class placeFeatures:
         for tweet_id, tweet in tweetsWithPlaces.items():
             places_dict[tweet.get_place()["full_name"]] = places_dict.get(tweet.get_place()["full_name"], []) + [tweet]
         return places_dict
+
+    def test3(self):
+        print("hi from test3")
 
 class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
     # def __init__(self, tweets):
@@ -468,7 +532,7 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
         :param unit: the unit of analysis for tweet complexity analysis. It can be "word", "sentence", or "syllables".
         :return: a dictionary that represents the change of the tweet complexity across the timespan of the dataset
         due to selected unit of analysis. The key-value pair in this dictionary corresponds to
-        the timestamps and the statistical metrics of the tweet complexity scores in all the tweets that are created
+        the timestamps and the statistical metrics of the tweet complexity scores in all the tweets that are posted
         within every timestamp.
         """
 
@@ -499,7 +563,8 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                 complexity[time_frame]["stdev"] = np.nan
                 complexity[time_frame]["median"] = np.nan
         return complexity
-    def tweet_readability_change(self, nodes, metric="flesch_reading_ease"):
+
+    def tweet_readability_change(self, nodes, metric="flesch_kincaid_grade"):
         """
         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
         the timestamps and all the tweets that are posted within every timestamp.
@@ -516,7 +581,6 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
                                                                "automated_readability_index, coleman_liau_index, linsear_write_formula," \
                                                                "or dale_chall_readability_score."
-
 
         readability = {}
         for time_frame, tweets in nodes.items():
@@ -542,6 +606,7 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                 readability[time_frame]["stdev"] = np.nan
                 readability[time_frame]["median"] = np.nan
         return readability
+
     def tweet_length_change(self, nodes, unit="word"):
         """
         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
@@ -553,8 +618,6 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
         """
 
         assert (unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
-
-
 
         tweet_length = {}
         for time_frame, tweets in nodes.items():
@@ -582,20 +645,21 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                 tweet_length[time_frame]["median"] = np.nan
                 tweet_length[time_frame]["median"] = np.nan
         return tweet_length
+
     def tweet_count_change(self, nodes):
         """
         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
         the timestamps and all the tweets that are posted within every timestamp.
         :return: a dictionary that represents the change of the tweet count across the timespan of the dataset.
         The key-value pair in this dictionary corresponds to the timestamps and
-        the statistical metrics of the tweet count in all the tweets that are posted within every timestamp.
+        the number of tweets that are posted within every timestamp.
         """
-
 
         tweet_count = {}
         for time_frame, tweets in nodes.items():
             tweet_count[time_frame] = len(tweets)
         return tweet_count
+
     def sentiment_change(self, nodes, sentiment_engine="vader"):
         """
         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
@@ -608,9 +672,10 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
         within every timestamp.
         """
 
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech", "vad"]), "The sentiment_engine has to be" \
-                                                                                         "textblob, vader, nrc," \
-                                                                                 "hate_speech or vad"
+        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+                                     "vad"]), "The sentiment_engine has to be" \
+                                              "textblob, vader, nrc," \
+                                              "hate_speech or vad"
         sentiments = {}
         for time_frame, tweets in nodes.items():
             sentiments[time_frame] = {}
@@ -630,6 +695,7 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                 sentiments[time_frame][score]["stdev"] = np.nanstd(scores)
                 sentiments[time_frame][score]["median"] = np.nanmedian(scores)
         return sentiments
+
 
 class timeDependentLocationIndependentUserMassFeatures(temporalFeatures):
     # def __init__(self, tweets):
@@ -666,15 +732,22 @@ class timeDependentLocationIndependentUserMassFeatures(temporalFeatures):
                 user_roles[time_frame]["stdev"] = np.nan
                 user_roles[time_frame]["median"] = np.nan
         return user_roles
+
+
 class timeDependentLocationDependentTweetMassFeatures(temporalFeatures, placeFeatures):
     def test(self):
         print("test")
+
+
 class timeDependentLocationDependentUserMassFeatures(temporalFeatures, placeFeatures):
     def test(self):
         print("test")
+
+
 class timeIndependentLocationIndependentTweetMassFeatures:
     def __init__(self, tweets):
         self.tweets = tweets
+
     def tweets_tf_idf(self):
         """
         This function measures tf-idf for every tweet in the dataset. Tf-idf is the result of elementwise product
@@ -714,6 +787,7 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             for token in tf[tweet_id]:
                 tf_idf[tweet_id][token] = tf[tweet_id][token] * np.log(len(df) / df[tweet_id][token])
         return tf_idf
+
     def tweets_pos_tf_idf(self):
         """
         This function measures tf-idf for tweet text part-of-speech (POS). Measuring pos_tf_idf is slightly different
@@ -754,6 +828,7 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             for token in tf[tweet_id]:
                 tf_idf[tweet_id][token] = tf[tweet_id][token] * np.log(len(df) / df[tweet_id][token])
         return tf_idf
+
     def tf_idf_dimension_balancer(self, tf_idf):
         """
         This function equalise the dimension of tweets tf-idf vectors. To this end, it pulls all the tweets distinct tokens
@@ -779,6 +854,7 @@ class timeIndependentLocationIndependentTweetMassFeatures:
                 # temp[element] = tfidf[tweet_id][element]
             # tfidf[tweet_id] = vec
         return tfidf
+
     def tweets_mention_histogram(self):
         """
         This function counts the frequency of mentioning different users in the dataset.
@@ -790,7 +866,8 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             if len(mentions) != 0:
                 for mention in mentions:
                     mention_histogram[mention["screen_name"]] = mention_histogram.get(mention["screen_name"], 0) + 1
-        return {m[0]:m[1] for m in sorted(mention_histogram.items(), key=lambda p:p[1], reverse=True)}
+        return {m[0]: m[1] for m in sorted(mention_histogram.items(), key=lambda p: p[1], reverse=True)}
+
     def tweets_hashtag_histogram(self):
         """
         This function counts the frequency of different hashtags in the dataset.
@@ -802,31 +879,34 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             if len(hashtags) != 0:
                 for hashtag in hashtags:
                     hashtag_histogram[hashtag["text"]] = hashtag_histogram.get(hashtag["text"], 0) + 1
-        return {m[0]:m[1] for m in sorted(hashtag_histogram.items(), key=lambda p:p[1], reverse=True)}
+        return {m[0]: m[1] for m in sorted(hashtag_histogram.items(), key=lambda p: p[1], reverse=True)}
+
     def tweets_retweeted_status_histogram(self):
         """
         This function counts how many of the tweets in the dataset are retweets.
         :return: a dictionary that shows the number of retweets(True) and non-retweets(False).
         """
-        retweet = {True:0, False:0}
+        retweet = {True: 0, False: 0}
         for tweet_id in self.tweets:
             if self.tweets[tweet_id].is_retweeted():
                 retweet[True] += 1
             else:
                 retweet[False] += 1
         return retweet
+
     def tweets_quoted_status_histogram(self):
         """
         This function counts how many of the tweets in the dataset are quoted.
         :return: a dictionary that shows the number of quoted-tweets(True) and non-quoted tweets(False).
         """
-        quoted = {True:0, False:0}
+        quoted = {True: 0, False: 0}
         for tweet_id in self.tweets:
             if self.tweets[tweet_id].is_quoted():
                 quoted[True] += 1
             else:
                 quoted[False] += 1
         return quoted
+
     def tweets_emojis_histogram(self):
         """
         This function counts the frequency of different emojis in the dataset.
@@ -838,7 +918,8 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             if len(emojis) != 0:
                 for emoji in emojis:
                     emojis_histogram[emoji["emoji"]] = emojis_histogram.get(emoji["emoji"], 0) + 1
-        return {m[0]:m[1] for m in sorted(emojis_histogram.items(), key=lambda p:p[1], reverse=True)}
+        return {m[0]: m[1] for m in sorted(emojis_histogram.items(), key=lambda p: p[1], reverse=True)}
+
     def tweets_emoticons_histogram(self):
         """
         This function counts the frequency of different emoticons in the dataset.
@@ -850,13 +931,15 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             if len(emoticons) != 0:
                 for emoticon in emoticons:
                     emoticons_histogram[emoticon] = emoticons_histogram.get(emoticon, 0) + 1
-        return {m[0]:m[1] for m in sorted(emoticons_histogram.items(), key=lambda p:p[1], reverse=True)}
+        return {m[0]: m[1] for m in sorted(emoticons_histogram.items(), key=lambda p: p[1], reverse=True)}
+
     def tweets_count(self):
         """
         This function count the number of tweets in the dataset.
         :return: an integer showing the number of tweets in the dataset.
         """
         return len(self.tweets)
+
     def official_source_fraction(self):
         """
         This function finds the fraction of tweets posted from official sources in the dataset.
@@ -867,6 +950,7 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             if tweet.tweet_source_status():
                 target += 1
         return target / len(self.tweets)
+
     def tweets_photo_histogram(self):
         """
         This function counts the frequency of photos in the dataset.
@@ -877,6 +961,7 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             photos = self.tweets[tweet_id].get_photo()
             photos_histogram[len(photos)] = photos_histogram.get(len(photos), 0) + 1
         return photos_histogram
+
     def tweets_video_histogram(self):
         """
         This function counts the frequency of videos in the dataset.
@@ -887,6 +972,7 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             videos = self.tweets[tweet_id].get_video()
             videos_histogram[len(videos)] = videos_histogram.get(len(videos), 0) + 1
         return videos_histogram
+
     def tweets_gif_histogram(self):
         """
         This function counts the frequency of gifs in the dataset.
@@ -897,6 +983,7 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             gifs = self.tweets[tweet_id].get_gif()
             gifs_histogram[len(gifs)] = gifs_histogram.get(len(gifs), 0) + 1
         return gifs_histogram
+
     def tweets_symbols_histogram(self):
         """
         This function counts the frequency of symbols in the dataset.
@@ -907,9 +994,12 @@ class timeIndependentLocationIndependentTweetMassFeatures:
             symbols = self.tweets[tweet_id].get_gif()
             symbols_histogram[len(symbols)] = symbols_histogram.get(len(symbols), 0) + 1
         return symbols_histogram
+
+
 class timeIndependentLocationIndependentUserMassFeatures:
     def __init__(self, tweets):
         self.tweets = tweets
+
     def users_followers_fraction(self, period=True, threshold=100):
         """
         This function finds the fraction of users whose followers number is equal or greater (depending on period)
@@ -931,6 +1021,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
                 if user.get_followers_count() == threshold:
                     target += 1
         return target / self.distinct_users_count()
+
     def users_friends_fraction(self, period=True, threshold=100):
         """
         This function finds the fraction of users whose friends (followee) number is equal or greater (depending on period)
@@ -952,6 +1043,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
                 if user.get_friends_count() == threshold:
                     target += 1
         return target / self.distinct_users_count()
+
     def users_role_fraction(self, period=True, threshold=1):
         """
         This function finds the fraction of users whose role is equal or greater (depending on period)
@@ -973,6 +1065,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
                 if user.get_user_role() == threshold:
                     target += 1
         return target / self.distinct_users_count()
+
     def verified_users_fraction(self):
         """
         This function finds the fraction of verified users in the dataset.
@@ -984,6 +1077,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
             if user.get_user_verification_status() == True:
                 target += 1
         return target / self.distinct_users_count()
+
     def users_with_location_fraction(self):
         """
         This function finds the fraction of geolocated users in the dataset.
@@ -995,6 +1089,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
             if user.user_has_profile_location() == True:
                 target += 1
         return target / self.distinct_users_count()
+
     def users_with_photo_fraction(self):
         """
         This function finds the fraction of users with profile picture in the dataset.
@@ -1006,6 +1101,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
             if user.user_has_profile_picture() == True:
                 target += 1
         return target / self.distinct_users_count()
+
     def users_with_url_fraction(self):
         """
         This function finds the fraction of users with profile url in the dataset.
@@ -1017,6 +1113,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
             if user.user_has_profile_url() == True:
                 target += 1
         return target / self.distinct_users_count()
+
     def users_with_description_fraction(self):
         """
         This function finds the fraction of users with profile description in the dataset.
@@ -1028,6 +1125,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
             if user.user_has_profile_description() == True:
                 target += 1
         return target / self.distinct_users_count()
+
     def protected_users_fraction(self):
         """
         This function finds the fraction of protected users in the dataset.
@@ -1039,7 +1137,8 @@ class timeIndependentLocationIndependentUserMassFeatures:
             if user.user_protected_profile() == True:
                 target += 1
         return target / self.distinct_users_count()
-    def top_twitters(self, threshold_mode = True, threshold=5, top_k_mode=False, top_k = 10):
+
+    def top_twitters(self, threshold_mode=True, threshold=5, top_k_mode=False, top_k=10):
         """
         This function finds either the users whose tweets number is more than the threshold (threshold-mode), or
         top k users with highest tweets number (top_k-mode).
@@ -1056,22 +1155,25 @@ class timeIndependentLocationIndependentUserMassFeatures:
             tweet_id = self.tweets[tweet_id].get_id()
             user_id = self.tweets[tweet_id].get_twitter().get_user_id()
             users[user_id] = users.get(user_id, []) + [tweet_id]
-        top_users = {user:len(users[user]) for user in users}
+        top_users = {user: len(users[user]) for user in users}
 
         if threshold_mode and not top_k_mode:
-            return {user:top_users[user] for user in top_users if top_users[user] > threshold}
+            return {user: top_users[user] for user in top_users if top_users[user] > threshold}
         elif top_k_mode and not threshold_mode:
-            return {m[0]:m[1] for m in sorted(top_users.items(), key=lambda p: p[1], reverse=True)[:top_k]}
+            return {m[0]: m[1] for m in sorted(top_users.items(), key=lambda p: p[1], reverse=True)[:top_k]}
+
     def users_tweet_count_histogram(self):
         """
         This function counts the frequency of users for distinct number of tweets.
         :return: a sorted dictionary that maps frequency of users to tweet number.
         """
-        all_users = self.top_twitters(threshold_mode = False, threshold=50, top_k_mode=True, top_k = self.distinct_users_count())
+        all_users = self.top_twitters(threshold_mode=False, threshold=50, top_k_mode=True,
+                                      top_k=self.distinct_users_count())
         histogram = {}
         for user in all_users:
             histogram[all_users[user]] = histogram.get(all_users[user], 0) + 1
-        return {m[0]:m[1] for m in sorted(histogram.items(), key=lambda p: p[0])}
+        return {m[0]: m[1] for m in sorted(histogram.items(), key=lambda p: p[0])}
+
     def distinct_users_count(self):
         """
         This function counts the number of all distinct users who posted at least one tweet in the dataset.
@@ -1081,6 +1183,7 @@ class timeIndependentLocationIndependentUserMassFeatures:
         for tweet_id in self.tweets:
             users.add(self.tweets[tweet_id].get_twitter().get_user_id())
         return len(users)
+
     def get_distinct_users(self, output="users_list"):
         """
         This function gives all distinct users who posted at least one tweet in the dataset.
@@ -1088,8 +1191,9 @@ class timeIndependentLocationIndependentUserMassFeatures:
         :return: a list of all distinct users_object or user_ids.
         """
 
-        assert(output in ["users_list", "id", "users_tweet_dictionary"]), "the output paramater can be users_list or id, or " \
-                                                                          "users_tweet_dictionary"
+        assert (output in ["users_list", "id",
+                           "users_tweet_dictionary"]), "the output paramater can be users_list or id, or " \
+                                                       "users_tweet_dictionary"
 
         users = set()
         users_object = []
@@ -1116,12 +1220,299 @@ class timeIndependentLocationIndependentUserMassFeatures:
     #             dist = TwixUtility.levenshtein_distance(pair[0], pair[1])
     #             if dist == 0:
     #                 users_redundant_dict[user_id][len(users_redundant_dict[user_id])+1] =
+
+
 class timeIndependentLocationDependentTweetMassFeatures(placeFeatures):
-    def test(self):
-        print("test")
+    # def __init__(self, tweets):
+    #     self.tweets = tweets
+    def spatial_tweet_complexity(self, resolution='country', unit="word"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param unit: the unit of analysis for tweet complexity analysis. It can be "word", "sentence", or "syllables".
+        :return: a dictionary that represents the tweet complexity across the spatial units. The key-value pair in this dictionary corresponds to
+        the spatial unit of analysis and the statistical metrics of the tweet complexity scores in all the tweets that are posted
+        within every spatial unit.
+        """
+
+        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (unit in ["word", "sentence",
+                         "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
+
+        complexity = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                complexity[country] = []
+                complexity_results = []
+                for tweet in tweets:
+                    complexity_results.append(tweet.text_complexity(unit=unit))
+                for result in complexity_results:
+                    complexity[country] = complexity.get(country, []) + [float(result)]
+
+                scores = complexity[country]
+                complexity[country] = {}
+                if len(scores) > 0:
+                    complexity[country]["average"] = np.nanmean(scores)
+                    complexity[country]["max"] = np.nanmax(scores)
+                    complexity[country]["min"] = np.nanmin(scores)
+                    complexity[country]["stdev"] = np.nanstd(scores)
+                    complexity[country]["median"] = np.nanmedian(scores)
+                else:
+                    complexity[country]["average"] = np.nan
+                    complexity[country]["max"] = np.nan
+                    complexity[country]["min"] = np.nan
+                    complexity[country]["stdev"] = np.nan
+                    complexity[country]["median"] = np.nan
+            return complexity
+
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                complexity[place] = []
+                complexity_results = []
+                for tweet in tweets:
+                    complexity_results.append(tweet.text_complexity(unit=unit))
+                for result in complexity_results:
+                    complexity[place] = complexity.get(place, []) + [float(result)]
+
+                scores = complexity[place]
+                complexity[place] = {}
+                if len(scores) > 0:
+                    complexity[place]["average"] = np.nanmean(scores)
+                    complexity[place]["max"] = np.nanmax(scores)
+                    complexity[place]["min"] = np.nanmin(scores)
+                    complexity[place]["stdev"] = np.nanstd(scores)
+                    complexity[place]["median"] = np.nanmedian(scores)
+                else:
+                    complexity[place]["average"] = np.nan
+                    complexity[place]["max"] = np.nan
+                    complexity[place]["min"] = np.nan
+                    complexity[place]["stdev"] = np.nan
+                    complexity[place]["median"] = np.nan
+            return complexity
+
+    def spatial_tweet_readability(self, resolution='country', metric="flesch_kincaid_grade"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
+        :return: a dictionary that represents the tweet readability score across the spatial units. The key-value pair in this dictionary corresponds to
+        the spatial unit of analysis and the statistical metrics of the tweet readability scores in all the tweets that are posted
+        within every spatial unit.
+        """
+
+        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+                           "coleman_liau_index", "linsear_write_formula",
+                           "dale_chall_readability_score", ]), "The metric " \
+                                                               "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+                                                               "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+                                                               "or dale_chall_readability_score."
+
+        readability = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                readability[country] = []
+                readability_results = []
+                for tweet in tweets:
+                    readability_results.append(tweet.readability(metric=metric))
+                for result in readability_results:
+                    readability[country] = readability.get(country, []) + [float(result)]
+
+                scores = readability[country]
+                readability[country] = {}
+                if len(scores) > 0:
+                    readability[country]["average"] = np.nanmean(scores)
+                    readability[country]["max"] = np.nanmax(scores)
+                    readability[country]["min"] = np.nanmin(scores)
+                    readability[country]["stdev"] = np.nanstd(scores)
+                    readability[country]["median"] = np.nanmedian(scores)
+                else:
+                    readability[country]["average"] = np.nan
+                    readability[country]["max"] = np.nan
+                    readability[country]["min"] = np.nan
+                    readability[country]["stdev"] = np.nan
+                    readability[country]["median"] = np.nan
+            return readability
+
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                readability[place] = []
+                readability_results = []
+                for tweet in tweets:
+                    readability_results.append(tweet.readability(metric=metric))
+                for result in readability_results:
+                    readability[place] = readability.get(place, []) + [float(result)]
+
+                scores = readability[place]
+                readability[place] = {}
+                if len(scores) > 0:
+                    readability[place]["average"] = np.nanmean(scores)
+                    readability[place]["max"] = np.nanmax(scores)
+                    readability[place]["min"] = np.nanmin(scores)
+                    readability[place]["stdev"] = np.nanstd(scores)
+                    readability[place]["median"] = np.nanmedian(scores)
+                else:
+                    readability[place]["average"] = np.nan
+                    readability[place]["max"] = np.nan
+                    readability[place]["min"] = np.nan
+                    readability[place]["stdev"] = np.nan
+                    readability[place]["median"] = np.nan
+            return readability
+
+    def spatial_tweet_length(self, resolution='country', unit="word"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
+        :return: a dictionary that represents the tweet length across the spatial units. The key-value pair in this dictionary corresponds to
+        the spatial unit of analysis and the statistical metrics of the tweet length in all the tweets that are posted
+        within every spatial unit.
+        """
+
+        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
+
+        tweet_length = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                tweet_length[country] = []
+                tweet_length_results = []
+                for tweet in tweets:
+                    tweet_length_results.append(tweet.text_length(unit=unit))
+                for result in tweet_length_results:
+                    tweet_length[country] = tweet_length.get(country, []) + [float(result)]
+
+                scores = tweet_length[country]
+                tweet_length[country] = {}
+                if len(scores) > 0:
+                    tweet_length[country]["average"] = np.nanmean(scores)
+                    tweet_length[country]["max"] = np.nanmax(scores)
+                    tweet_length[country]["min"] = np.nanmin(scores)
+                    tweet_length[country]["stdev"] = np.nanstd(scores)
+                    tweet_length[country]["median"] = np.nanmedian(scores)
+                    tweet_length[country]["median"] = np.nanmedian(scores)
+                else:
+                    tweet_length[country]["average"] = np.nan
+                    tweet_length[country]["max"] = np.nan
+                    tweet_length[country]["min"] = np.nan
+                    tweet_length[country]["stdev"] = np.nan
+                    tweet_length[country]["median"] = np.nan
+                    tweet_length[country]["median"] = np.nan
+            return tweet_length
+
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                tweet_length[place] = []
+                tweet_length_results = []
+                for tweet in tweets:
+                    tweet_length_results.append(tweet.text_length(unit=unit))
+                for result in tweet_length_results:
+                    tweet_length[place] = tweet_length.get(place, []) + [float(result)]
+
+                scores = tweet_length[place]
+                tweet_length[place] = {}
+                if len(scores) > 0:
+                    tweet_length[place]["average"] = np.nanmean(scores)
+                    tweet_length[place]["max"] = np.nanmax(scores)
+                    tweet_length[place]["min"] = np.nanmin(scores)
+                    tweet_length[place]["stdev"] = np.nanstd(scores)
+                    tweet_length[place]["median"] = np.nanmedian(scores)
+                    tweet_length[place]["median"] = np.nanmedian(scores)
+                else:
+                    tweet_length[place]["average"] = np.nan
+                    tweet_length[place]["max"] = np.nan
+                    tweet_length[place]["min"] = np.nan
+                    tweet_length[place]["stdev"] = np.nan
+                    tweet_length[place]["median"] = np.nan
+                    tweet_length[place]["median"] = np.nan
+            return tweet_length
+
+    def spatial_tweet_count(self, resolution='country'):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that represents the tweet count across the spatial units.
+        The key-value pair in this dictionary corresponds to the spatial unit of analysis and
+        the the number of the tweets that are posted within every spatial unit.
+        """
+        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+
+        tweet_count = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                tweet_count[country] = len(tweets)
+            return tweet_count
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                tweet_count[place] = len(tweets)
+            return tweet_count
+
+    def spatial_sentiment(self, resolution='country', sentiment_engine="vader"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
+        "vad".
+        :return: a dictionary that represents the tweet sentiments across the spatial units regarding the selected sentiment engine. The key-value pair in this dictionary corresponds to
+        the spatial unit of analysis and the statistical metrics of the sentiment scores in all the tweets that are posted within every spatial unit.
+        """
+
+        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+                                     "vad"]), "The sentiment_engine has to be" \
+                                              "textblob, vader, nrc," \
+                                              "hate_speech or vad"
+
+        sentiments = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                sentiments[country] = {}
+                sentiment_results = []
+                for tweet in tweets:
+                    sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
+                for result in sentiment_results:
+                    for score in result:
+                        sentiments[country][score] = sentiments[country].get(score, []) + [float(result[score])]
+
+                for score in sentiments[country]:
+                    scores = sentiments[country][score]
+                    sentiments[country][score] = {}
+                    sentiments[country][score]["average"] = np.nanmean(scores)
+                    sentiments[country][score]["max"] = np.nanmax(scores)
+                    sentiments[country][score]["min"] = np.nanmin(scores)
+                    sentiments[country][score]["stdev"] = np.nanstd(scores)
+                    sentiments[country][score]["median"] = np.nanmedian(scores)
+            return sentiments
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                sentiments[place] = {}
+                sentiment_results = []
+                for tweet in tweets:
+                    sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
+                for result in sentiment_results:
+                    for score in result:
+                        sentiments[place][score] = sentiments[place].get(score, []) + [float(result[score])]
+
+                for score in sentiments[place]:
+                    scores = sentiments[place][score]
+                    sentiments[place][score] = {}
+                    sentiments[place][score]["average"] = np.nanmean(scores)
+                    sentiments[place][score]["max"] = np.nanmax(scores)
+                    sentiments[place][score]["min"] = np.nanmin(scores)
+                    sentiments[country][score]["stdev"] = np.nanstd(scores)
+                    sentiments[place][score]["median"] = np.nanmedian(scores)
+            return sentiments
+
 class timeIndependentLocationDependentUserMassFeatures(placeFeatures):
     def test(self):
         print("test")
+
 
 ############################################# mass features #############################################
 
@@ -1134,95 +1525,121 @@ class topologyBasedFeatures:
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
         """
         self.tweets = tweets
+
     def time_dependent_features(self):
         """
         :return: an object of networkTweetFeatures which comprises the singleTweet objects
         """
         return timeDependentNetworkFeatures(self.tweets)
+
     def time_independent_features(self):
         """
         :return: an object of networkUserFeatures which comprises the singleTweet objects
         """
         return timeIndependentNetworkFeatures(self.tweets)
+
+
 class timeDependentNetworkFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def time_dependent_location_dependent_network_features(self):
         return timeDependentLocationDependentNetworkFeatures(self.tweets)
+
     def time_dependent_location_independent_network_features(self):
         return timeDependentLocationIndependentNetworkFeatures(self.tweets)
+
+
 class timeIndependentNetworkFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def time_independent_location_dependent_network_features(self):
         return timeIndependentLocationDependentNetworkFeatures(self.tweets)
+
     def time_independent_location_independent_network_features(self):
         return timeIndependentLocationIndependentNetworkFeatures(self.tweets)
+
+
 class timeDependentLocationDependentNetworkFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweet_features(self):
         """
         :return: an object of timeDependentTweetNetworkFeatures which comprises the singleTweet objects
         """
         return timeDependentLocationDependentTweetNetworkFeatures(self.tweets)
+
     def user_features(self):
         """
         :return: an object of timeDependentUserNetworkFeatures which comprises the singleTweet objects
         """
         return timeDependentLocationDependentUserNetworkFeatures(self.tweets)
+
+
 class timeDependentLocationIndependentNetworkFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweet_features(self):
         """
         :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
         """
         return timeDependentLocationIndependentTweetNetworkFeatures(self.tweets)
+
     def user_features(self):
         """
         :return: an object of timeDependentUserNetworkFeatures which comprises the singleTweet objects
         """
         return timeDependentLocationIndependentUserNetworkFeatures(self.tweets)
+
+
 class timeIndependentLocationDependentNetworkFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweet_features(self):
         """
         :return: an object of timeDependentTweetNetworkFeatures which comprises the singleTweet objects
         """
         return timeIndependentLocationDependentTweetNetworkFeatures(self.tweets)
+
     def user_features(self):
         """
         :return: an object of timeDependentUserNetworkFeatures which comprises the singleTweet objects
         """
         return timeIndependentLocationDependentUserNetworkFeatures(self.tweets)
+
+
 class timeIndependentLocationIndependentNetworkFeatures:
     def __init__(self, tweets):
         """
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
         """
         self.tweets = tweets
+
     def tweet_features(self):
         """
         :return: an object of timeDependentTweetNetworkFeatures which comprises the singleTweet objects
         """
         return timeIndependentLocationIndependentTweetNetworkFeatures(self.tweets)
+
     def user_features(self):
         """
         :return: an object of timeDependentUserNetworkFeatures which comprises the singleTweet objects
@@ -1231,13 +1648,21 @@ class timeIndependentLocationIndependentNetworkFeatures:
 
 
 # class timeDependentLocationDependentTweetNetworkFeatures:
+
 # class timeDependentLocationDependentUserNetworkFeatures:
+
 # class timeDependentLocationIndependentTweetNetworkFeatures:
+
 # class timeDependentLocationIndependentUserNetworkFeatures:
+
 # class timeIndependentLocationDependentTweetNetworkFeatures:
+
 # class timeIndependentLocationDependentUserNetworkFeatures:
+
 # class timeIndependentLocationIndependentTweetNetworkFeatures:
+
 # class timeIndependentLocationIndependentUserNetworkFeatures:
+
 ############################################# network features #############################################
 
 #### => 8 classes based on 4 above classes
@@ -1250,48 +1675,52 @@ class tweetTopologyFeatures:
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
         """
         self.tweets = tweets
+
     def retweet_network(self):
         """
         This function creates the network of retweets from the dataset.
         :return: a retweetNetwork object.
         """
         return retweetNetwork(self.tweets)
+
     def quote_network(self):
         """
         This function creates the network of quotes from the dataset.
         :return: a quoteNetwork object.
         """
         return quoteNetwork(self.tweets)
+
     def reply_network(self):  # not yet deployed
         """
         This function creates the network of replies from the dataset.
         :return: a replyNetwork object.
         """
         return replyNetwork(self.tweets)
-    def retweet_quote_network(self):
-        """
-        This function creates the network of retweet-quote from the dataset.
-        :return: a retweetQuoteNetwork object.
-        """
-        return retweetQuoteNetwork(self.tweets)
-    def retweet_reply_network(self):  # Not yet deplyed
-        """
-        This function creates the network of retweet-reply from the dataset.
-        :return: a retweetReplyNetwork object.
-        """
-        return retweetReplyNetwork(self.tweets)
-    def quote_reply_network(self):  # not yet deployed
-        """
-        This function creates the network of quote-reply from the dataset.
-        :return: a quoteReplyNetwork object.
-        """
-        return quoteReplyNetwork(self.tweets)
-    def retweet_quote_reply_network(self):  # not yet deployed
-        """
-        This function creates the network of retweet_quote_reply from the dataset.
-        :return: a retweetQuoteReplyNetwork object.
-        """
-        return retweetQuoteReplyNetwork(self.tweets)
+    # def retweet_quote_network(self):
+    #     """
+    #     This function creates the network of retweet-quote from the dataset.
+    #     :return: a retweetQuoteNetwork object.
+    #     """
+    #     return retweetQuoteNetwork(self.tweets)
+    # def retweet_reply_network(self):  # Not yet deplyed
+    #     """
+    #     This function creates the network of retweet-reply from the dataset.
+    #     :return: a retweetReplyNetwork object.
+    #     """
+    #     return retweetReplyNetwork(self.tweets)
+    # def quote_reply_network(self):  # not yet deployed
+    #     """
+    #     This function creates the network of quote-reply from the dataset.
+    #     :return: a quoteReplyNetwork object.
+    #     """
+    #     return quoteReplyNetwork(self.tweets)
+    # def retweet_quote_reply_network(self):  # not yet deployed
+    #     """
+    #     This function creates the network of retweet_quote_reply from the dataset.
+    #     :return: a retweetQuoteReplyNetwork object.
+    #     """
+    #     return retweetQuoteReplyNetwork(self.tweets)
+
 
 class userTopologyFeatures:
     def __init__(self, tweets):
@@ -1300,6 +1729,7 @@ class userTopologyFeatures:
         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
         """
         self.tweets = tweets
+
     def user_retweet_network(self):
         """
         This function creates the user_retweet_network from the dataset. In this directed network, nodes
@@ -1307,6 +1737,7 @@ class userTopologyFeatures:
         :return: a userRetweetNetwork object.
         """
         return userRetweetNetwork(self.tweets)
+
     def user_quote_network(self):
         """
         This function creates the user_quote_network from the dataset. In this directed network, nodes
@@ -1314,6 +1745,7 @@ class userTopologyFeatures:
         :return: a userQuoteNetwork object.
         """
         return userQuoteNetwork(self.tweets)
+
     def user_reply_network(self):  # not yet deployed
         """
         This function creates the user_reply_network from the dataset. In this directed network, nodes
@@ -1321,34 +1753,35 @@ class userTopologyFeatures:
         :return: a userReplyNetwork object.
         """
         return userReplyNetwork(self.tweets)
-    def user_retweet_quote_network(self):
-        """
-        This function creates user_retweet_quote_network from the dataset. In this directed network, nodes
-        represent users. Also a link from user A to B shows user B has either retweeted or quoted user A.
-        :return: a userRetweetQuoteNetwork object.
-        """
-        return userRetweetQuoteNetwork(self.tweets)
-    def user_retweet_reply_network(self):  # Not yet deplyed
-        """
-        This function creates user_retweet_reply_network from the dataset. In this directed network, nodes
-        represent users. Also a link from user A to B shows user B has either retweeted or replied to user A.
-        :return: a userRetweetReplyNetwork object.
-        """
-        return userRetweetReplyNetwork(self.tweets)
-    def user_quote_reply_network(self):  # not yet deployed
-        """
-        This function creates user_quote_reply_network from the dataset. In this directed network, nodes
-        represent users. Also a link from user A to B shows user B has either quoted or replied to user A.
-        :return: a userQuoteReplyNetwork object.
-        """
-        return userQuoteReplyNetwork(self.tweets)
-    def user_retweet_quote_reply_network(self):  # not yet deployed
-        """
-        This function creates user_retweet_quote_reply_network from the dataset. In this directed network, nodes
-        represent users. Also a link from user A to B shows user B has either quoted, retweeted or replied to user A.
-        :return: a userRetweetQuoteReplyNetwork object.
-        """
-        return userRetweetQuoteReplyNetwork(self.tweets)
+    # def user_retweet_quote_network(self):
+    #     """
+    #     This function creates user_retweet_quote_network from the dataset. In this directed network, nodes
+    #     represent users. Also a link from user A to B shows user B has either retweeted or quoted user A.
+    #     :return: a userRetweetQuoteNetwork object.
+    #     """
+    #     return userRetweetQuoteNetwork(self.tweets)
+    # def user_retweet_reply_network(self):  # Not yet deplyed
+    #     """
+    #     This function creates user_retweet_reply_network from the dataset. In this directed network, nodes
+    #     represent users. Also a link from user A to B shows user B has either retweeted or replied to user A.
+    #     :return: a userRetweetReplyNetwork object.
+    #     """
+    #     return userRetweetReplyNetwork(self.tweets)
+    # def user_quote_reply_network(self):  # not yet deployed
+    #     """
+    #     This function creates user_quote_reply_network from the dataset. In this directed network, nodes
+    #     represent users. Also a link from user A to B shows user B has either quoted or replied to user A.
+    #     :return: a userQuoteReplyNetwork object.
+    #     """
+    #     return userQuoteReplyNetwork(self.tweets)
+    # def user_retweet_quote_reply_network(self):  # not yet deployed
+    #     """
+    #     This function creates user_retweet_quote_reply_network from the dataset. In this directed network, nodes
+    #     represent users. Also a link from user A to B shows user B has either quoted, retweeted or replied to user A.
+    #     :return: a userRetweetQuoteReplyNetwork object.
+    #     """
+    #     return userRetweetQuoteReplyNetwork(self.tweets)
+
 
 class network():
     def __init__(self, tweets):
@@ -1358,14 +1791,17 @@ class network():
         """
         self.network = nx.DiGraph()
         self.tweets = tweets
+
     def building_network(self):
         pass
+
     def components_number(self):
         """
         This function calculates the number of connected components in the desired network.
         :return: an integer that shows the number of connected components.
         """
         return nx.number_connected_components(self.network.to_undirected())
+
     def centrality_measures(self, metric="degree"):
         """
         This function measures network centrality based on the chosen metric.
@@ -1375,9 +1811,10 @@ class network():
         To get the network, use get_network() function.
         """
 
-        assert (metric in ["degree", "closeness", "betweenness", "eigenvector", "katz", "pagerank"]), "The metric has to be" \
-                                                                                                      " degree, closeness, betweenness, " \
-                                                                                                      "eigenvector, katz, or pagerank."
+        assert (metric in ["degree", "closeness", "betweenness", "eigenvector", "katz",
+                           "pagerank"]), "The metric has to be" \
+                                         " degree, closeness, betweenness, " \
+                                         "eigenvector, katz, or pagerank."
         if metric == "degree":
             degree_centrality = nx.centrality.degree_centrality(self.network)
             for node_id in degree_centrality:
@@ -1408,6 +1845,7 @@ class network():
             pagerank_centrality = nx.pagerank_numpy(self.network)
             for node_id in pagerank_centrality:
                 self.network.node[node_id]["pagerank_centrality"] = pagerank_centrality[node_id]
+
     def community_detection(self):
         """
         This function identified communities in the network using Louvain algorithm. PLease note that, it uses the undirected
@@ -1418,26 +1856,36 @@ class network():
         partition = community.best_partition(self.network.to_undirected())
         for node_id in partition:
             self.network.node[node_id]["community"] = partition[node_id]
+
     def word_count_layer(self):
         pass
+
     def character_count_layer(self):
         pass
+
     def sentence_count_layer(self):
         pass
+
     def word_complexity_layer(self):
         pass
+
     def sentence_complexity_layer(self):
         pass
+
     def syllables_complexity_layer(self):
         pass
+
     def sentiment_layer(self):
         pass
+
     def readability_layer(self):
         pass
+
     def get_network(self):
         return self.network
 
-class retweetNetwork(network): #node should change to nodes in order to call a particular node
+
+class retweetNetwork(network):  # node should change to nodes in order to call a particular node
     def building_network(self):
         """
         This function builds the retweet network.
@@ -1450,6 +1898,7 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 self.network.add_edge(tweet.get_retweeted().get_id(), tweet.get_id(), kind="retweet")
             elif trf == False:
                 self.network.add_node(tweet.get_id())
+
     def word_count_layer(self):
         """
         This function add the number of words in each tweet as a property to every node.
@@ -1463,6 +1912,7 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
             elif trf == False:
                 self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
+
     def character_count_layer(self):
         """
         This function add the number of characters in each tweet as a property to every node.
@@ -1477,6 +1927,7 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="character")
             elif trf == False:
                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="character")
+
     def sentence_count_layer(self):
         """
         This function add the number of sentences in each tweet as a property to every node.
@@ -1491,6 +1942,7 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
             elif trf == False:
                 self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
+
     def word_complexity_layer(self):
         """
         This function add the word complexity of each tweet as a property to every node.
@@ -1505,6 +1957,7 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
             elif trf == False:
                 self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
+
     def sentence_complexity_layer(self):
         """
         This function add the sentence complexity of each tweet as a property to every node.
@@ -1519,6 +1972,7 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(unit="sentence")
             elif trf == False:
                 self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(unit="sentence")
+
     def syllables_complexity_layer(self):
         """
         This function add the syllables complexity of each tweet as a property to every node.
@@ -1533,6 +1987,7 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(unit="syllables")
             elif trf == False:
                 self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(unit="syllables")
+
     def sentiment_layer(self, sentiment_engine="vader"):
         """
         This function add the sentiment of each tweet as a property to every node.
@@ -1542,9 +1997,10 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
          nodes of the caller network object. To get the network, use get_network() function.
         """
 
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech", "vad"]), "The sentiment_engine has to be" \
-                                                                                         "textblob, vader, nrc," \
-                                                                                         "hate_speech or vad"
+        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+                                     "vad"]), "The sentiment_engine has to be" \
+                                              "textblob, vader, nrc," \
+                                              "hate_speech or vad"
 
         subscores_labels = {"textblob": ["subjectivity", "polarity"],
                             "vader": ["positivity_score", "negativity_score", "neutrality_score", "composite_score"],
@@ -1557,12 +2013,13 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 trf = tweet.is_retweeted()
                 if trf == True:
                     self.network.node[tweet.get_retweeted().get_id()][i] = \
-                    tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)[i]
+                        tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)[i]
                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
                         i]
                 elif trf == False:
                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
                         i]
+
     def readability_layer(self, metric="flesch_kincaid_grade"):
         """
         This function add the readability of each tweet as a property to every node.
@@ -1592,6 +2049,7 @@ class retweetNetwork(network): #node should change to nodes in order to call a p
                 self.network.node[tweet.get_id()]["readability"] = eval(
                     f'textstat.{metric}(\"{tweet.text_preprocessing()}\")')
 
+
 class quoteNetwork(network):
     def building_network(self):
         """
@@ -1605,6 +2063,7 @@ class quoteNetwork(network):
                 self.network.add_edge(tweet.get_quote().get_id(), tweet.get_id(), kind="quote")
             elif tqf == False:
                 self.network.add_node(tweet.get_id())
+
     def word_count_layer(self):
         """
         This function add the number of words in each tweet as a property to every node.
@@ -1618,6 +2077,7 @@ class quoteNetwork(network):
                 self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
             elif tqf == False:
                 self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
+
     def character_count_layer(self):
         """
         This function add the number of characters in each tweet as a property to every node.
@@ -1632,6 +2092,7 @@ class quoteNetwork(network):
                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="character")
             elif tqf == False:
                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="character")
+
     def sentence_count_layer(self):
         """
         This function add the number of sentences in each tweet as a property to every node.
@@ -1646,6 +2107,7 @@ class quoteNetwork(network):
                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
             elif tqf == False:
                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
+
     def word_complexity_layer(self):
         """
         This function add the word complexity of each tweet as a property to every node.
@@ -1659,6 +2121,7 @@ class quoteNetwork(network):
                 self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
             elif tqf == False:
                 self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
+
     def sentence_complexity_layer(self):
         """
         This function add the sentence complexity of each tweet as a property to every node.
@@ -1673,6 +2136,7 @@ class quoteNetwork(network):
                 self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(unit="sentence")
             elif tqf == False:
                 self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(unit="sentence")
+
     def syllables_complexity_layer(self):
         """
         This function add the syllables complexity of each tweet as a property to every node.
@@ -1687,6 +2151,7 @@ class quoteNetwork(network):
                 self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(unit="syllables")
             elif tqf == False:
                 self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(unit="syllables")
+
     def sentiment_layer(self, sentiment_engine="vader"):
         """
         This function add the sentiment of each tweet as a property to every node.
@@ -1696,9 +2161,10 @@ class quoteNetwork(network):
          nodes of the caller network object. To get the network, use get_network() function.
         """
 
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech", "vad"]), "The sentiment_engine has to be" \
-                                                                                         "textblob, vader, nrc," \
-                                                                                         "hate_speech or vad"
+        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+                                     "vad"]), "The sentiment_engine has to be" \
+                                              "textblob, vader, nrc," \
+                                              "hate_speech or vad"
 
         subscores_labels = {"textblob": ["subjectivity", "polarity"],
                             "vader": ["positivity_score", "negativity_score", "neutrality_score", "composite_score"],
@@ -1711,12 +2177,13 @@ class quoteNetwork(network):
                 tqf = tweet.is_quoted()
                 if tqf == True:
                     self.network.node[tweet.get_quote().get_id()][i] = \
-                    tweet.get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)[i]
+                        tweet.get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)[i]
                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
                         i]
                 elif tqf == False:
                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
                         i]
+
     def readability_layer(self, metric="flesch_kincaid_grade"):
         """
         This function add the readability of each tweet as a property to every node.
@@ -1744,6 +2211,7 @@ class quoteNetwork(network):
                 self.network.node[tweet.get_id()]["readability"] = eval(
                     f'textstat.{metric}(\"{tweet.text_preprocessing()}\")')
 
+
 class user:
     def __init__(self, user_object):
         """
@@ -1751,12 +2219,14 @@ class user:
         :param user_object: the user object which is embedded in tweet object.
         """
         self.user = user_object
+
     def get_user_id(self):
         """
         This function gives the user unique id.
         :return: an integer showing the user unique id.
         """
         return self.user["id"]
+
     def get_user_name(self):
         """
         The name of the user, as they’ve defined it. Not necessarily a person’s name. Typically capped at 50 characters,
@@ -1764,6 +2234,7 @@ class user:
         :return: a string showing the user defined name.
         """
         return self.user["name"]
+
     def get_screen_name(self):
         """
         The screen name, handle, or alias that this user identifies themselves with. screen_names are unique but subject
@@ -1771,18 +2242,21 @@ class user:
         :return: a string showing the screen name of the user.
         """
         return self.user["screen_name"]
+
     def get_friends_count(self):
         """
         The number of users this account is following (AKA their “followings”)
         :return: an integer showing the number of account holder's friends (followings).
         """
         return self.user["friends_count"]
+
     def get_followers_count(self):
         """
         The number of followers this account has.
         :return: an integer showing the number of account holder's followers.
         """
         return self.user["followers_count"]
+
     def get_user_role(self):  # Think about division by zero prioblem
         """
         user role measures the ratio of followers to followees of a user. A user with a high follower to followee ratio is a
@@ -1794,6 +2268,7 @@ class user:
         except ZeroDivisionError:
             print("This user does not have any friend")
             return np.nan
+
     def get_user_reputation(self):
         """
         this function measures the relative importance of a user on Twitter. The reputation is defined as the ratio
@@ -1806,6 +2281,7 @@ class user:
         except ZeroDivisionError:
             print("This user has neither friend or follower")
             return np.nan
+
     def get_account_birthday(self, output="object"):
         """
         It showsthe  date and time that the user account was created on Twitter.
@@ -1820,6 +2296,7 @@ class user:
             return datetime.datetime.strptime(self.user["created_at"], "%a %b %d %H:%M:%S %z %Y")
         elif output == "string":
             return self.user["created_at"]
+
     def get_account_age(self):
         """
         This function calculates the age of the account until today with the resolution of day.
@@ -1828,60 +2305,70 @@ class user:
         today = datetime.datetime.now()
         account_creation_time = self.get_account_birthday()
         return (today.date() - account_creation_time.date()).days
+
     def get_user_total_likes_count(self):
         """
         The number of Tweets this user has liked in the account’s lifetime.
         :return: an integer show the number of Tweets that this account has liked in the account’s lifetime.
         """
         return self.user["favourites_count"]
+
     def get_statusses_count(self):
         """
         The number of Tweets (including retweets) issued by the user in the account's lifetime
         :return: an integer  showing the number of Tweets issued by the user.
         """
         return self.user["statuses_count"]
+
     def get_average_follow_speed(self):
         """
         this function calculates the average speed of this account in following other Twitter accounts.
         :return: a float number showing the average follow speed in this account.
         """
         return self.get_followers_count() / self.get_account_age()
+
     def get_being_followed_speed(self):
         """
         this function calculates the average speed of being followed by other accounts.
         :return: a float number showing the average speed of being followed by other accounts.
         """
         return self.get_friends_count() / self.get_account_age()
+
     def get_average_like_speed(self):
         """
         this function calculates the average speed of this account in liking tweets.
         :return: a float number showing the average like speed in this account.
         """
         return self.get_user_total_likes_count() / self.get_account_age()
+
     def get_average_status_speed(self):
         """
         this function calculates the average speed of this account in posting tweets.
         :return: a float number showing the average tweet speed in this account.
         """
         return self.get_statusses_count() / self.get_account_age()
+
     def get_user_verification_status(self):
         """
         this function shows the verification status of this account.
         :return: a boolean showing the verification status of this account.
         """
         return self.user["verified"]
+
     def user_has_profile_location(self):
         """
         this function shows the user-defined location for this account’s profile. Not necessarily a location, nor machine-parseable.
         :return: a string showing the user-defined location for this account.
         """
         return True if self.user["location"] != None else False
+
     def user_has_profile_picture(self):
         """
         this function shows the user-defined location for this account’s profile. Not necessarily a location, nor machine-parseable.
         :return: a string showing the user-defined location for this account.
         """
         return True if self.user["profile_image_url_https"] != None else False
+
     def get_user_profile_picture(self, saving_address):
         """
         this function download the user profile picture.
@@ -1896,26 +2383,29 @@ class user:
         local_filename = url.split('/')[-1]
         response = requests.get(url, stream=True)
         if response.status_code == 200:
-            with open(saving_address+local_filename, 'wb') as f:
+            with open(saving_address + local_filename, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
                         f.write(chunk)
         elif response.status_code == 404:
             print("the photo in the specified address is not found")
         else:
-            return ("the error code: ",response.status_code)
+            return ("the error code: ", response.status_code)
+
     def user_has_profile_url(self):  # need to add url in class attributes
         """
         this function shows a URL provided by the user in association with their profile.
         :return: a string showing the url provided by the user.
         """
         return True if self.user["url"] != None else False
+
     def user_has_profile_description(self):
         """
         this function shows the user-defined string describing their account.
         :return: a string showing the user defined profile description.
         """
         return True if self.user["description"] != None else False
+
     def user_protected_profile(self):
         """
         this function shows the protection status of the account. When true, indicates that this user has chosen to
@@ -1923,6 +2413,7 @@ class user:
         :return: a boolean showing the protection status of the account.
         """
         return True if self.user["protected"] == True else False
+
     # Your username cannot be longer than 15 characters.
     # A username can only contain alphanumeric characters (letters A-Z, numbers 0-9) with the exception of underscores
     # https://www.techwalla.com/articles/what-characters-are-allowed-in-a-twitter-name
@@ -1941,6 +2432,7 @@ class user:
                 "screen_name_length": len(self.get_screen_name())
                 }
 
+
 class singleTweet:
     def __init__(self, tweet_path, param):
         """
@@ -1951,6 +2443,7 @@ class singleTweet:
         self.tweet = json.load(open(tweet_path))
         self.parameters = param
         self.text = ""
+
     def get_entities(self):
         """
         This function extracts the full tweet entities including hashtags, mentions, urls, photos, videos, gifs, and symbols
@@ -1977,22 +2470,26 @@ class singleTweet:
                 if "extended_entities" in self.tweet["retweeted_status"].keys():
                     tweet_entities["media"] = self.tweet["retweeted_status"]["extended_entities"]["media"]
         return tweet_entities
+
     def get_tweet(self):
         """
         :return: the tweet as a json file
         """
         return self.tweet
+
     def get_url(self):
         """
         this function builds the tweet url.
         :return: a string of tweet url.
         """
         return "https://twitter.com/" + self.get_twitter().get_screen_name() + "/status/" + str(self.get_id())
+
     def get_twitter(self):
         """
         :return: the user object embedded in the tweet object.
         """
         return user(self.tweet["user"])
+
     def get_creation_time(self, output="object"):
         """
         It shows the creation time and date of a tweet.
@@ -2003,55 +2500,64 @@ class singleTweet:
         :return: a string or datetime object of the tweet creation time.
         """
 
-        assert (output in ["object", "original_string", "improved_string"]), "the output has to be object or original_string, or" \
-                                                                             "improved_string"
+        assert (output in ["object", "original_string",
+                           "improved_string"]), "the output has to be object or original_string, or" \
+                                                "improved_string"
 
         if output == "object":
             return datetime.datetime.strptime(datetime.datetime.strftime(
                 datetime.datetime.strptime(self.tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"), "%Y %m %d %H %M %S"),
-                                              "%Y %m %d %H %M %S")
+                "%Y %m %d %H %M %S")
         elif output == "original_string":
             return self.tweet["created_at"]
         elif output == "improved_string":
             return datetime.datetime.strftime(
                 datetime.datetime.strptime(self.tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"), "%Y %m %d %H %M %S")
+
     def get_source(self):
         """
         :return: a string showing th utility used to post the Tweet.
         """
         return self.tweet["source"]
+
     def get_likes_count(self):
         """
         :return: an integer which indicates approximately how many times this Tweet has been liked by Twitter users
         """
         return self.tweet["favorite_count"]
+
     def get_retweet_count(self):
         """
         :return: an integer which indicates how many times this tweet has been retweeted.
         """
         return self.tweet["retweet_count"]
+
     def get_language(self):
         """
         :return: a string showing the language of the tweet.
         """
         return self.tweet["lang"]
+
     def get_place(self):
         """
         When present, indicates that the tweet is associated (but not necessarily originating from) a Place.
         :return: a place object.
         """
         return self.tweet["place"]
+
     def get_coordinates(self):
         """
         Represents the geographic location of this Tweet as reported by the user or client application.
         :return: a coordinate object
         """
         return self.tweet["coordinates"]
+
     def get_tweet_urls(self):
         """
         :return: a list of urls in this tweet.
         """
         return self.get_entities()["urls"]
+
     def get_hashtags(self):
         """
         :return: a list of hashtags in this tweet.
@@ -2061,6 +2567,7 @@ class singleTweet:
             return entities["hashtags"]
         else:
             return []
+
     def get_mentions(self):
         """
         :return: a list of mentions in this tweet.
@@ -2070,6 +2577,7 @@ class singleTweet:
             return entities["user_mentions"]
         else:
             return []
+
     def get_symbols(self):
         """
         :return: a list of symbols in this tweet.
@@ -2079,6 +2587,7 @@ class singleTweet:
             return entities["symbols"]
         else:
             return []
+
     def get_media(self):
         """
         :return: it returns the photo(s), video, and animated-gif attached to this tweet as a list.
@@ -2088,6 +2597,7 @@ class singleTweet:
             return entities["media"]
         else:
             return []
+
     def get_photo(self):
         """
         :return: it returns the photo(s) attached to this tweet as a list.
@@ -2098,6 +2608,7 @@ class singleTweet:
             if medium["type"] == "photo":
                 photos.append(medium)
         return photos
+
     def get_video(self):
         """
         :return: it returns the video attached to this tweet in a list.
@@ -2108,6 +2619,7 @@ class singleTweet:
             if medium["type"] == "video":
                 videos.append(medium)
         return videos
+
     def get_gif(self):
         """
         :return: it returns the animated-gif attached to this tweet as a list.
@@ -2118,6 +2630,7 @@ class singleTweet:
             if medium["type"] == "animated_gif":
                 gifs.append(medium)
         return gifs
+
     def get_text(self):  ## Maybe you need to check this function for retweet and quote class
         """
         :return: a string showing the full text of this tweet
@@ -2139,42 +2652,49 @@ class singleTweet:
                 else:
                     tweet_text = self.tweet["retweeted_status"]["text"]
             return tweet_text
+
     def get_id(self):
         """
         :return: an integer showing the unique id of this tweet.
         """
         return self.tweet["id"]
+
     def is_retweeted(self):
         """
         :return: a boolean shows whether this tweet is retweeted or not.
         """
         return True if "retweeted_status" in self.tweet.keys() else False
+
     def is_quoted(self):
         """
         :return: a boolean showing whether this is a quoted tweet or not..
         """
         return True if "quoted_status" in self.tweet.keys() else False
+
     def get_quote(self):
         """
         :return: it returns the quoted part of the this tweet..
         """
         return quoteClass(self.tweet["quoted_status"], self.parameters) if self.is_quoted() else None
+
     def get_retweeted(self):
         """
         :return: it returns the retweeted part of this tweet.
         """
         return retweetedClass(self.tweet["retweeted_status"], self.parameters) if self.is_retweeted() else None
+
     def tweet_source_status(self):
         """
         :return: a boolean that shows whether this tweet is posted by an official source or not.
         """
         official_clients = ["Twitter for iPhone", "Twitter for Android", "Twitter Web Client", "Twitter for iPad",
-                           "Mobile Web (M5)", "TweetDeck", "Facebook", "Twitter for Windows", "Mobile Web (M2)",
-                           "Twitter for Windows Phone", "Mobile Web", "Google", "Twitter for BlackBerry",
-                           "Twitter for Android Tablets", "Twitter for Mac", "iOS", "Twitter for BlackBerry®"]
+                            "Mobile Web (M5)", "TweetDeck", "Facebook", "Twitter for Windows", "Mobile Web (M2)",
+                            "Twitter for Windows Phone", "Mobile Web", "Google", "Twitter for BlackBerry",
+                            "Twitter for Android Tablets", "Twitter for Mac", "iOS", "Twitter for BlackBerry®"]
         soup = BeautifulSoup(self.get_source(), "html.parser")
         client = soup.text
         return True if client in official_clients else False
+
     def tweet_stemming(self, input_text=None, inplace=False):
         """
         This function performs the stemming operation using Porter algorithm.
@@ -2199,6 +2719,7 @@ class singleTweet:
             return self
         else:
             return stemmed
+
     def hashtag_splitter(self, input_text=None, inplace=False):
         """
         This function slices up hashtags as in most of the times, hashtags are made up of concatanation of meaningful words.
@@ -2236,6 +2757,7 @@ class singleTweet:
             return self
         else:
             return text
+
     def mention_replacement(self, input_text=None, inplace=False):
         """
         This function replaces Twitter account mentions by the accounts' screen name.
@@ -2263,6 +2785,7 @@ class singleTweet:
             return self
         else:
             return text
+
     def url_removal(self, input_text=None, inplace=False):
         """
         This function removes the urls from the tweet text.
@@ -2290,6 +2813,7 @@ class singleTweet:
             return self
         else:
             return text
+
     def hashtags_removal(self, input_text=None, mode=2, inplace=False):
         """
         This function removes hashtags from tweet text according to different modes.
@@ -2325,6 +2849,7 @@ class singleTweet:
             return self
         else:
             return text
+
     def mentions_removal(self, input_text=None, mode=2, inplace=False):
         """
         This function removes mentions from tweet text according to different modes.
@@ -2360,6 +2885,7 @@ class singleTweet:
             return self
         else:
             return text
+
     def control_characters_removal(self, input_text=None, inplace=False):
         """
         This functions removes common control characters carriage return (\r), line feed (\n), horizontal tab (\t).
@@ -2386,6 +2912,7 @@ class singleTweet:
             return self
         else:
             return text
+
     def stopwords_removal(self, input_text=None, stopword_corpus="stone", inplace=False):
         """
         This function removes stopwords from the tweet according to chosen stopword corpus.
@@ -2400,7 +2927,8 @@ class singleTweet:
         stopwords from the text.
         """
 
-        assert (stopword_corpus in ["stone", "nltk", "corenlp", "glascow"]), "stopword_orpus can be stone, nltk, corenlp, and glascow"
+        assert (stopword_corpus in ["stone", "nltk", "corenlp",
+                                    "glascow"]), "stopword_orpus can be stone, nltk, corenlp, and glascow"
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
         if input_text == None:
@@ -2410,19 +2938,24 @@ class singleTweet:
 
         words = self.tweet_splitter(text)
         if stopword_corpus == "stone":
-            processed_text = " ".join([word for word in words if word.lower() not in self.parameters["stopwords"]["stone"]])
+            processed_text = " ".join(
+                [word for word in words if word.lower() not in self.parameters["stopwords"]["stone"]])
         elif stopword_corpus == "nltk":
-            processed_text = " ".join([word for word in words if word.lower() not in self.parameters["stopwords"]["nltk"]])
+            processed_text = " ".join(
+                [word for word in words if word.lower() not in self.parameters["stopwords"]["nltk"]])
         elif stopword_corpus == "corenlp":
-            processed_text = " ".join([word for word in words if word.lower() not in self.parameters["stopwords"]["corenlp"]])
+            processed_text = " ".join(
+                [word for word in words if word.lower() not in self.parameters["stopwords"]["corenlp"]])
         elif stopword_corpus == "glascow":
-            processed_text = " ".join([word for word in words if word.lower() not in self.parameters["stopwords"]["glascow"]])
+            processed_text = " ".join(
+                [word for word in words if word.lower() not in self.parameters["stopwords"]["glascow"]])
 
         if inplace:
             self.text = processed_text
             return self
         else:
             return processed_text
+
     def whitespace_removal(self, input_text=None, inplace=False):
         """
         This functions removes whitespaces from the text.
@@ -2450,6 +2983,7 @@ class singleTweet:
             return self
         else:
             return text
+
     def punctuation_removal(self, input_text=None, inplace=False):
         """
         This functions removes punctuation characters from the text.
@@ -2469,14 +3003,18 @@ class singleTweet:
         else:
             text = input_text
 
-        punctuation_free = textstat.remove_punctuation(text).replace(".", "").replace("\"","").replace("“","").replace("”","").strip()
+        punctuation_free = textstat.remove_punctuation(text).replace(".", "").replace("\"", "").replace("“",
+                                                                                                        "").replace("”",
+                                                                                                                    "").strip()
         if inplace:
             self.text = punctuation_free
             return self
         else:
             return punctuation_free
+
     def text_preprocessing(self, input_text=None, url=True, case=True, punctuation=True, hashtag=2, mention=2,
-                           whitespace=True, control_characters=True, stop="stone", hashtag_split=True, mention_replacement=True):
+                           whitespace=True, control_characters=True, stop="stone", hashtag_split=True,
+                           mention_replacement=True):
         """
         This function preprocess the tweet text.
         :param input_text: if this parameter is None, then preprocessing is performed on the caller object text field,
@@ -2509,7 +3047,8 @@ class singleTweet:
         assert (mention in [1, 2, 3]), "mention parameter can be 1, 2, 3"
         assert (whitespace in [True, False]), "whitespace parameter can be True or False"
         assert (control_characters in [True, False]), "control_characters parameter can be True or False"
-        assert (stop in ["stone", "nltk", "corenlp", "glascow", False]), "stop parameter can be stone, nltk, corenlp, glascow, or False"
+        assert (stop in ["stone", "nltk", "corenlp", "glascow",
+                         False]), "stop parameter can be stone, nltk, corenlp, glascow, or False"
         assert (hashtag_split in [True, False]), "hashtag_split parameter can be True or False"
         assert (mention_replacement in [True, False]), "mention_replacement parameter can be True or False"
 
@@ -2559,6 +3098,7 @@ class singleTweet:
         #         if contraction == True
 
         return text
+
     def tweet_pos(self, input_text=None):
         """
         This function replaces every word in the tweet by its corresponding Part-of-Speech (POS) tag.
@@ -2576,6 +3116,7 @@ class singleTweet:
         for token in spacy_text:
             pos_text = pos_text + " " + token.pos_
         return pos_text.strip()
+
     def tweet_ner(self, input_text=None):
         """
         This function replaces every word in the tweet by its corresponding Named-Entity-Recognition (NER) tag.
@@ -2596,6 +3137,7 @@ class singleTweet:
             ner_text = ner_text + " " + token.label_
 
         return ner_text.strip()
+
     def tweet_lemmatization(self, input_text=None):
         """
         This function replaces every word in the tweet by its corresponding lemma.
@@ -2616,6 +3158,7 @@ class singleTweet:
             tweet_lemmas = tweet_lemmas + " " + token.lemma_
 
         return tweet_lemmas.strip()
+
     def tweet_tokens(self, preprocessing=True, lemmatization=True, input_text=None):
         """
         This function tokenises the tweet text field. If any customized preprocessing is required, the preprocessing can
@@ -2634,7 +3177,7 @@ class singleTweet:
         if input_text == None:
             if preprocessing and lemmatization:
                 return self.tweet_splitter(self.tweet_lemmatization(self.text_preprocessing(self.get_text())))
-            elif preprocessing and lemmatization==False:
+            elif preprocessing and lemmatization == False:
                 return self.tweet_splitter(self.text_preprocessing(self.get_text()))
             elif preprocessing == False and lemmatization:
                 return self.tweet_splitter(self.tweet_lemmatization(self.get_text()))
@@ -2643,12 +3186,13 @@ class singleTweet:
         else:
             if preprocessing and lemmatization:
                 return self.tweet_splitter(self.tweet_lemmatization(self.text_preprocessing(input_text=input_text)))
-            elif preprocessing and lemmatization==False:
+            elif preprocessing and lemmatization == False:
                 return self.tweet_splitter(self.text_preprocessing(input_text=input_text))
             elif preprocessing == False and lemmatization:
                 return self.tweet_splitter(self.tweet_lemmatization(input_text=input_text))
             elif preprocessing == False and lemmatization == False:
                 return self.tweet_splitter(input_text=input_text)
+
     def get_emojis(self, count=True, emoji_list=True, input_text=None):
         """
         This function collects the emojis from tweet text.
@@ -2664,7 +3208,7 @@ class singleTweet:
         assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
         assert (emoji_list in [True, False]), "emoji_list is a boolean parameter, so it can be True or False"
         assert (count or emoji_list), "at least one of the count and emoji_list parameters " \
-                                                            "has to be set to True"
+                                      "has to be set to True"
 
         if input_text == None:
             text = self.get_text()
@@ -2679,7 +3223,8 @@ class singleTweet:
         elif emoji_list == False and count == True:
             return len(emojis)
 
-                # Emoticon analysos <= doesn't work properly
+            # Emoticon analysos <= doesn't work properly
+
     def get_emoticon(self, count=True, emoticon_list=True, input_text=None):
         """
         This function collects the emoticons from tweet text.
@@ -2695,7 +3240,7 @@ class singleTweet:
         assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
         assert (emoticon_list in [True, False]), "emoticon_list is a boolean parameter, so it can be True or False"
         assert (count or emoticon_list), "at least one of the count and emoticon_list parameters " \
-                                                               "has to be set to True"
+                                         "has to be set to True"
 
         if input_text == None:
             text = self.get_text()
@@ -2711,6 +3256,7 @@ class singleTweet:
             return emoticons
         elif emoticon_list == False and count == True:
             return len(emoticons)
+
     def tweet_splitter(self, input_text=None, unit="word"):
         """
         this function splits the tweet text field according to chosen splitting unit.
@@ -2728,6 +3274,7 @@ class singleTweet:
             return re.findall(r'\S+', text)
         elif unit == "sentence":
             return [i for i in re.split(r'[.?!]+', text) if i != '']
+
     def text_length(self, input_text=None, unit="word"):
         """
         this function measures the length of the tweet based on the selected length unit.
@@ -2750,6 +3297,7 @@ class singleTweet:
             return len(self.tweet_splitter(unit="word", input_text=text))
         elif unit == "sentence":
             return len(self.tweet_splitter(unit="sentence", input_text=text))
+
     def text_complexity(self, input_text=None, unit="word"):
         """
         this function measures the complexity of a tweet text based on the selected complexity unit.
@@ -2772,8 +3320,10 @@ class singleTweet:
             return np.average([len(self.tweet_splitter(unit="word", input_text=sentence)) for sentence in
                                self.tweet_splitter(unit="sentence", input_text=text)])
         elif unit == "syllables":
-            return np.average([textstat.syllable_count(i, lang='en_US') for i in self.tweet_splitter(unit="word", input_text=text)])
-    def text_pronoun_count(self,  input_text=None, pronoun="third_singular"):
+            return np.average(
+                [textstat.syllable_count(i, lang='en_US') for i in self.tweet_splitter(unit="word", input_text=text)])
+
+    def text_pronoun_count(self, input_text=None, pronoun="third_singular"):
         """
         This function counts the number of pronouns in the tweet text according to selected pronoun for counting.
         :param input_text: if this parameter is None, then the number of chosen pronoun in the caller object text field
@@ -2785,8 +3335,8 @@ class singleTweet:
         """
 
         assert (pronoun in ["first_singular", "first_plural", "second_singular", "second_plural", "third_singular",
-        "third_plural"]), "the pronoun parameter can be first_singular, first_plural, second_singular, second_plural, " \
-                          "third_singular, or third_plural"
+                            "third_plural"]), "the pronoun parameter can be first_singular, first_plural, second_singular, second_plural, " \
+                                              "third_singular, or third_plural"
 
         if input_text == None:
             text = self.get_text()
@@ -2817,7 +3367,9 @@ class singleTweet:
             return words.count("they") + words.count("them") + words.count("their") + words.count(
                 "theirs") + words.count("themselves") + words.count("they're") + words.count("they've") + words.count(
                 "they'd") + words.count("they'll")
-    def case_analysis(self, count=True, frac=True, unit="character", input_text=None):  #### THINK ABOUT DIVISION BY ZERO ERROR ####
+
+    def case_analysis(self, count=True, frac=True, unit="character",
+                      input_text=None):  #### THINK ABOUT DIVISION BY ZERO ERROR ####
         """
         This function analyses the count and fraction of upper and lower letters or capital and small words in the tweet text
         depending on the selected unit of analysis.
@@ -2858,7 +3410,8 @@ class singleTweet:
                             "uppercase_to_all_characters": uppercase_character_count / character_count}
                 except ZeroDivisionError:
                     if character_count == 0:
-                        print("the number of characters is zero, consequently the number of lowercase character is zero")
+                        print(
+                            "the number of characters is zero, consequently the number of lowercase character is zero")
                     elif lowercase_character_count == 0:
                         print("the number of lowercase characters is zero")
 
@@ -2872,7 +3425,8 @@ class singleTweet:
                             "uppercase_to_all_characters": uppercase_character_count / character_count}
                 except ZeroDivisionError:
                     if character_count == 0:
-                        print("the number of characters is zero, consequently the number of lowercase characters is zero")
+                        print(
+                            "the number of characters is zero, consequently the number of lowercase characters is zero")
                     elif lowercase_character_count == 0:
                         print("the number of lowercase characters is zero")
 
@@ -2905,6 +3459,7 @@ class singleTweet:
                         print("the number of words is zero, consequently the number of snall words is zero")
                     elif small_words_count == 0:
                         print("the number of small words is zero")
+
     def exclamation_mark_count(self, input_text=None):
         """
         This function counts the number of exclamation mark in  the tweet text field.
@@ -2918,6 +3473,7 @@ class singleTweet:
         else:
             text = input_text
         return text.count("!")
+
     def question_mark_count(self, input_text=None):
         """
         This function counts the number of question marks in the tweet text field.
@@ -2931,6 +3487,7 @@ class singleTweet:
         else:
             text = input_text
         return text.count("?")
+
     def abbreviations(self, input_text=None):
         """
         This function finds the abbreviations used in tweet text.
@@ -2946,6 +3503,7 @@ class singleTweet:
 
         words = self.tweet_splitter(unit="word", input_text=text)
         return [i for i in words if i in self.parameters["abbr"]]
+
     def vulgar_words(self, input_text=None):
         """
          This function finds the vulgar terms used in tweet text.
@@ -2961,6 +3519,7 @@ class singleTweet:
 
         words = self.tweet_splitter(unit="word", input_text=text)
         return [i for i in words if i in self.parameters["vulgar"]]
+
     def sentiment_analysis(self, sentiment_engine="vader", input_text=None):
         """
         This function performs sentiment analysis over tweet text field using various sentiment analysis engines
@@ -2976,8 +3535,9 @@ class singleTweet:
         and dominance.
         """
 
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech", "vad"]), "the sentiment_engine has to be" \
-                                                                                         "textblob, vader, nrc, hate_speech, or vad"
+        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+                                     "vad"]), "the sentiment_engine has to be" \
+                                              "textblob, vader, nrc, hate_speech, or vad"
 
         if input_text == None:
             text = self.get_text()
@@ -3053,6 +3613,7 @@ class singleTweet:
                     dominance_score += self.parameters["vad"][term]["dominance"]
 
             return {"valence_score": valence_score, "arousal_score": arousal_score, "dominance_score": dominance_score}
+
     def readability(self, metric="flesch_kincaid_grade", input_text=None):
         """
         This function measures the readability of the tweet text according to the chosen readbility metric.
@@ -3065,10 +3626,11 @@ class singleTweet:
         """
 
         assert (metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
-                           "coleman_liau_index", "linsear_write_formula", "dale_chall_readability_score"]), "The metric " \
-                                            "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
-                                            "automated_readability_index, coleman_liau_index, linsear_write_formula,"\
-                                            "or dale_chall_readability_score."
+                           "coleman_liau_index", "linsear_write_formula",
+                           "dale_chall_readability_score"]), "The metric " \
+                                                             "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+                                                             "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+                                                             "or dale_chall_readability_score."
 
         if input_text == None:
             text = self.get_text()
@@ -3091,6 +3653,7 @@ class singleTweet:
             return textstat.linsear_write_formula(text)
         elif metric == "dale_chall_readability_score":
             return textstat.dale_chall_readability_score(text)
+
     def long_words_count(self, threshold=6, input_text=None):
         """
         This function counts the number of words that are longer than a particular threshold.
@@ -3101,7 +3664,7 @@ class singleTweet:
         :return: an integer number showing the number of words which are longer than a particular threshhold.
         """
 
-        assert(isinstance(threshold, int) and threshold > 0), "threshhold has to be a positive integer"
+        assert (isinstance(threshold, int) and threshold > 0), "threshhold has to be a positive integer"
 
         if input_text == None:
             text = self.get_text()
@@ -3110,6 +3673,7 @@ class singleTweet:
 
         words = self.tweet_splitter(unit="word", input_text=text)
         return len([i for i in words if len(i) > threshold])
+
     def multiple_syllables_count(self, threshold=2, input_text=None):
         """
         This function counts the number of words that their syllables number is more than a particular threshold.
@@ -3120,7 +3684,7 @@ class singleTweet:
         :return: an integer number showing the number of wordsthat that their syllables number is higher than a particular threshold.
         """
 
-        assert(isinstance(threshold, int) and threshold > 0), "threshhold has to be a positive integer"
+        assert (isinstance(threshold, int) and threshold > 0), "threshhold has to be a positive integer"
 
         if input_text == None:
             text = self.get_text()
@@ -3129,6 +3693,7 @@ class singleTweet:
 
         words = self.tweet_splitter(unit="word", input_text=text)
         return len([i for i in words if textstat.syllable_count(i, lang='en_US') > threshold])
+
     def get_tweet_photos(self, saving_address):
         photos = self.get_photo()
         for photo in photos:
@@ -3136,16 +3701,17 @@ class singleTweet:
             local_filename = url.split('/')[-1]
             response = requests.get(url, stream=True)
             if response.status_code == 200:
-                with open(saving_address+local_filename, 'wb') as f:
+                with open(saving_address + local_filename, 'wb') as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
             elif response.status_code == 404:
                 print("the photo in the specified address is not found")
             else:
-                return ("the error code: ",response.status_code)
+                return ("the error code: ", response.status_code)
+
     def get_tweet_videos(self, saving_address):
-        videos = self.get_video() # So far, there is only possibility of uploading one single video in every tweet
+        videos = self.get_video()  # So far, there is only possibility of uploading one single video in every tweet
         for video in videos:
             urls = video["video_info"]["variants"]
             for variant in urls:
@@ -3156,17 +3722,18 @@ class singleTweet:
             if response.status_code == 200:
                 local_filename = url.split('/')[-1]
                 reg = re.search(r'^.*\?', local_filename)
-                file_name = local_filename[reg.start():reg.end()].replace("?","")
-                with open(saving_address+file_name, 'wb') as f:
+                file_name = local_filename[reg.start():reg.end()].replace("?", "")
+                with open(saving_address + file_name, 'wb') as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
             elif response.status_code == 404:
                 print("the video in the specified address is not found")
             else:
-                return ("the error code: ",response.status_code)
+                return ("the error code: ", response.status_code)
+
     def get_tweet_gifs(self, saving_address):
-        gifs = self.get_gif() # So far, there is only possibility of uploading one single gif in every tweet
+        gifs = self.get_gif()  # So far, there is only possibility of uploading one single gif in every tweet
         for gif in gifs:
             url = gif["video_info"]["variants"][0]["url"]
             response = requests.get(url, stream=True)
@@ -3174,14 +3741,15 @@ class singleTweet:
                 file_name = url.split('/')[-1]
                 # reg = re.search(r'^.*\?', local_filename)
                 # file_name = local_filename[reg.start():reg.end()].replace("?","")
-                with open(saving_address+file_name, 'wb') as f:
+                with open(saving_address + file_name, 'wb') as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
             elif response.status_code == 404:
                 print("the gif in the specified address is not found")
             else:
-                return ("the error code: ",response.status_code)
+                return ("the error code: ", response.status_code)
+
 
 class retweetedClass(singleTweet):
     def __init__(self, twt, para):
@@ -3192,6 +3760,7 @@ class retweetedClass(singleTweet):
         """
         self.tweet = twt
         self.parameters = para
+
     def get_entities(self):
         """
         This function extracts the full retweet entities including hashtags, mentions, urls, photos, videos, gifs, and symbols
@@ -3207,7 +3776,8 @@ class retweetedClass(singleTweet):
             if "extended_entities" in self.tweet.keys():
                 tweet_entities["media"] = self.tweet["extended_entities"]["media"]
         return tweet_entities
-    def get_text(self):## Maybe you need to check this function for retweet and quote class
+
+    def get_text(self):  ## Maybe you need to check this function for retweet and quote class
         """
         :return: a string showing the full text of this retweet
         """
@@ -3220,6 +3790,7 @@ class retweetedClass(singleTweet):
                 tweet_text = self.tweet["text"]
         return tweet_text
 
+
 class quoteClass(singleTweet):
     def __init__(self, twt, para):
         """
@@ -3229,6 +3800,7 @@ class quoteClass(singleTweet):
         """
         self.tweet = twt
         self.parameters = para
+
     def get_entities(self):
         """
         This function extracts the full quote entities including hashtags, mentions, urls, photos, videos, gifs, and symbols
@@ -3244,7 +3816,8 @@ class quoteClass(singleTweet):
             if "extended_entities" in self.tweet.keys():
                 tweet_entities["media"] = self.tweet["extended_entities"]["media"]
         return tweet_entities
-    def get_text(self): ## Maybe you need to check this function for retweet and quote class
+
+    def get_text(self):  ## Maybe you need to check this function for retweet and quote class
         """
         :return: a string showing the full text of this retweet
         """
@@ -3256,7 +3829,6 @@ class quoteClass(singleTweet):
             else:
                 tweet_text = self.tweet["text"]
         return tweet_text
-
 
         # return self.tweet["extended_tweet"]["full_text"] if self.tweet["truncated"] else self.tweet["text"]
 
