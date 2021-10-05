@@ -69,7 +69,8 @@ from itertools import combinations
 #     - Add dictionaries/models related to metaphor detection
 # memotion (meme emotion)?
 #       - the spatial units of analysis are place and country. How are they different? Explain what is "place"?
-
+#       - Why don't we have resolution parameter for get account age function? and it only calculate the age in days?
+#       - When we are returning some statistics on for example number of followers or totall likes, why don't we also return "sum" and "count"?
 
 ############################################# Notes and Comments #############################################
 
@@ -1510,9 +1511,424 @@ class timeIndependentLocationDependentTweetMassFeatures(placeFeatures):
             return sentiments
 
 class timeIndependentLocationDependentUserMassFeatures(placeFeatures):
-    def test(self):
-        print("test")
 
+    def spatial_user_role(self, resolution="country"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that represents user score across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the user role of every account
+        that has posted at least a tweet within each spatial unit.
+        """
+
+        user_roles = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                user_roles[country] = []
+                user_roles_results = []
+                for tweet in tweets:
+                    user_roles_results.append(tweet.get_twitter().get_user_role())
+                for result in user_roles_results:
+                    user_roles[country] = user_roles.get(country, []) + [float(result)]
+
+                scores = user_roles[country]
+                user_roles[country] = {}
+                if len(scores) > 0:
+                    user_roles[country]["average"] = np.nanmean(scores)
+                    user_roles[country]["max"] = np.nanmax(scores)
+                    user_roles[country]["min"] = np.nanmin(scores)
+                    user_roles[country]["stdev"] = np.nanstd(scores)
+                    user_roles[country]["median"] = np.nanmedian(scores)
+                else:
+                    user_roles[country]["average"] = np.nan
+                    user_roles[country]["max"] = np.nan
+                    user_roles[country]["min"] = np.nan
+                    user_roles[country]["stdev"] = np.nan
+                    user_roles[country]["median"] = np.nan
+            return user_roles
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                user_roles[place] = []
+                user_roles_results = []
+                for tweet in tweets:
+                    user_roles_results.append(tweet.get_twitter().get_user_role())
+                for result in user_roles_results:
+                    user_roles[place] = user_roles.get(place, []) + [float(result)]
+
+                scores = user_roles[place]
+                user_roles[place] = {}
+                if len(scores) > 0:
+                    user_roles[place]["average"] = np.nanmean(scores)
+                    user_roles[place]["max"] = np.nanmax(scores)
+                    user_roles[place]["min"] = np.nanmin(scores)
+                    user_roles[place]["stdev"] = np.nanstd(scores)
+                    user_roles[place]["median"] = np.nanmedian(scores)
+                else:
+                    user_roles[place]["average"] = np.nan
+                    user_roles[place]["max"] = np.nan
+                    user_roles[place]["min"] = np.nan
+                    user_roles[place]["stdev"] = np.nan
+                    user_roles[place]["median"] = np.nan
+            return user_roles
+
+    def spatial_user_reputation(self, resolution="country"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that represents user reputation across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the user reputation of every account
+        that has posted at least a tweet within each spatial unit.
+        """
+
+        user_reputation = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                user_reputation[country] = []
+                user_reputation_results = []
+                for tweet in tweets:
+                    user_reputation_results.append(tweet.get_twitter().get_user_reputation())
+                for result in user_reputation_results:
+                    user_reputation[country] = user_reputation.get(country, []) + [float(result)]
+
+                scores = user_reputation[country]
+                user_reputation[country] = {}
+                if len(scores) > 0:
+                    user_reputation[country]["average"] = np.nanmean(scores)
+                    user_reputation[country]["max"] = np.nanmax(scores)
+                    user_reputation[country]["min"] = np.nanmin(scores)
+                    user_reputation[country]["stdev"] = np.nanstd(scores)
+                    user_reputation[country]["median"] = np.nanmedian(scores)
+                else:
+                    user_reputation[country]["average"] = np.nan
+                    user_reputation[country]["max"] = np.nan
+                    user_reputation[country]["min"] = np.nan
+                    user_reputation[country]["stdev"] = np.nan
+                    user_reputation[country]["median"] = np.nan
+            return user_reputation
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                user_reputation[place] = []
+                user_reputation_results = []
+                for tweet in tweets:
+                    user_reputation_results.append(tweet.get_twitter().get_user_reputation())
+                for result in user_reputation_results:
+                    user_reputation[place] = user_reputation.get(place, []) + [float(result)]
+
+                scores = user_reputation[place]
+                user_reputation[place] = {}
+                if len(scores) > 0:
+                    user_reputation[place]["average"] = np.nanmean(scores)
+                    user_reputation[place]["max"] = np.nanmax(scores)
+                    user_reputation[place]["min"] = np.nanmin(scores)
+                    user_reputation[place]["stdev"] = np.nanstd(scores)
+                    user_reputation[place]["median"] = np.nanmedian(scores)
+                else:
+                    user_reputation[place]["average"] = np.nan
+                    user_reputation[place]["max"] = np.nan
+                    user_reputation[place]["min"] = np.nan
+                    user_reputation[place]["stdev"] = np.nan
+                    user_reputation[place]["median"] = np.nan
+            return user_reputation
+
+    def spatial_followers(self, resolution="country"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that represents followers count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the followers count of every account
+        that has posted at least a tweet within each spatial unit.
+        """
+
+        followers_count = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                followers_count[country] = []
+                followers_count_results = []
+                for tweet in tweets:
+                    followers_count_results.append(tweet.get_twitter().get_followers_count())
+                for result in followers_count_results:
+                    followers_count[country] = followers_count.get(country, []) + [float(result)]
+
+                scores = followers_count[country]
+                followers_count[country] = {}
+                if len(scores) > 0:
+                    followers_count[country]["average"] = np.nanmean(scores)
+                    followers_count[country]["max"] = np.nanmax(scores)
+                    followers_count[country]["min"] = np.nanmin(scores)
+                    followers_count[country]["stdev"] = np.nanstd(scores)
+                    followers_count[country]["median"] = np.nanmedian(scores)
+                else:
+                    followers_count[country]["average"] = np.nan
+                    followers_count[country]["max"] = np.nan
+                    followers_count[country]["min"] = np.nan
+                    followers_count[country]["stdev"] = np.nan
+                    followers_count[country]["median"] = np.nan
+            return followers_count
+
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                followers_count[place] = []
+                followers_count_results = []
+                for tweet in tweets:
+                    followers_count_results.append(tweet.get_twitter().get_followers_count())
+                for result in followers_count_results:
+                    followers_count[place] = followers_count.get(place, []) + [float(result)]
+
+                scores = followers_count[place]
+                followers_count[place] = {}
+                if len(scores) > 0:
+                    followers_count[place]["average"] = np.nanmean(scores)
+                    followers_count[place]["max"] = np.nanmax(scores)
+                    followers_count[place]["min"] = np.nanmin(scores)
+                    followers_count[place]["stdev"] = np.nanstd(scores)
+                    followers_count[place]["median"] = np.nanmedian(scores)
+                else:
+                    followers_count[place]["average"] = np.nan
+                    followers_count[place]["max"] = np.nan
+                    followers_count[place]["min"] = np.nan
+                    followers_count[place]["stdev"] = np.nan
+                    followers_count[place]["median"] = np.nan
+            return followers_count
+
+    def spatial_friends(self, resolution="country"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that represents friends count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the friends count of every account
+        that has posted at least a tweet within each spatial unit.
+        """
+
+        followers_count = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                followers_count[country] = []
+                followers_count_results = []
+                for tweet in tweets:
+                    followers_count_results.append(tweet.get_twitter().get_friends_count())
+                for result in followers_count_results:
+                    followers_count[country] = followers_count.get(country, []) + [float(result)]
+
+                scores = followers_count[country]
+                followers_count[country] = {}
+                if len(scores) > 0:
+                    followers_count[country]["average"] = np.nanmean(scores)
+                    followers_count[country]["max"] = np.nanmax(scores)
+                    followers_count[country]["min"] = np.nanmin(scores)
+                    followers_count[country]["stdev"] = np.nanstd(scores)
+                    followers_count[country]["median"] = np.nanmedian(scores)
+                else:
+                    followers_count[country]["average"] = np.nan
+                    followers_count[country]["max"] = np.nan
+                    followers_count[country]["min"] = np.nan
+                    followers_count[country]["stdev"] = np.nan
+                    followers_count[country]["median"] = np.nan
+            return followers_count
+
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                followers_count[place] = []
+                followers_count_results = []
+                for tweet in tweets:
+                    followers_count_results.append(tweet.get_twitter().get_friends_count())
+                for result in followers_count_results:
+                    followers_count[place] = followers_count.get(place, []) + [float(result)]
+
+                scores = followers_count[place]
+                followers_count[place] = {}
+                if len(scores) > 0:
+                    followers_count[place]["average"] = np.nanmean(scores)
+                    followers_count[place]["max"] = np.nanmax(scores)
+                    followers_count[place]["min"] = np.nanmin(scores)
+                    followers_count[place]["stdev"] = np.nanstd(scores)
+                    followers_count[place]["median"] = np.nanmedian(scores)
+                else:
+                    followers_count[place]["average"] = np.nan
+                    followers_count[place]["max"] = np.nan
+                    followers_count[place]["min"] = np.nan
+                    followers_count[place]["stdev"] = np.nan
+                    followers_count[place]["median"] = np.nan
+            return followers_count
+
+    def spatial_account_age(self, resolution="country"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that represents account age across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the age of every account
+        that has posted at least a tweet within each spatial unit.
+        """
+
+        account_age = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                account_age[country] = []
+                account_age_results = []
+                for tweet in tweets:
+                    account_age_results.append(tweet.get_twitter().get_account_age())
+                for result in account_age_results:
+                    account_age[country] = account_age.get(country, []) + [float(result)]
+
+                scores = account_age[country]
+                account_age[country] = {}
+                if len(scores) > 0:
+                    account_age[country]["average"] = np.nanmean(scores)
+                    account_age[country]["max"] = np.nanmax(scores)
+                    account_age[country]["min"] = np.nanmin(scores)
+                    account_age[country]["stdev"] = np.nanstd(scores)
+                    account_age[country]["median"] = np.nanmedian(scores)
+                else:
+                    account_age[country]["average"] = np.nan
+                    account_age[country]["max"] = np.nan
+                    account_age[country]["min"] = np.nan
+                    account_age[country]["stdev"] = np.nan
+                    account_age[country]["median"] = np.nan
+            return account_age
+
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                account_age[place] = []
+                account_age_results = []
+                for tweet in tweets:
+                    account_age_results.append(tweet.get_twitter().get_account_age())
+                for result in account_age_results:
+                    account_age[place] = account_age.get(place, []) + [float(result)]
+
+                scores = account_age[place]
+                account_age[place] = {}
+                if len(scores) > 0:
+                    account_age[place]["average"] = np.nanmean(scores)
+                    account_age[place]["max"] = np.nanmax(scores)
+                    account_age[place]["min"] = np.nanmin(scores)
+                    account_age[place]["stdev"] = np.nanstd(scores)
+                    account_age[place]["median"] = np.nanmedian(scores)
+                else:
+                    account_age[place]["average"] = np.nan
+                    account_age[place]["max"] = np.nan
+                    account_age[place]["min"] = np.nan
+                    account_age[place]["stdev"] = np.nan
+                    account_age[place]["median"] = np.nan
+            return account_age
+
+    def spatial_total_likes(self, resolution="country"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that represents total account likes across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the totall likes of every account
+        that has posted at least a tweet within each spatial unit.
+        """
+
+        total_likes = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                total_likes[country] = []
+                total_likes_results = []
+                for tweet in tweets:
+                    total_likes_results.append(tweet.get_twitter().get_user_total_likes_count())
+                for result in total_likes_results:
+                    total_likes[country] = total_likes.get(country, []) + [float(result)]
+
+                scores = total_likes[country]
+                total_likes[country] = {}
+                if len(scores) > 0:
+                    total_likes[country]["average"] = np.nanmean(scores)
+                    total_likes[country]["max"] = np.nanmax(scores)
+                    total_likes[country]["min"] = np.nanmin(scores)
+                    total_likes[country]["stdev"] = np.nanstd(scores)
+                    total_likes[country]["median"] = np.nanmedian(scores)
+                else:
+                    total_likes[country]["average"] = np.nan
+                    total_likes[country]["max"] = np.nan
+                    total_likes[country]["min"] = np.nan
+                    total_likes[country]["stdev"] = np.nan
+                    total_likes[country]["median"] = np.nan
+            return total_likes
+
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                total_likes[place] = []
+                total_likes_results = []
+                for tweet in tweets:
+                    total_likes_results.append(tweet.get_twitter().get_user_total_likes_count())
+                for result in total_likes_results:
+                    total_likes[place] = total_likes.get(place, []) + [float(result)]
+
+                scores = total_likes[place]
+                total_likes[place] = {}
+                if len(scores) > 0:
+                    total_likes[place]["average"] = np.nanmean(scores)
+                    total_likes[place]["max"] = np.nanmax(scores)
+                    total_likes[place]["min"] = np.nanmin(scores)
+                    total_likes[place]["stdev"] = np.nanstd(scores)
+                    total_likes[place]["median"] = np.nanmedian(scores)
+                else:
+                    total_likes[place]["average"] = np.nan
+                    total_likes[place]["max"] = np.nan
+                    total_likes[place]["min"] = np.nan
+                    total_likes[place]["stdev"] = np.nan
+                    total_likes[place]["median"] = np.nan
+            return total_likes
+
+    def spatial_status_count(self, resolution="country"):
+        """
+        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that represents status count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the status count of every account
+        that has posted at least a tweet within each spatial unit.
+        """
+
+        status_count = {}
+        if resolution == "country":
+            tweets_with_countries = self.countries_with_tweets()
+            for country, tweets in tweets_with_countries.items():
+                status_count[country] = []
+                status_count_results = []
+                for tweet in tweets:
+                    status_count_results.append(tweet.get_twitter().get_statusses_count())
+                for result in status_count_results:
+                    status_count[country] = status_count.get(country, []) + [float(result)]
+
+                scores = status_count[country]
+                status_count[country] = {}
+                if len(scores) > 0:
+                    status_count[country]["average"] = np.nanmean(scores)
+                    status_count[country]["max"] = np.nanmax(scores)
+                    status_count[country]["min"] = np.nanmin(scores)
+                    status_count[country]["stdev"] = np.nanstd(scores)
+                    status_count[country]["median"] = np.nanmedian(scores)
+                else:
+                    status_count[country]["average"] = np.nan
+                    status_count[country]["max"] = np.nan
+                    status_count[country]["min"] = np.nan
+                    status_count[country]["stdev"] = np.nan
+                    status_count[country]["median"] = np.nan
+            return status_count
+
+        elif resolution == "place":
+            tweets_with_places = self.places_with_tweets()
+            for place, tweets in tweets_with_places.items():
+                status_count[place] = []
+                status_count_results = []
+                for tweet in tweets:
+                    status_count_results.append(tweet.get_twitter().get_statusses_count())
+                for result in status_count_results:
+                    status_count[place] = status_count.get(place, []) + [float(result)]
+
+                scores = status_count[place]
+                status_count[place] = {}
+                if len(scores) > 0:
+                    status_count[place]["average"] = np.nanmean(scores)
+                    status_count[place]["max"] = np.nanmax(scores)
+                    status_count[place]["min"] = np.nanmin(scores)
+                    status_count[place]["stdev"] = np.nanstd(scores)
+                    status_count[place]["median"] = np.nanmedian(scores)
+                else:
+                    status_count[place]["average"] = np.nan
+                    status_count[place]["max"] = np.nan
+                    status_count[place]["min"] = np.nan
+                    status_count[place]["stdev"] = np.nan
+                    status_count[place]["median"] = np.nan
+            return status_count
 
 ############################################# mass features #############################################
 
