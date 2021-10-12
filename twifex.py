@@ -71,7 +71,8 @@ from itertools import combinations
 #       - the spatial units of analysis are place and country. How are they different? Explain what is "place"?
 #       - Why don't we have resolution parameter for get account age function? and it only calculate the age in days?
 #       - When we are returning some statistics on for example number of followers or totall likes, why don't we also return "sum" and "count"?
-
+#       - Having a consistency between the class methods and names. Sme methods have to be available across different classes with the same name
+#       - Summarising all those if and else where you calcualte statitical metrics for an array => maybe defining a function?
 ############################################# Notes and Comments #############################################
 
 
@@ -216,6 +217,9 @@ class collectiveTweets:
         """
         return topologyBasedFeatures(self.tweets)  # Shouldn't this be topologyBasedFeatures?
 
+    @staticmethod
+    def collective_tweets_to_dictionary(tweets):
+        return {tweet.get_id(): tweet for tweet in tweets}
 
 ############################################# mass features #############################################
 
@@ -462,7 +466,7 @@ class placeFeatures:
         """
         self.tweets = tweets
 
-    def tweets_with_place(self):
+    def geotagged_tweets(self):
         """
         This function filters out all tweets without geo location.
         :return: a dictionary that maps every geotagged tweet_id to its corresponding singleTweet object
@@ -474,7 +478,7 @@ class placeFeatures:
         This function finds all countries that the tweets in the dataset are comming from.
         :return: return a list of distinct countries.
         """
-        tweetsWithPlaces = self.tweets_with_place()
+        tweetsWithPlaces = self.geotagged_tweets()
         places = set()
         for tweet_id, tweet in tweetsWithPlaces.items():
             place = tweet.get_place()
@@ -486,7 +490,7 @@ class placeFeatures:
         This function finds all places that the tweets in the dataset are comming from.
         :return: return a list of distinct places.
         """
-        tweetsWithPlaces = self.tweets_with_place()
+        tweetsWithPlaces = self.geotagged_tweets()
         places_coordinates = {}
         for tweet_id, tweet in tweetsWithPlaces.items():
             place = tweet.get_place()
@@ -496,48 +500,64 @@ class placeFeatures:
         else:
             return list(places_coordinates.keys())
 
-    def countries_with_tweets(self):
+    def tweets_with_location(self, spatial_resolution='country'):
         """
-        This function mapped all the geotagged tweets to their country of origin.
-        :return: a dictionary that maps every country to the list of all tweets comming from that country.
+        This function mapped all the geotagged tweets to their locations based on the spatial resolution specified in the function argument.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: a dictionary that maps every location to the list of all tweets coming from that location.
         """
-        tweetsWithPlaces = self.tweets_with_place()
-        countries_dict = {}
+        if spatial_resolution == 'country':
+            res = "country"
+        elif spatial_resolution == 'place':
+            res = "full_name"
+
+        tweetsWithPlaces = self.geotagged_tweets()
+        location_dict = {}
         for tweet_id, tweet in tweetsWithPlaces.items():
-            countries_dict[tweet.get_place()["country"]] = countries_dict.get(tweet.get_place()["country"], []) + [
+            location_dict[tweet.get_place()[res]] = location_dict.get(tweet.get_place()[res], []) + [
                 tweet]
-        return countries_dict
+        return location_dict
 
-    def places_with_tweets(self):
-        """
-        This function mapped all the geotagged tweets to their origin.
-        :return: a dictionary that maps every place to the list of all tweets comming from that country.
-        """
-        tweetsWithPlaces = self.tweets_with_place()
-        places_dict = {}
-        for tweet_id, tweet in tweetsWithPlaces.items():
-            places_dict[tweet.get_place()["full_name"]] = places_dict.get(tweet.get_place()["full_name"], []) + [tweet]
-        return places_dict
+    # def countries_with_tweets(self):
+    #     """
+    #     This function mapped all the geotagged tweets to their country of origin.
+    #     :return: a dictionary that maps every country to the list of all tweets comming from that country.
+    #     """
+    #     tweetsWithPlaces = self.geotagged_tweets()
+    #     countries_dict = {}
+    #     for tweet_id, tweet in tweetsWithPlaces.items():
+    #         countries_dict[tweet.get_place()["country"]] = countries_dict.get(tweet.get_place()["country"], []) + [
+    #             tweet]
+    #     return countries_dict
+    #
+    # def places_with_tweets(self):
+    #     """
+    #     This function mapped all the geotagged tweets to their origin.
+    #     :return: a dictionary that maps every place to the list of all tweets comming from that country.
+    #     """
+    #     tweetsWithPlaces = self.geotagged_tweets()
+    #     places_dict = {}
+    #     for tweet_id, tweet in tweetsWithPlaces.items():
+    #         places_dict[tweet.get_place()["full_name"]] = places_dict.get(tweet.get_place()["full_name"], []) + [tweet]
+    #     return places_dict
 
-    def test3(self):
-        print("hi from test3")
 
 class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
     # def __init__(self, tweets):
     #     self.tweets = tweets
     #     self.nodes = self.tweets_period()
-    def tweet_complexity_change(self, nodes, unit="word"):
+    def tweet_complexity_change(self, nodes, complexity_unit="word"):
         """
         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
         the timestamps and all the tweets that are posted within every timestamp.
-        :param unit: the unit of analysis for tweet complexity analysis. It can be "word", "sentence", or "syllables".
+        :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
         :return: a dictionary that represents the change of the tweet complexity across the timespan of the dataset
         due to selected unit of analysis. The key-value pair in this dictionary corresponds to
         the timestamps and the statistical metrics of the tweet complexity scores in all the tweets that are posted
         within every timestamp.
         """
 
-        assert (unit in ["word", "sentence",
+        assert (complexity_unit in ["word", "sentence",
                          "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
 
         complexity = {}
@@ -545,7 +565,7 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
             complexity[time_frame] = []
             complexity_results = []
             for tweet in tweets:
-                complexity_results.append(tweet.text_complexity(unit=unit))
+                complexity_results.append(tweet.text_complexity(complexity_unit=complexity_unit))
             for result in complexity_results:
                 complexity[time_frame] = complexity.get(time_frame, []) + [float(result)]
 
@@ -565,18 +585,18 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                 complexity[time_frame]["median"] = np.nan
         return complexity
 
-    def tweet_readability_change(self, nodes, metric="flesch_kincaid_grade"):
+    def tweet_readability_change(self, nodes, readability_metric="flesch_kincaid_grade"):
         """
         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
         the timestamps and all the tweets that are posted within every timestamp.
-        :param metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score"
         :return: a dictionary that represents the change of the tweet readability across the timespan of the dataset
         due to selected readability metric. The key-value pair in this dictionary corresponds to the timestamps and
         the statistical metrics of the tweet readability scores in all the tweets that are posted within every timestamp.
         """
 
-        assert (metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
                            "coleman_liau_index", "linsear_write_formula",
                            "dale_chall_readability_score", ]), "The metric " \
                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
@@ -588,7 +608,7 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
             readability[time_frame] = []
             readability_results = []
             for tweet in tweets:
-                readability_results.append(tweet.readability(metric=metric))
+                readability_results.append(tweet.readability(readability_metric=readability_metric))
             for result in readability_results:
                 readability[time_frame] = readability.get(time_frame, []) + [float(result)]
 
@@ -608,24 +628,24 @@ class timeDependentLocationIndependentTweetMassFeatures(temporalFeatures):
                 readability[time_frame]["median"] = np.nan
         return readability
 
-    def tweet_length_change(self, nodes, unit="word"):
+    def tweet_length_change(self, nodes, length_unit="word"):
         """
         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
         the timestamps and all the tweets that are posted within every timestamp.
-        :param unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
+        :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
         :return: a dictionary that represents the change of the tweet length across the timespan of the dataset
         due to selected unit of analysis. The key-value pair in this dictionary corresponds to the timestamps and
         the statistical metrics of the tweet length in all the tweets that are posted within every timestamp.
         """
 
-        assert (unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
+        assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
 
         tweet_length = {}
         for time_frame, tweets in nodes.items():
             tweet_length[time_frame] = []
             tweet_length_results = []
             for tweet in tweets:
-                tweet_length_results.append(tweet.text_length(unit=unit))
+                tweet_length_results.append(tweet.text_length(length_unit=length_unit))
             for result in tweet_length_results:
                 tweet_length[time_frame] = tweet_length.get(time_frame, []) + [float(result)]
 
@@ -736,8 +756,255 @@ class timeDependentLocationIndependentUserMassFeatures(temporalFeatures):
 
 
 class timeDependentLocationDependentTweetMassFeatures(temporalFeatures, placeFeatures):
-    def test(self):
-        print("test")
+
+    def temporal_spatial_tweets(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1, spatial_resolution='country'):
+        """
+        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+        "hour", "minute" and "second".
+        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+        it means tweets are categorised by the time-frame of two weeks.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: an embedded dictionary that classifies a set of tweets into a hierarchical structure in which the key-value corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be all tweets corresponding to the location and timestamp.
+        """
+
+        assert (order in ["spatial-temporal", "temporal-spatial"])
+        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time resolution " \
+                                                                                             "should be year, month, " \
+                                                                                             "week, day, hour, minute," \
+                                                                                             " or second"
+        assert (isinstance(temporal_frequency, int) and temporal_frequency>0), "The temporal frequency has to be a positive integer"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+
+        tweet_set = {}
+        if order == "spatial-temporal":
+            spatial_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+            for location, tweets in spatial_tweets.items():
+                tweet_set[location] = temporalFeatures(collectiveTweets.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
+        elif order == "temporal-spatial":
+            temporal_tweets = self.tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
+            for timestamp, tweets in temporal_tweets.items():
+                tweet_set[timestamp] = placeFeatures(collectiveTweets.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
+        return tweet_set
+
+    def temporal_spatial_tweet_complexity(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1, spatial_resolution='country', complexity_unit="word"):
+        """
+        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+        "hour", "minute" and "second".
+        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+        it means tweets are categorised by the time-frame of two weeks.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
+        :return: an embedded dictionary that represents the tweet complexity across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet complexity scores in all the tweets that are posted
+        within every timeframe and spatial unit.
+        """
+
+        assert (order in ["spatial-temporal", "temporal-spatial"])
+        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time resolution " \
+                                                                                             "should be year, month, " \
+                                                                                             "week, day, hour, minute," \
+                                                                                             " or second"
+        assert (isinstance(temporal_frequency, int) and temporal_frequency>0), "The temporal frequency has to be a positive integer"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (complexity_unit in ["word", "sentence",
+                         "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
+
+
+
+
+        complexity = {}
+        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+        for layer1, embedded_dictionary in hierarchical_tweets.items():
+            complexity[layer1] = {}
+            for layer2, tweets in embedded_dictionary.items():
+                complexity[layer1][layer2] = []
+                for tweet in tweets:
+                    complexity[layer1][layer2] = complexity[layer1].get(layer2, []) + [float(tweet.text_complexity(complexity_unit=complexity_unit))]
+
+                scores = complexity[layer1][layer2]
+                complexity[layer1][layer2] = {}
+                if len(scores) > 0:
+                    complexity[layer1][layer2]["average"] = np.nanmean(scores)
+                    complexity[layer1][layer2]["max"] = np.nanmax(scores)
+                    complexity[layer1][layer2]["min"] = np.nanmin(scores)
+                    complexity[layer1][layer2]["stdev"] = np.nanstd(scores)
+                    complexity[layer1][layer2]["median"] = np.nanmedian(scores)
+                    complexity[layer1][layer2]["sum"] = np.nansum(scores)
+                else:
+                    complexity[layer1][layer2]["average"] = np.nan
+                    complexity[layer1][layer2]["max"] = np.nan
+                    complexity[layer1][layer2]["min"] = np.nan
+                    complexity[layer1][layer2]["stdev"] = np.nan
+                    complexity[layer1][layer2]["median"] = np.nan
+                    complexity[layer1][layer2]["sum"] = np.nan
+                complexity[layer1][layer2]["count"] = len(scores)
+
+        return complexity
+
+    def temporal_spatial_tweet_readability(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1, spatial_resolution='country', readability_metric="flesch_kincaid_grade"):
+        """
+        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+        "hour", "minute" and "second".
+        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+        it means tweets are categorised by the time-frame of two weeks.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
+        :return: an embedded dictionary that represents the tweet readability across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet complexity scores in all the tweets that are posted
+        within every timeframe and spatial unit.
+        """
+
+        assert (order in ["spatial-temporal", "temporal-spatial"])
+        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time resolution " \
+                                                                                             "should be year, month, " \
+                                                                                             "week, day, hour, minute," \
+                                                                                             " or second"
+        assert (isinstance(temporal_frequency, int) and temporal_frequency>0), "The temporal frequency has to be a positive integer"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+                           "coleman_liau_index", "linsear_write_formula",
+                           "dale_chall_readability_score", ]), "The metric " \
+                                                               "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+                                                               "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+                                                               "or dale_chall_readability_score."
+
+        readability = {}
+        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+        for layer1, embedded_dictionary in hierarchical_tweets.items():
+            readability[layer1] = {}
+            for layer2, tweets in embedded_dictionary.items():
+                readability[layer1][layer2] = []
+                for tweet in tweets:
+                    readability[layer1][layer2] = readability[layer1].get(layer2, []) + [float(tweet.readability(readability_metric=readability_metric))]
+
+                scores = readability[layer1][layer2]
+                readability[layer1][layer2] = {}
+                if len(scores) > 0:
+                    readability[layer1][layer2]["average"] = np.nanmean(scores)
+                    readability[layer1][layer2]["max"] = np.nanmax(scores)
+                    readability[layer1][layer2]["min"] = np.nanmin(scores)
+                    readability[layer1][layer2]["stdev"] = np.nanstd(scores)
+                    readability[layer1][layer2]["median"] = np.nanmedian(scores)
+                    readability[layer1][layer2]["sum"] = np.nansum(scores)
+                else:
+                    readability[layer1][layer2]["average"] = np.nan
+                    readability[layer1][layer2]["max"] = np.nan
+                    readability[layer1][layer2]["min"] = np.nan
+                    readability[layer1][layer2]["stdev"] = np.nan
+                    readability[layer1][layer2]["median"] = np.nan
+                    readability[layer1][layer2]["sum"] = np.nan
+                readability[layer1][layer2]["count"] = len(scores)
+
+        return readability
+
+    def temporal_spatial_tweet_length(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1, spatial_resolution='country', length_unit="word"):
+        """
+        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+        "hour", "minute" and "second".
+        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+        it means tweets are categorised by the time-frame of two weeks.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
+        :return: an embedded dictionary that represents the tweet length across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet complexity scores in all the tweets that are posted
+        within every timeframe and spatial unit.
+        """
+
+        assert (order in ["spatial-temporal", "temporal-spatial"])
+        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time resolution " \
+                                                                                             "should be year, month, " \
+                                                                                             "week, day, hour, minute," \
+                                                                                             " or second"
+        assert (isinstance(temporal_frequency, int) and temporal_frequency>0), "The temporal frequency has to be a positive integer"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
+
+        tweet_length = {}
+        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+        for layer1, embedded_dictionary in hierarchical_tweets.items():
+            tweet_length[layer1] = {}
+            for layer2, tweets in embedded_dictionary.items():
+                tweet_length[layer1][layer2] = []
+                for tweet in tweets:
+                    tweet_length[layer1][layer2] = tweet_length[layer1].get(layer2, []) + [float(tweet.text_length(length_unit=length_unit))]
+
+                scores = tweet_length[layer1][layer2]
+                tweet_length[layer1][layer2] = {}
+                if len(scores) > 0:
+                    tweet_length[layer1][layer2]["average"] = np.nanmean(scores)
+                    tweet_length[layer1][layer2]["max"] = np.nanmax(scores)
+                    tweet_length[layer1][layer2]["min"] = np.nanmin(scores)
+                    tweet_length[layer1][layer2]["stdev"] = np.nanstd(scores)
+                    tweet_length[layer1][layer2]["median"] = np.nanmedian(scores)
+                    tweet_length[layer1][layer2]["sum"] = np.nansum(scores)
+                else:
+                    tweet_length[layer1][layer2]["average"] = np.nan
+                    tweet_length[layer1][layer2]["max"] = np.nan
+                    tweet_length[layer1][layer2]["min"] = np.nan
+                    tweet_length[layer1][layer2]["stdev"] = np.nan
+                    tweet_length[layer1][layer2]["median"] = np.nan
+                    tweet_length[layer1][layer2]["sum"] = np.nan
+                tweet_length[layer1][layer2]["count"] = len(scores)
+
+        return tweet_length
+
+    def temporal_spatial_tweet_count(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1, spatial_resolution='country'):
+        """
+        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+        "hour", "minute" and "second".
+        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+        it means tweets are categorised by the time-frame of two weeks.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :return: an embedded dictionary that represents the number of tweets across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet complexity scores in all the tweets that are posted
+        within every timeframe and spatial unit.
+        """
+
+        assert (order in ["spatial-temporal", "temporal-spatial"])
+        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time resolution " \
+                                                                                             "should be year, month, " \
+                                                                                             "week, day, hour, minute," \
+                                                                                             " or second"
+        assert (isinstance(temporal_frequency, int) and temporal_frequency>0), "The temporal frequency has to be a positive integer"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+
+        tweet_count = {}
+        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+        for layer1, embedded_dictionary in hierarchical_tweets.items():
+            tweet_count[layer1] = {}
+            for layer2, tweets in embedded_dictionary.items():
+                tweet_count[layer1][layer2] = len(tweets)
+        return tweet_count
+
+    def temporal_spatial_tweet_sentiment(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1, spatial_resolution='country', sentiment_engine="vader"):
+        """
+        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+        "hour", "minute" and "second".
+        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+        it means tweets are categorised by the time-frame of two weeks.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
+        "vad".
+        :return: an embedded dictionary that represents the tweets sentiment across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet complexity scores in all the tweets that are posted
+        within every timeframe and spatial unit.
+        """
+
+        assert (order in ["spatial-temporal", "temporal-spatial"])
+        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time resolution " \
+                                                                                             "should be year, month, " \
+                                                                                             "week, day, hour, minute," \
+                                                                                             " or second"
+        assert (isinstance(temporal_frequency, int) and temporal_frequency>0), "The temporal frequency has to be a positive integer"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+                                     "vad"]), "The sentiment_engine has to be" \
+                                              "textblob, vader, nrc," \
+                                              "hate_speech or vad"
+
+
 
 
 class timeDependentLocationDependentUserMassFeatures(temporalFeatures, placeFeatures):
@@ -1224,86 +1491,55 @@ class timeIndependentLocationIndependentUserMassFeatures:
 
 
 class timeIndependentLocationDependentTweetMassFeatures(placeFeatures):
-    # def __init__(self, tweets):
-    #     self.tweets = tweets
-    def spatial_tweet_complexity(self, resolution='country', unit="word"):
+
+    def spatial_tweet_complexity(self, spatial_resolution='country', complexity_unit="word"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param unit: the unit of analysis for tweet complexity analysis. It can be "word", "sentence", or "syllables".
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
         :return: a dictionary that represents the tweet complexity across the spatial units. The key-value pair in this dictionary corresponds to
         the spatial unit of analysis and the statistical metrics of the tweet complexity scores in all the tweets that are posted
         within every spatial unit.
         """
 
-        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (unit in ["word", "sentence",
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (complexity_unit in ["word", "sentence",
                          "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
 
         complexity = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                complexity[country] = []
-                complexity_results = []
-                for tweet in tweets:
-                    complexity_results.append(tweet.text_complexity(unit=unit))
-                for result in complexity_results:
-                    complexity[country] = complexity.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            complexity[location] = []
+            for tweet in tweets:
+                complexity[location] = complexity.get(location, []) + [float(tweet.text_complexity(complexity_unit=complexity_unit))]
 
-                scores = complexity[country]
-                complexity[country] = {}
-                if len(scores) > 0:
-                    complexity[country]["average"] = np.nanmean(scores)
-                    complexity[country]["max"] = np.nanmax(scores)
-                    complexity[country]["min"] = np.nanmin(scores)
-                    complexity[country]["stdev"] = np.nanstd(scores)
-                    complexity[country]["median"] = np.nanmedian(scores)
-                else:
-                    complexity[country]["average"] = np.nan
-                    complexity[country]["max"] = np.nan
-                    complexity[country]["min"] = np.nan
-                    complexity[country]["stdev"] = np.nan
-                    complexity[country]["median"] = np.nan
-            return complexity
+            scores = complexity[location]
+            complexity[location] = {}
+            if len(scores) > 0:
+                complexity[location]["average"] = np.nanmean(scores)
+                complexity[location]["max"] = np.nanmax(scores)
+                complexity[location]["min"] = np.nanmin(scores)
+                complexity[location]["stdev"] = np.nanstd(scores)
+                complexity[location]["median"] = np.nanmedian(scores)
+            else:
+                complexity[location]["average"] = np.nan
+                complexity[location]["max"] = np.nan
+                complexity[location]["min"] = np.nan
+                complexity[location]["stdev"] = np.nan
+                complexity[location]["median"] = np.nan
+        return complexity
 
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                complexity[place] = []
-                complexity_results = []
-                for tweet in tweets:
-                    complexity_results.append(tweet.text_complexity(unit=unit))
-                for result in complexity_results:
-                    complexity[place] = complexity.get(place, []) + [float(result)]
-
-                scores = complexity[place]
-                complexity[place] = {}
-                if len(scores) > 0:
-                    complexity[place]["average"] = np.nanmean(scores)
-                    complexity[place]["max"] = np.nanmax(scores)
-                    complexity[place]["min"] = np.nanmin(scores)
-                    complexity[place]["stdev"] = np.nanstd(scores)
-                    complexity[place]["median"] = np.nanmedian(scores)
-                else:
-                    complexity[place]["average"] = np.nan
-                    complexity[place]["max"] = np.nan
-                    complexity[place]["min"] = np.nan
-                    complexity[place]["stdev"] = np.nan
-                    complexity[place]["median"] = np.nan
-            return complexity
-
-    def spatial_tweet_readability(self, resolution='country', metric="flesch_kincaid_grade"):
+    def spatial_tweet_readability(self, spatial_resolution='country', readability_metric="flesch_kincaid_grade"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
         :return: a dictionary that represents the tweet readability score across the spatial units. The key-value pair in this dictionary corresponds to
         the spatial unit of analysis and the statistical metrics of the tweet readability scores in all the tweets that are posted
         within every spatial unit.
         """
 
-        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
                            "coleman_liau_index", "linsear_write_formula",
                            "dale_chall_readability_score", ]), "The metric " \
                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
@@ -1311,624 +1547,326 @@ class timeIndependentLocationDependentTweetMassFeatures(placeFeatures):
                                                                "or dale_chall_readability_score."
 
         readability = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                readability[country] = []
-                readability_results = []
-                for tweet in tweets:
-                    readability_results.append(tweet.readability(metric=metric))
-                for result in readability_results:
-                    readability[country] = readability.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            readability[location] = []
+            for tweet in tweets:
+                readability[location] = readability.get(location, []) + [float(tweet.readability(readability_metric=readability_metric))]
 
-                scores = readability[country]
-                readability[country] = {}
-                if len(scores) > 0:
-                    readability[country]["average"] = np.nanmean(scores)
-                    readability[country]["max"] = np.nanmax(scores)
-                    readability[country]["min"] = np.nanmin(scores)
-                    readability[country]["stdev"] = np.nanstd(scores)
-                    readability[country]["median"] = np.nanmedian(scores)
-                else:
-                    readability[country]["average"] = np.nan
-                    readability[country]["max"] = np.nan
-                    readability[country]["min"] = np.nan
-                    readability[country]["stdev"] = np.nan
-                    readability[country]["median"] = np.nan
-            return readability
+            scores = readability[location]
+            readability[location] = {}
+            if len(scores) > 0:
+                readability[location]["average"] = np.nanmean(scores)
+                readability[location]["max"] = np.nanmax(scores)
+                readability[location]["min"] = np.nanmin(scores)
+                readability[location]["stdev"] = np.nanstd(scores)
+                readability[location]["median"] = np.nanmedian(scores)
+            else:
+                readability[location]["average"] = np.nan
+                readability[location]["max"] = np.nan
+                readability[location]["min"] = np.nan
+                readability[location]["stdev"] = np.nan
+                readability[location]["median"] = np.nan
+        return readability
 
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                readability[place] = []
-                readability_results = []
-                for tweet in tweets:
-                    readability_results.append(tweet.readability(metric=metric))
-                for result in readability_results:
-                    readability[place] = readability.get(place, []) + [float(result)]
-
-                scores = readability[place]
-                readability[place] = {}
-                if len(scores) > 0:
-                    readability[place]["average"] = np.nanmean(scores)
-                    readability[place]["max"] = np.nanmax(scores)
-                    readability[place]["min"] = np.nanmin(scores)
-                    readability[place]["stdev"] = np.nanstd(scores)
-                    readability[place]["median"] = np.nanmedian(scores)
-                else:
-                    readability[place]["average"] = np.nan
-                    readability[place]["max"] = np.nan
-                    readability[place]["min"] = np.nan
-                    readability[place]["stdev"] = np.nan
-                    readability[place]["median"] = np.nan
-            return readability
-
-    def spatial_tweet_length(self, resolution='country', unit="word"):
+    def spatial_tweet_length(self, spatial_resolution='country', length_unit="word"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
         :return: a dictionary that represents the tweet length across the spatial units. The key-value pair in this dictionary corresponds to
         the spatial unit of analysis and the statistical metrics of the tweet length in all the tweets that are posted
         within every spatial unit.
         """
 
-        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
 
         tweet_length = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                tweet_length[country] = []
-                tweet_length_results = []
-                for tweet in tweets:
-                    tweet_length_results.append(tweet.text_length(unit=unit))
-                for result in tweet_length_results:
-                    tweet_length[country] = tweet_length.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            tweet_length[location] = []
+            for tweet in tweets:
+                tweet_length[location] = tweet_length.get(location, []) + [float(tweet.text_length(length_unit=length_unit))]
 
-                scores = tweet_length[country]
-                tweet_length[country] = {}
-                if len(scores) > 0:
-                    tweet_length[country]["average"] = np.nanmean(scores)
-                    tweet_length[country]["max"] = np.nanmax(scores)
-                    tweet_length[country]["min"] = np.nanmin(scores)
-                    tweet_length[country]["stdev"] = np.nanstd(scores)
-                    tweet_length[country]["median"] = np.nanmedian(scores)
-                    tweet_length[country]["median"] = np.nanmedian(scores)
-                else:
-                    tweet_length[country]["average"] = np.nan
-                    tweet_length[country]["max"] = np.nan
-                    tweet_length[country]["min"] = np.nan
-                    tweet_length[country]["stdev"] = np.nan
-                    tweet_length[country]["median"] = np.nan
-                    tweet_length[country]["median"] = np.nan
-            return tweet_length
+            scores = tweet_length[location]
+            tweet_length[location] = {}
+            if len(scores) > 0:
+                tweet_length[location]["average"] = np.nanmean(scores)
+                tweet_length[location]["max"] = np.nanmax(scores)
+                tweet_length[location]["min"] = np.nanmin(scores)
+                tweet_length[location]["stdev"] = np.nanstd(scores)
+                tweet_length[location]["median"] = np.nanmedian(scores)
+            else:
+                tweet_length[location]["average"] = np.nan
+                tweet_length[location]["max"] = np.nan
+                tweet_length[location]["min"] = np.nan
+                tweet_length[location]["stdev"] = np.nan
+                tweet_length[location]["median"] = np.nan
+        return tweet_length
 
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                tweet_length[place] = []
-                tweet_length_results = []
-                for tweet in tweets:
-                    tweet_length_results.append(tweet.text_length(unit=unit))
-                for result in tweet_length_results:
-                    tweet_length[place] = tweet_length.get(place, []) + [float(result)]
-
-                scores = tweet_length[place]
-                tweet_length[place] = {}
-                if len(scores) > 0:
-                    tweet_length[place]["average"] = np.nanmean(scores)
-                    tweet_length[place]["max"] = np.nanmax(scores)
-                    tweet_length[place]["min"] = np.nanmin(scores)
-                    tweet_length[place]["stdev"] = np.nanstd(scores)
-                    tweet_length[place]["median"] = np.nanmedian(scores)
-                    tweet_length[place]["median"] = np.nanmedian(scores)
-                else:
-                    tweet_length[place]["average"] = np.nan
-                    tweet_length[place]["max"] = np.nan
-                    tweet_length[place]["min"] = np.nan
-                    tweet_length[place]["stdev"] = np.nan
-                    tweet_length[place]["median"] = np.nan
-                    tweet_length[place]["median"] = np.nan
-            return tweet_length
-
-    def spatial_tweet_count(self, resolution='country'):
+    def spatial_tweet_count(self, spatial_resolution='country'):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :return: a dictionary that represents the tweet count across the spatial units.
         The key-value pair in this dictionary corresponds to the spatial unit of analysis and
         the the number of the tweets that are posted within every spatial unit.
         """
-        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
 
         tweet_count = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                tweet_count[country] = len(tweets)
-            return tweet_count
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                tweet_count[place] = len(tweets)
-            return tweet_count
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
 
-    def spatial_sentiment(self, resolution='country', sentiment_engine="vader"):
+        for location, tweets in geotagged_tweets.items():
+            tweet_count[location] = len(tweets)
+        return tweet_count
+
+    def spatial_sentiment(self, spatial_resolution='country', sentiment_engine="vader"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
         "vad".
         :return: a dictionary that represents the tweet sentiments across the spatial units regarding the selected sentiment engine. The key-value pair in this dictionary corresponds to
         the spatial unit of analysis and the statistical metrics of the sentiment scores in all the tweets that are posted within every spatial unit.
         """
 
-        assert (resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
         assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
                                      "vad"]), "The sentiment_engine has to be" \
                                               "textblob, vader, nrc," \
                                               "hate_speech or vad"
 
         sentiments = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                sentiments[country] = {}
-                sentiment_results = []
-                for tweet in tweets:
-                    sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
-                for result in sentiment_results:
-                    for score in result:
-                        sentiments[country][score] = sentiments[country].get(score, []) + [float(result[score])]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            sentiments[location] = {}
+            sentiment_results = []
+            for tweet in tweets:
+                sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
+            for result in sentiment_results:
+                for score in result:
+                    sentiments[location][score] = sentiments[location].get(score, []) + [float(result[score])]
 
-                for score in sentiments[country]:
-                    scores = sentiments[country][score]
-                    sentiments[country][score] = {}
-                    sentiments[country][score]["average"] = np.nanmean(scores)
-                    sentiments[country][score]["max"] = np.nanmax(scores)
-                    sentiments[country][score]["min"] = np.nanmin(scores)
-                    sentiments[country][score]["stdev"] = np.nanstd(scores)
-                    sentiments[country][score]["median"] = np.nanmedian(scores)
-            return sentiments
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                sentiments[place] = {}
-                sentiment_results = []
-                for tweet in tweets:
-                    sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
-                for result in sentiment_results:
-                    for score in result:
-                        sentiments[place][score] = sentiments[place].get(score, []) + [float(result[score])]
-
-                for score in sentiments[place]:
-                    scores = sentiments[place][score]
-                    sentiments[place][score] = {}
-                    sentiments[place][score]["average"] = np.nanmean(scores)
-                    sentiments[place][score]["max"] = np.nanmax(scores)
-                    sentiments[place][score]["min"] = np.nanmin(scores)
-                    sentiments[country][score]["stdev"] = np.nanstd(scores)
-                    sentiments[place][score]["median"] = np.nanmedian(scores)
-            return sentiments
+            for score in sentiments[location]:
+                scores = sentiments[location][score]
+                sentiments[location][score] = {}
+                sentiments[location][score]["average"] = np.nanmean(scores)
+                sentiments[location][score]["max"] = np.nanmax(scores)
+                sentiments[location][score]["min"] = np.nanmin(scores)
+                sentiments[location][score]["stdev"] = np.nanstd(scores)
+                sentiments[location][score]["median"] = np.nanmedian(scores)
+        return sentiments
 
 class timeIndependentLocationDependentUserMassFeatures(placeFeatures):
 
-    def spatial_user_role(self, resolution="country"):
+    def spatial_user_role(self, spatial_resolution="country"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :return: a dictionary that represents user score across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the user role of every account
         that has posted at least a tweet within each spatial unit.
         """
 
         user_roles = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                user_roles[country] = []
-                user_roles_results = []
-                for tweet in tweets:
-                    user_roles_results.append(tweet.get_twitter().get_user_role())
-                for result in user_roles_results:
-                    user_roles[country] = user_roles.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            user_roles[location] = []
+            for tweet in tweets:
+                user_roles[location] = user_roles.get(location, []) + [float(tweet.get_twitter().get_user_role())]
 
-                scores = user_roles[country]
-                user_roles[country] = {}
-                if len(scores) > 0:
-                    user_roles[country]["average"] = np.nanmean(scores)
-                    user_roles[country]["max"] = np.nanmax(scores)
-                    user_roles[country]["min"] = np.nanmin(scores)
-                    user_roles[country]["stdev"] = np.nanstd(scores)
-                    user_roles[country]["median"] = np.nanmedian(scores)
-                else:
-                    user_roles[country]["average"] = np.nan
-                    user_roles[country]["max"] = np.nan
-                    user_roles[country]["min"] = np.nan
-                    user_roles[country]["stdev"] = np.nan
-                    user_roles[country]["median"] = np.nan
-            return user_roles
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                user_roles[place] = []
-                user_roles_results = []
-                for tweet in tweets:
-                    user_roles_results.append(tweet.get_twitter().get_user_role())
-                for result in user_roles_results:
-                    user_roles[place] = user_roles.get(place, []) + [float(result)]
+            scores = user_roles[location]
+            user_roles[location] = {}
+            if len(scores) > 0:
+                user_roles[location]["average"] = np.nanmean(scores)
+                user_roles[location]["max"] = np.nanmax(scores)
+                user_roles[location]["min"] = np.nanmin(scores)
+                user_roles[location]["stdev"] = np.nanstd(scores)
+                user_roles[location]["median"] = np.nanmedian(scores)
+            else:
+                user_roles[location]["average"] = np.nan
+                user_roles[location]["max"] = np.nan
+                user_roles[location]["min"] = np.nan
+                user_roles[location]["stdev"] = np.nan
+                user_roles[location]["median"] = np.nan
+        return user_roles
 
-                scores = user_roles[place]
-                user_roles[place] = {}
-                if len(scores) > 0:
-                    user_roles[place]["average"] = np.nanmean(scores)
-                    user_roles[place]["max"] = np.nanmax(scores)
-                    user_roles[place]["min"] = np.nanmin(scores)
-                    user_roles[place]["stdev"] = np.nanstd(scores)
-                    user_roles[place]["median"] = np.nanmedian(scores)
-                else:
-                    user_roles[place]["average"] = np.nan
-                    user_roles[place]["max"] = np.nan
-                    user_roles[place]["min"] = np.nan
-                    user_roles[place]["stdev"] = np.nan
-                    user_roles[place]["median"] = np.nan
-            return user_roles
-
-    def spatial_user_reputation(self, resolution="country"):
+    def spatial_user_reputation(self, spatial_resolution="country"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :return: a dictionary that represents user reputation across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the user reputation of every account
         that has posted at least a tweet within each spatial unit.
         """
 
         user_reputation = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                user_reputation[country] = []
-                user_reputation_results = []
-                for tweet in tweets:
-                    user_reputation_results.append(tweet.get_twitter().get_user_reputation())
-                for result in user_reputation_results:
-                    user_reputation[country] = user_reputation.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            user_reputation[location] = []
+            for tweet in tweets:
+                user_reputation[location] = user_reputation.get(location, []) + [float(tweet.get_twitter().get_user_reputation())]
 
-                scores = user_reputation[country]
-                user_reputation[country] = {}
-                if len(scores) > 0:
-                    user_reputation[country]["average"] = np.nanmean(scores)
-                    user_reputation[country]["max"] = np.nanmax(scores)
-                    user_reputation[country]["min"] = np.nanmin(scores)
-                    user_reputation[country]["stdev"] = np.nanstd(scores)
-                    user_reputation[country]["median"] = np.nanmedian(scores)
-                else:
-                    user_reputation[country]["average"] = np.nan
-                    user_reputation[country]["max"] = np.nan
-                    user_reputation[country]["min"] = np.nan
-                    user_reputation[country]["stdev"] = np.nan
-                    user_reputation[country]["median"] = np.nan
-            return user_reputation
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                user_reputation[place] = []
-                user_reputation_results = []
-                for tweet in tweets:
-                    user_reputation_results.append(tweet.get_twitter().get_user_reputation())
-                for result in user_reputation_results:
-                    user_reputation[place] = user_reputation.get(place, []) + [float(result)]
+            scores = user_reputation[location]
+            user_reputation[location] = {}
+            if len(scores) > 0:
+                user_reputation[location]["average"] = np.nanmean(scores)
+                user_reputation[location]["max"] = np.nanmax(scores)
+                user_reputation[location]["min"] = np.nanmin(scores)
+                user_reputation[location]["stdev"] = np.nanstd(scores)
+                user_reputation[location]["median"] = np.nanmedian(scores)
+            else:
+                user_reputation[location]["average"] = np.nan
+                user_reputation[location]["max"] = np.nan
+                user_reputation[location]["min"] = np.nan
+                user_reputation[location]["stdev"] = np.nan
+                user_reputation[location]["median"] = np.nan
+        return user_reputation
 
-                scores = user_reputation[place]
-                user_reputation[place] = {}
-                if len(scores) > 0:
-                    user_reputation[place]["average"] = np.nanmean(scores)
-                    user_reputation[place]["max"] = np.nanmax(scores)
-                    user_reputation[place]["min"] = np.nanmin(scores)
-                    user_reputation[place]["stdev"] = np.nanstd(scores)
-                    user_reputation[place]["median"] = np.nanmedian(scores)
-                else:
-                    user_reputation[place]["average"] = np.nan
-                    user_reputation[place]["max"] = np.nan
-                    user_reputation[place]["min"] = np.nan
-                    user_reputation[place]["stdev"] = np.nan
-                    user_reputation[place]["median"] = np.nan
-            return user_reputation
-
-    def spatial_followers(self, resolution="country"):
+    def spatial_followers(self, spatial_resolution="country"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :return: a dictionary that represents followers count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the followers count of every account
         that has posted at least a tweet within each spatial unit.
         """
 
         followers_count = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                followers_count[country] = []
-                followers_count_results = []
-                for tweet in tweets:
-                    followers_count_results.append(tweet.get_twitter().get_followers_count())
-                for result in followers_count_results:
-                    followers_count[country] = followers_count.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            followers_count[location] = []
+            for tweet in tweets:
+                followers_count[location] = followers_count.get(location, []) + [float(tweet.get_twitter().get_followers_count())]
 
-                scores = followers_count[country]
-                followers_count[country] = {}
-                if len(scores) > 0:
-                    followers_count[country]["average"] = np.nanmean(scores)
-                    followers_count[country]["max"] = np.nanmax(scores)
-                    followers_count[country]["min"] = np.nanmin(scores)
-                    followers_count[country]["stdev"] = np.nanstd(scores)
-                    followers_count[country]["median"] = np.nanmedian(scores)
-                else:
-                    followers_count[country]["average"] = np.nan
-                    followers_count[country]["max"] = np.nan
-                    followers_count[country]["min"] = np.nan
-                    followers_count[country]["stdev"] = np.nan
-                    followers_count[country]["median"] = np.nan
-            return followers_count
+            scores = followers_count[location]
+            followers_count[location] = {}
+            if len(scores) > 0:
+                followers_count[location]["average"] = np.nanmean(scores)
+                followers_count[location]["max"] = np.nanmax(scores)
+                followers_count[location]["min"] = np.nanmin(scores)
+                followers_count[location]["stdev"] = np.nanstd(scores)
+                followers_count[location]["median"] = np.nanmedian(scores)
+            else:
+                followers_count[location]["average"] = np.nan
+                followers_count[location]["max"] = np.nan
+                followers_count[location]["min"] = np.nan
+                followers_count[location]["stdev"] = np.nan
+                followers_count[location]["median"] = np.nan
+        return followers_count
 
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                followers_count[place] = []
-                followers_count_results = []
-                for tweet in tweets:
-                    followers_count_results.append(tweet.get_twitter().get_followers_count())
-                for result in followers_count_results:
-                    followers_count[place] = followers_count.get(place, []) + [float(result)]
-
-                scores = followers_count[place]
-                followers_count[place] = {}
-                if len(scores) > 0:
-                    followers_count[place]["average"] = np.nanmean(scores)
-                    followers_count[place]["max"] = np.nanmax(scores)
-                    followers_count[place]["min"] = np.nanmin(scores)
-                    followers_count[place]["stdev"] = np.nanstd(scores)
-                    followers_count[place]["median"] = np.nanmedian(scores)
-                else:
-                    followers_count[place]["average"] = np.nan
-                    followers_count[place]["max"] = np.nan
-                    followers_count[place]["min"] = np.nan
-                    followers_count[place]["stdev"] = np.nan
-                    followers_count[place]["median"] = np.nan
-            return followers_count
-
-    def spatial_friends(self, resolution="country"):
+    def spatial_friends(self, spatial_resolution="country"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :return: a dictionary that represents friends count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the friends count of every account
         that has posted at least a tweet within each spatial unit.
         """
 
-        followers_count = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                followers_count[country] = []
-                followers_count_results = []
-                for tweet in tweets:
-                    followers_count_results.append(tweet.get_twitter().get_friends_count())
-                for result in followers_count_results:
-                    followers_count[country] = followers_count.get(country, []) + [float(result)]
+        friends_count = {}
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            friends_count[location] = []
+            for tweet in tweets:
+                friends_count[location] = friends_count.get(location, []) + [float(tweet.get_twitter().get_friends_count())]
 
-                scores = followers_count[country]
-                followers_count[country] = {}
-                if len(scores) > 0:
-                    followers_count[country]["average"] = np.nanmean(scores)
-                    followers_count[country]["max"] = np.nanmax(scores)
-                    followers_count[country]["min"] = np.nanmin(scores)
-                    followers_count[country]["stdev"] = np.nanstd(scores)
-                    followers_count[country]["median"] = np.nanmedian(scores)
-                else:
-                    followers_count[country]["average"] = np.nan
-                    followers_count[country]["max"] = np.nan
-                    followers_count[country]["min"] = np.nan
-                    followers_count[country]["stdev"] = np.nan
-                    followers_count[country]["median"] = np.nan
-            return followers_count
+            scores = friends_count[location]
+            friends_count[location] = {}
+            if len(scores) > 0:
+                friends_count[location]["average"] = np.nanmean(scores)
+                friends_count[location]["max"] = np.nanmax(scores)
+                friends_count[location]["min"] = np.nanmin(scores)
+                friends_count[location]["stdev"] = np.nanstd(scores)
+                friends_count[location]["median"] = np.nanmedian(scores)
+            else:
+                friends_count[location]["average"] = np.nan
+                friends_count[location]["max"] = np.nan
+                friends_count[location]["min"] = np.nan
+                friends_count[location]["stdev"] = np.nan
+                friends_count[location]["median"] = np.nan
+        return friends_count
 
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                followers_count[place] = []
-                followers_count_results = []
-                for tweet in tweets:
-                    followers_count_results.append(tweet.get_twitter().get_friends_count())
-                for result in followers_count_results:
-                    followers_count[place] = followers_count.get(place, []) + [float(result)]
-
-                scores = followers_count[place]
-                followers_count[place] = {}
-                if len(scores) > 0:
-                    followers_count[place]["average"] = np.nanmean(scores)
-                    followers_count[place]["max"] = np.nanmax(scores)
-                    followers_count[place]["min"] = np.nanmin(scores)
-                    followers_count[place]["stdev"] = np.nanstd(scores)
-                    followers_count[place]["median"] = np.nanmedian(scores)
-                else:
-                    followers_count[place]["average"] = np.nan
-                    followers_count[place]["max"] = np.nan
-                    followers_count[place]["min"] = np.nan
-                    followers_count[place]["stdev"] = np.nan
-                    followers_count[place]["median"] = np.nan
-            return followers_count
-
-    def spatial_account_age(self, resolution="country"):
+    def spatial_account_age(self, spatial_resolution="country"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :return: a dictionary that represents account age across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the age of every account
         that has posted at least a tweet within each spatial unit.
         """
 
         account_age = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                account_age[country] = []
-                account_age_results = []
-                for tweet in tweets:
-                    account_age_results.append(tweet.get_twitter().get_account_age())
-                for result in account_age_results:
-                    account_age[country] = account_age.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            account_age[location] = []
+            for tweet in tweets:
+                account_age[location] = account_age.get(location, []) + [float(tweet.get_twitter().get_account_age())]
 
-                scores = account_age[country]
-                account_age[country] = {}
-                if len(scores) > 0:
-                    account_age[country]["average"] = np.nanmean(scores)
-                    account_age[country]["max"] = np.nanmax(scores)
-                    account_age[country]["min"] = np.nanmin(scores)
-                    account_age[country]["stdev"] = np.nanstd(scores)
-                    account_age[country]["median"] = np.nanmedian(scores)
-                else:
-                    account_age[country]["average"] = np.nan
-                    account_age[country]["max"] = np.nan
-                    account_age[country]["min"] = np.nan
-                    account_age[country]["stdev"] = np.nan
-                    account_age[country]["median"] = np.nan
-            return account_age
+            scores = account_age[location]
+            account_age[location] = {}
+            if len(scores) > 0:
+                account_age[location]["average"] = np.nanmean(scores)
+                account_age[location]["max"] = np.nanmax(scores)
+                account_age[location]["min"] = np.nanmin(scores)
+                account_age[location]["stdev"] = np.nanstd(scores)
+                account_age[location]["median"] = np.nanmedian(scores)
+            else:
+                account_age[location]["average"] = np.nan
+                account_age[location]["max"] = np.nan
+                account_age[location]["min"] = np.nan
+                account_age[location]["stdev"] = np.nan
+                account_age[location]["median"] = np.nan
+        return account_age
 
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                account_age[place] = []
-                account_age_results = []
-                for tweet in tweets:
-                    account_age_results.append(tweet.get_twitter().get_account_age())
-                for result in account_age_results:
-                    account_age[place] = account_age.get(place, []) + [float(result)]
-
-                scores = account_age[place]
-                account_age[place] = {}
-                if len(scores) > 0:
-                    account_age[place]["average"] = np.nanmean(scores)
-                    account_age[place]["max"] = np.nanmax(scores)
-                    account_age[place]["min"] = np.nanmin(scores)
-                    account_age[place]["stdev"] = np.nanstd(scores)
-                    account_age[place]["median"] = np.nanmedian(scores)
-                else:
-                    account_age[place]["average"] = np.nan
-                    account_age[place]["max"] = np.nan
-                    account_age[place]["min"] = np.nan
-                    account_age[place]["stdev"] = np.nan
-                    account_age[place]["median"] = np.nan
-            return account_age
-
-    def spatial_total_likes(self, resolution="country"):
+    def spatial_total_likes(self, spatial_resolution="country"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :return: a dictionary that represents total account likes across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the totall likes of every account
         that has posted at least a tweet within each spatial unit.
         """
 
         total_likes = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                total_likes[country] = []
-                total_likes_results = []
-                for tweet in tweets:
-                    total_likes_results.append(tweet.get_twitter().get_user_total_likes_count())
-                for result in total_likes_results:
-                    total_likes[country] = total_likes.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            total_likes[location] = []
+            for tweet in tweets:
+                total_likes[location] = total_likes.get(location, []) + [float(tweet.get_twitter().get_user_total_likes_count())]
 
-                scores = total_likes[country]
-                total_likes[country] = {}
-                if len(scores) > 0:
-                    total_likes[country]["average"] = np.nanmean(scores)
-                    total_likes[country]["max"] = np.nanmax(scores)
-                    total_likes[country]["min"] = np.nanmin(scores)
-                    total_likes[country]["stdev"] = np.nanstd(scores)
-                    total_likes[country]["median"] = np.nanmedian(scores)
-                else:
-                    total_likes[country]["average"] = np.nan
-                    total_likes[country]["max"] = np.nan
-                    total_likes[country]["min"] = np.nan
-                    total_likes[country]["stdev"] = np.nan
-                    total_likes[country]["median"] = np.nan
-            return total_likes
+            scores = total_likes[location]
+            total_likes[location] = {}
+            if len(scores) > 0:
+                total_likes[location]["average"] = np.nanmean(scores)
+                total_likes[location]["max"] = np.nanmax(scores)
+                total_likes[location]["min"] = np.nanmin(scores)
+                total_likes[location]["stdev"] = np.nanstd(scores)
+                total_likes[location]["median"] = np.nanmedian(scores)
+            else:
+                total_likes[location]["average"] = np.nan
+                total_likes[location]["max"] = np.nan
+                total_likes[location]["min"] = np.nan
+                total_likes[location]["stdev"] = np.nan
+                total_likes[location]["median"] = np.nan
+        return total_likes
 
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                total_likes[place] = []
-                total_likes_results = []
-                for tweet in tweets:
-                    total_likes_results.append(tweet.get_twitter().get_user_total_likes_count())
-                for result in total_likes_results:
-                    total_likes[place] = total_likes.get(place, []) + [float(result)]
-
-                scores = total_likes[place]
-                total_likes[place] = {}
-                if len(scores) > 0:
-                    total_likes[place]["average"] = np.nanmean(scores)
-                    total_likes[place]["max"] = np.nanmax(scores)
-                    total_likes[place]["min"] = np.nanmin(scores)
-                    total_likes[place]["stdev"] = np.nanstd(scores)
-                    total_likes[place]["median"] = np.nanmedian(scores)
-                else:
-                    total_likes[place]["average"] = np.nan
-                    total_likes[place]["max"] = np.nan
-                    total_likes[place]["min"] = np.nan
-                    total_likes[place]["stdev"] = np.nan
-                    total_likes[place]["median"] = np.nan
-            return total_likes
-
-    def spatial_status_count(self, resolution="country"):
+    def spatial_status_count(self, spatial_resolution="country"):
         """
-        :param resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
         :return: a dictionary that represents status count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the status count of every account
         that has posted at least a tweet within each spatial unit.
         """
 
         status_count = {}
-        if resolution == "country":
-            tweets_with_countries = self.countries_with_tweets()
-            for country, tweets in tweets_with_countries.items():
-                status_count[country] = []
-                status_count_results = []
-                for tweet in tweets:
-                    status_count_results.append(tweet.get_twitter().get_statusses_count())
-                for result in status_count_results:
-                    status_count[country] = status_count.get(country, []) + [float(result)]
+        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+        for location, tweets in geotagged_tweets.items():
+            status_count[location] = []
+            for tweet in tweets:
+                status_count[location] = status_count.get(location, []) + [float(tweet.get_twitter().get_statusses_count())]
 
-                scores = status_count[country]
-                status_count[country] = {}
-                if len(scores) > 0:
-                    status_count[country]["average"] = np.nanmean(scores)
-                    status_count[country]["max"] = np.nanmax(scores)
-                    status_count[country]["min"] = np.nanmin(scores)
-                    status_count[country]["stdev"] = np.nanstd(scores)
-                    status_count[country]["median"] = np.nanmedian(scores)
-                else:
-                    status_count[country]["average"] = np.nan
-                    status_count[country]["max"] = np.nan
-                    status_count[country]["min"] = np.nan
-                    status_count[country]["stdev"] = np.nan
-                    status_count[country]["median"] = np.nan
-            return status_count
-
-        elif resolution == "place":
-            tweets_with_places = self.places_with_tweets()
-            for place, tweets in tweets_with_places.items():
-                status_count[place] = []
-                status_count_results = []
-                for tweet in tweets:
-                    status_count_results.append(tweet.get_twitter().get_statusses_count())
-                for result in status_count_results:
-                    status_count[place] = status_count.get(place, []) + [float(result)]
-
-                scores = status_count[place]
-                status_count[place] = {}
-                if len(scores) > 0:
-                    status_count[place]["average"] = np.nanmean(scores)
-                    status_count[place]["max"] = np.nanmax(scores)
-                    status_count[place]["min"] = np.nanmin(scores)
-                    status_count[place]["stdev"] = np.nanstd(scores)
-                    status_count[place]["median"] = np.nanmedian(scores)
-                else:
-                    status_count[place]["average"] = np.nan
-                    status_count[place]["max"] = np.nan
-                    status_count[place]["min"] = np.nan
-                    status_count[place]["stdev"] = np.nan
-                    status_count[place]["median"] = np.nan
-            return status_count
+            scores = status_count[location]
+            status_count[location] = {}
+            if len(scores) > 0:
+                status_count[location]["average"] = np.nanmean(scores)
+                status_count[location]["max"] = np.nanmax(scores)
+                status_count[location]["min"] = np.nanmin(scores)
+                status_count[location]["stdev"] = np.nanstd(scores)
+                status_count[location]["median"] = np.nanmedian(scores)
+            else:
+                status_count[location]["average"] = np.nan
+                status_count[location]["max"] = np.nan
+                status_count[location]["min"] = np.nan
+                status_count[location]["stdev"] = np.nan
+                status_count[location]["median"] = np.nan
+        return status_count
 
 ############################################# mass features #############################################
 
@@ -2339,10 +2277,10 @@ class retweetNetwork(network):  # node should change to nodes in order to call a
             trf = tweet.is_retweeted()
             if trf == True:
                 self.network.node[tweet.get_retweeted().get_id()][
-                    "character_count"] = tweet.get_retweeted().text_length(unit="character")
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="character")
+                    "character_count"] = tweet.get_retweeted().text_length(length_unit="character")
+                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
             elif trf == False:
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="character")
+                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
 
     def sentence_count_layer(self):
         """
@@ -2354,10 +2292,10 @@ class retweetNetwork(network):  # node should change to nodes in order to call a
             trf = tweet.is_retweeted()
             if trf == True:
                 self.network.nodes[tweet.get_retweeted().get_id()][
-                    "character_count"] = tweet.get_retweeted().text_length(unit="sentence")
-                self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
+                    "character_count"] = tweet.get_retweeted().text_length(length_unit="sentence")
+                self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
             elif trf == False:
-                self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
+                self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
 
     def word_complexity_layer(self):
         """
@@ -2384,10 +2322,10 @@ class retweetNetwork(network):  # node should change to nodes in order to call a
             trf = tweet.is_retweeted()
             if trf == True:
                 self.network.node[tweet.get_retweeted().get_id()][
-                    "sentence_complexity"] = tweet.get_retweeted().text_complexity(unit="sentence")
-                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(unit="sentence")
+                    "sentence_complexity"] = tweet.get_retweeted().text_complexity(complexity_unit="sentence")
+                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
             elif trf == False:
-                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(unit="sentence")
+                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
 
     def syllables_complexity_layer(self):
         """
@@ -2399,10 +2337,10 @@ class retweetNetwork(network):  # node should change to nodes in order to call a
             trf = tweet.is_retweeted()
             if trf == True:
                 self.network.node[tweet.get_retweeted().get_id()][
-                    "syllables_complexity"] = tweet.get_retweeted().text_complexity(unit="syllables")
-                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(unit="syllables")
+                    "syllables_complexity"] = tweet.get_retweeted().text_complexity(complexity_unit="syllables")
+                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
             elif trf == False:
-                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(unit="syllables")
+                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
 
     def sentiment_layer(self, sentiment_engine="vader"):
         """
@@ -2436,16 +2374,16 @@ class retweetNetwork(network):  # node should change to nodes in order to call a
                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
                         i]
 
-    def readability_layer(self, metric="flesch_kincaid_grade"):
+    def readability_layer(self, readability_metric="flesch_kincaid_grade"):
         """
         This function add the readability of each tweet as a property to every node.
-        :param metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
         :return: This function does not return anything, instead it add the relevant attribute (readability score) to the
          nodes of the caller network object. To get the network, use get_network() function.
         """
 
-        assert (metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
                            "coleman_liau_index", "linsear_write_formula",
                            "dale_chall_readability_score", ]), "The metric " \
                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
@@ -2458,12 +2396,12 @@ class retweetNetwork(network):  # node should change to nodes in order to call a
             trf = tweet.is_retweeted()
             if trf == True:
                 self.network.node[tweet.get_retweeted().get_id()]["readability"] = eval(
-                    f'textstat.{metric}(\"{tweet.get_retweeted().text_preprocessing()}\")')
+                    f'textstat.{readability_metric}(\"{tweet.get_retweeted().text_preprocessing()}\")')
                 self.network.node[tweet.get_id()]["readability"] = eval(
-                    f'textstat.{metric}(\"{tweet.text_preprocessing()}\")')
+                    f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
             elif trf == False:
                 self.network.node[tweet.get_id()]["readability"] = eval(
-                    f'textstat.{metric}(\"{tweet.text_preprocessing()}\")')
+                    f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
 
 
 class quoteNetwork(network):
@@ -2504,10 +2442,10 @@ class quoteNetwork(network):
             tqf = tweet.is_quoted()
             if tqf == True:
                 self.network.node[tweet.get_quote().get_id()]["character_count"] = tweet.get_quote().text_length(
-                    unit="character")
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="character")
+                    length_unit="character")
+                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
             elif tqf == False:
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="character")
+                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
 
     def sentence_count_layer(self):
         """
@@ -2519,10 +2457,10 @@ class quoteNetwork(network):
             tqf = tweet.is_quoted()
             if tqf == True:
                 self.network.node[tweet.get_quote().get_id()]["character_count"] = tweet.get_quote().text_length(
-                    unit="sentence")
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
+                    length_unit="sentence")
+                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
             elif tqf == False:
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(unit="sentence")
+                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
 
     def word_complexity_layer(self):
         """
@@ -2548,10 +2486,10 @@ class quoteNetwork(network):
             tqf = tweet.is_quoted()
             if tqf == True:
                 self.network.node[tweet.get_quote().get_id()][
-                    "sentence_complexity"] = tweet.get_quote().text_complexity(unit="sentence")
-                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(unit="sentence")
+                    "sentence_complexity"] = tweet.get_quote().text_complexity(complexity_unit="sentence")
+                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
             elif tqf == False:
-                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(unit="sentence")
+                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
 
     def syllables_complexity_layer(self):
         """
@@ -2563,10 +2501,10 @@ class quoteNetwork(network):
             tqf = tweet.is_quoted()
             if tqf == True:
                 self.network.node[tweet.get_quote().get_id()][
-                    "syllables_complexity"] = tweet.get_quote().text_complexity(unit="syllables")
-                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(unit="syllables")
+                    "syllables_complexity"] = tweet.get_quote().text_complexity(complexity_unit="syllables")
+                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
             elif tqf == False:
-                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(unit="syllables")
+                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
 
     def sentiment_layer(self, sentiment_engine="vader"):
         """
@@ -2600,16 +2538,16 @@ class quoteNetwork(network):
                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
                         i]
 
-    def readability_layer(self, metric="flesch_kincaid_grade"):
+    def readability_layer(self, readability_metric="flesch_kincaid_grade"):
         """
         This function add the readability of each tweet as a property to every node.
-        :param metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
         :return: This function does not return anything, instead it add the relevant attribute (readability score) to the
          nodes of the caller network object. To get the network, use get_network() function.
         """
 
-        assert (metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
                            "coleman_liau_index", "linsear_write_formula",
                            "dale_chall_readability_score", ]), "The metric " \
                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
@@ -2620,12 +2558,12 @@ class quoteNetwork(network):
             tqf = tweet.is_quoted()
             if tqf == True:
                 self.network.node[tweet.get_quote().get_id()]["readability"] = eval(
-                    f'textstat.{metric}(\"{tweet.get_quote().text_preprocessing()}\")')
+                    f'textstat.{readability_metric}(\"{tweet.get_quote().text_preprocessing()}\")')
                 self.network.node[tweet.get_id()]["readability"] = eval(
-                    f'textstat.{metric}(\"{tweet.text_preprocessing()}\")')
+                    f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
             elif tqf == False:
                 self.network.node[tweet.get_id()]["readability"] = eval(
-                    f'textstat.{metric}(\"{tweet.text_preprocessing()}\")')
+                    f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
 
 
 class user:
@@ -3673,12 +3611,12 @@ class singleTweet:
         elif emoticon_list == False and count == True:
             return len(emoticons)
 
-    def tweet_splitter(self, input_text=None, unit="word"):
+    def tweet_splitter(self, input_text=None, split_unit="word"):
         """
         this function splits the tweet text field according to chosen splitting unit.
         :param input_text: if this parameter is None, then the caller object text field is splitted, otherwise
         and in case of a string as an input for this parameter, the input text is splitted up.
-        :param unit: the splitting unit can be "word", or "sentence".
+        :param split_unit: the splitting unit can be "word", or "sentence".
         :return: a list containing the splitting units.
         """
         if input_text == None:
@@ -3686,58 +3624,58 @@ class singleTweet:
         else:
             text = input_text
 
-        if unit == "word":
+        if split_unit == "word":
             return re.findall(r'\S+', text)
-        elif unit == "sentence":
+        elif split_unit == "sentence":
             return [i for i in re.split(r'[.?!]+', text) if i != '']
 
-    def text_length(self, input_text=None, unit="word"):
+    def text_length(self, input_text=None, length_unit="word"):
         """
         this function measures the length of the tweet based on the selected length unit.
         :param input_text: if this parameter is None, then the length of caller object text field is measured, otherwise
         and in case of a string as an input for this parameter, the length of input text is measured.
-        :param unit: the length unit can be "character", "word", or "sentence".
+        :param length_unit: the length unit can be "character", "word", or "sentence".
         :return: an integer showing the length of the tweet text field.
         """
 
-        assert (unit in ["character", "word", "sentence"]), "the unit can be character, word, or sentence"
+        assert (length_unit in ["character", "word", "sentence"]), "the unit can be character, word, or sentence"
 
         if input_text == None:
             text = self.get_text()
         else:
             text = input_text
 
-        if unit == "character":
+        if length_unit == "character":
             return len(text)
-        elif unit == "word":
-            return len(self.tweet_splitter(unit="word", input_text=text))
-        elif unit == "sentence":
-            return len(self.tweet_splitter(unit="sentence", input_text=text))
+        elif length_unit == "word":
+            return len(self.tweet_splitter(split_unit="word", input_text=text))
+        elif length_unit == "sentence":
+            return len(self.tweet_splitter(split_unit="sentence", input_text=text))
 
-    def text_complexity(self, input_text=None, unit="word"):
+    def text_complexity(self, input_text=None, complexity_unit="word"):
         """
         this function measures the complexity of a tweet text based on the selected complexity unit.
         :param input_text: if this parameter is None, then the complexity of caller object text field is measured, otherwise
         and in case of a string as an input for this parameter, the complexity of input text is measured.
-        :param unit: the length unit can be "word", "sentence", or "syllables".
+        :param complexity_unit: the complexity unit can be "word", "sentence", or "syllables".
         :return: an float showing the complexity of the tweet text.
         """
 
-        assert (unit in ["word", "sentence", "syllables"]), "unit parameter can be word, sentence, or syllables"
+        assert (complexity_unit in ["word", "sentence", "syllables"]), "unit parameter can be word, sentence, or syllables"
 
         if input_text == None:
             text = self.get_text()
         else:
             text = input_text
 
-        if unit == "word":
-            return np.average([len(word) for word in self.tweet_splitter(unit="word", input_text=text)])
-        elif unit == "sentence":
-            return np.average([len(self.tweet_splitter(unit="word", input_text=sentence)) for sentence in
-                               self.tweet_splitter(unit="sentence", input_text=text)])
-        elif unit == "syllables":
+        if complexity_unit == "word":
+            return np.average([len(word) for word in self.tweet_splitter(split_unit="word", input_text=text)])
+        elif complexity_unit == "sentence":
+            return np.average([len(self.tweet_splitter(split_unit="word", input_text=sentence)) for sentence in
+                               self.tweet_splitter(split_unit="sentence", input_text=text)])
+        elif complexity_unit == "syllables":
             return np.average(
-                [textstat.syllable_count(i, lang='en_US') for i in self.tweet_splitter(unit="word", input_text=text)])
+                [textstat.syllable_count(i, lang='en_US') for i in self.tweet_splitter(split_unit="word", input_text=text)])
 
     def text_pronoun_count(self, input_text=None, pronoun="third_singular"):
         """
@@ -3759,7 +3697,7 @@ class singleTweet:
         else:
             text = input_text
 
-        words = [i.lower() for i in self.tweet_splitter(unit="word", input_text=text)]
+        words = [i.lower() for i in self.tweet_splitter(split_unit="word", input_text=text)]
         if pronoun == "first_singular":
             return words.count("i") + words.count("my") + words.count("mine") + words.count("me") + words.count(
                 "myself") + words.count("i'm") + words.count("i've") + words.count("i'd") + words.count("i'll")
@@ -3784,7 +3722,7 @@ class singleTweet:
                 "theirs") + words.count("themselves") + words.count("they're") + words.count("they've") + words.count(
                 "they'd") + words.count("they'll")
 
-    def case_analysis(self, count=True, frac=True, unit="character",
+    def case_analysis(self, count=True, frac=True, unit_of_analysis="character",
                       input_text=None):  #### THINK ABOUT DIVISION BY ZERO ERROR ####
         """
         This function analyses the count and fraction of upper and lower letters or capital and small words in the tweet text
@@ -3793,7 +3731,7 @@ class singleTweet:
         in the tweet text.
         :param frac: if this is set to True, the function measures the fraction of  upper and lower letters or capital and small words
         in the tweet text.
-        :param unit: the unit parameter can be word or character.
+        :param unit_of_analysis: the unit parameter can be word or character.
         :param input_text: if this parameter is None, then the case analysis is performed on the caller object text field
         , otherwise and in case of a string as an input for this parameter, the case analysis is performed on the input_text.
         :return: it returns a dictionary which its content depends on the parameters value. If the unit of analysis is
@@ -3806,17 +3744,17 @@ class singleTweet:
 
         assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
         assert (frac in [True, False]), "frac is a boolean parameter, so it can be True or False"
-        assert (unit in ["character", "word"]), "unit can be character or word"
+        assert (unit_of_analysis in ["character", "word"]), "unit can be character or word"
 
         if input_text == None:
             text = self.get_text()
         else:
             text = input_text
 
-        if unit == "character":
+        if unit_of_analysis == "character":
             uppercase_character_count = sum(1 for i in text if i.isupper())
             lowercase_character_count = sum(1 for i in text if i.islower())
-            character_count = self.text_length(unit="character", input_text=text)
+            character_count = self.text_length(length_unit="character", input_text=text)
             if count == True and frac == True:  ######### THINK ABOUT DIVISION BY ZERO ERROR ###
                 try:
                     return {"uppercase_character_count": uppercase_character_count,
@@ -3846,8 +3784,8 @@ class singleTweet:
                     elif lowercase_character_count == 0:
                         print("the number of lowercase characters is zero")
 
-        elif unit == "word":
-            words = self.tweet_splitter(unit="word", input_text=text)
+        elif unit_of_analysis == "word":
+            words = self.tweet_splitter(split_unit="word", input_text=text)
             capital_words_count = len([b for b in words if b.isupper()])
             small_words_count = len([b for b in words if b.islower()])
             words_count = len(words)
@@ -3917,7 +3855,7 @@ class singleTweet:
         else:
             text = input_text
 
-        words = self.tweet_splitter(unit="word", input_text=text)
+        words = self.tweet_splitter(split_unit="word", input_text=text)
         return [i for i in words if i in self.parameters["abbr"]]
 
     def vulgar_words(self, input_text=None):
@@ -3933,7 +3871,7 @@ class singleTweet:
         else:
             text = input_text
 
-        words = self.tweet_splitter(unit="word", input_text=text)
+        words = self.tweet_splitter(split_unit="word", input_text=text)
         return [i for i in words if i in self.parameters["vulgar"]]
 
     def sentiment_analysis(self, sentiment_engine="vader", input_text=None):
@@ -3969,7 +3907,7 @@ class singleTweet:
                     "neutrality_score": self.parameters["vader"].polarity_scores(text)["neu"],
                     "composite_score": self.parameters["vader"].polarity_scores(text)["compound"]}
         elif sentiment_engine == "nrc":
-            nrc_text_list = self.tweet_splitter(unit="word", input_text=text)
+            nrc_text_list = self.tweet_splitter(split_unit="word", input_text=text)
             anger_score = 0
             for term in nrc_text_list:
                 if term in self.parameters["nrc"]:
@@ -4011,7 +3949,7 @@ class singleTweet:
                     "offensive_language": sonar2["classes"][1]["confidence"],
                     "neither": sonar2["classes"][2]["confidence"]}
         elif sentiment_engine == "vad":
-            word_list = self.tweet_splitter(unit="word", input_text=text)
+            word_list = self.tweet_splitter(split_unit="word", input_text=text)
 
             valence_score = 0
             for term in word_list:
@@ -4030,10 +3968,10 @@ class singleTweet:
 
             return {"valence_score": valence_score, "arousal_score": arousal_score, "dominance_score": dominance_score}
 
-    def readability(self, metric="flesch_kincaid_grade", input_text=None):
+    def readability(self, readability_metric="flesch_kincaid_grade", input_text=None):
         """
         This function measures the readability of the tweet text according to the chosen readbility metric.
-        :param metric: the readability metrics can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+        :param readability_metric: the readability metrics can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score"
         :param input_text: if this parameter is None, then the function measures the readability of the caller object text field
          , otherwise and in case of a string as an input for this parameter, the function measures the readability of the
@@ -4041,7 +3979,7 @@ class singleTweet:
         :return:
         """
 
-        assert (metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
                            "coleman_liau_index", "linsear_write_formula",
                            "dale_chall_readability_score"]), "The metric " \
                                                              "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
@@ -4053,21 +3991,21 @@ class singleTweet:
         else:
             text = input_text
 
-        if metric == "flesch_reading_ease":
+        if readability_metric == "flesch_reading_ease":
             return textstat.flesch_reading_ease(text)
-        elif metric == "flesch_kincaid_grade":
+        elif readability_metric == "flesch_kincaid_grade":
             return textstat.flesch_kincaid_grade(text)
-        elif metric == "gunning_fog":
+        elif readability_metric == "gunning_fog":
             return textstat.gunning_fog(text)
-        elif metric == "smog_index":
+        elif readability_metric == "smog_index":
             return textstat.smog_index(text)
-        elif metric == "automated_readability_index":
+        elif readability_metric == "automated_readability_index":
             return textstat.automated_readability_index(text)
-        elif metric == "coleman_liau_index":
+        elif readability_metric == "coleman_liau_index":
             return textstat.coleman_liau_index(text)
-        elif metric == "linsear_write_formula":
+        elif readability_metric == "linsear_write_formula":
             return textstat.linsear_write_formula(text)
-        elif metric == "dale_chall_readability_score":
+        elif readability_metric == "dale_chall_readability_score":
             return textstat.dale_chall_readability_score(text)
 
     def long_words_count(self, threshold=6, input_text=None):
@@ -4087,7 +4025,7 @@ class singleTweet:
         else:
             text = input_text
 
-        words = self.tweet_splitter(unit="word", input_text=text)
+        words = self.tweet_splitter(split_unit="word", input_text=text)
         return len([i for i in words if len(i) > threshold])
 
     def multiple_syllables_count(self, threshold=2, input_text=None):
@@ -4107,7 +4045,7 @@ class singleTweet:
         else:
             text = input_text
 
-        words = self.tweet_splitter(unit="word", input_text=text)
+        words = self.tweet_splitter(split_unit="word", input_text=text)
         return len([i for i in words if textstat.syllable_count(i, lang='en_US') > threshold])
 
     def get_tweet_photos(self, saving_address):
