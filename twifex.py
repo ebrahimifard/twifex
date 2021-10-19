@@ -4063,21 +4063,21 @@ class singleTweet: #Update docstring and assertions
         """
         return self.tweet["lang"]
 
-    def get_place(self):
+    def get_place(self): #You should be more specific about this field, not returning bunch of fields
         """
         When present, indicates that the tweet is associated (but not necessarily originating from) a Place.
         :return: a place object.
         """
         return self.tweet["place"]
 
-    def get_coordinates(self):
+    def get_coordinates(self):#You should be more specific about this field, not returning bunch of fields
         """
         Represents the geographic location of this Tweet as reported by the user or client application.
         :return: a coordinate object
         """
         return self.tweet["coordinates"]
 
-    def get_tweet_urls(self):
+    def get_tweet_urls(self):#You should be more specific about this field, not returning bunch of fields
         """
         :return: a list of urls in this tweet.
         """
@@ -4213,11 +4213,14 @@ class singleTweet: #Update docstring and assertions
         """
         return False if self.tweet["in_reply_to_status_id"] is None else True
 
-    def get_reply_to_id(self):
+    def get_reply_to_id(self, return_format='int'):
         """
         :return: an integer showing the unique id of the tweet that this one is a reply to that.
         """
-        return self.tweet["in_reply_to_status_id"]
+        if return_format == "int":
+            return self.tweet["in_reply_to_status_id"]
+        elif return_format == "string":
+            return self.tweet["in_reply_to_status_id_str"]
 
     def is_retweeted(self):
         """
@@ -4231,13 +4234,13 @@ class singleTweet: #Update docstring and assertions
         """
         return True if "quoted_status" in self.tweet.keys() else False
 
-    def get_quote(self):
+    def get_quote(self): #go to the buttom of this
         """
         :return: it returns the quoted part of the this tweet..
         """
         return quoteClass(self.tweet["quoted_status"], self.parameters) if self.is_quoted() else None
 
-    def get_retweeted(self):
+    def get_retweeted(self): #go to the buttom of this
         """
         :return: it returns the retweeted part of this tweet.
         """
@@ -4278,10 +4281,6 @@ class singleTweet: #Update docstring and assertions
             return self
         else:
             return stemmed
-
-
-
-
 
     def hashtag_splitter(self, input_text=None, inplace=False):
         """
