@@ -2560,13 +2560,13 @@ class Network:
             if network_type == "retweet":
                 retweet_condition = tweet.is_retweeted()
                 if retweet_condition is True:
-                    network.add_edge(tweet.get_retweeted().get_id(), tweet.get_id(), kind="retweet")
+                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
                 elif retweet_condition is False:
                     network.add_node(tweet.get_id())
             elif network_type == "quote":
                 quote_condition = tweet.is_quoted()
                 if quote_condition is True:
-                    network.add_edge(tweet.get_quote().get_id(), tweet.get_id(), kind="quote")
+                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
                 elif quote_condition is False:
                     network.add_node(tweet.get_id())
             elif network_type == "reply":
@@ -5393,4 +5393,8 @@ class quoteClass(singleTweet):
         return tweet_text
 
         # return self.tweet["extended_tweet"]["full_text"] if self.tweet["truncated"] else self.tweet["text"]
+
+
+
+
 
