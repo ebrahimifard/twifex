@@ -80,10 +80,10 @@ print("hi2")
 
 
 q = twifex.collective_tweets(_tweets).topology_based_features().time_independent_features().time_independent_location_independent_network_features().user_features()
-q.network_building(network_type="quote")
+q.network_building(network_type="reply")
 q.user_followers_count_layer()
 q.user_friends_count_layer()
 q.user_role_count_layer()
-q.download_network(path="./net1.gexf")
+q.download_network(path="./net5.gexf")
 
 print("hi3")

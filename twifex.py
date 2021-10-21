@@ -2593,7 +2593,7 @@ class Network:
     def download_network(self, download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
 
         if download_format == "GEXF":
-            nx.write_gexf(self.get_network(), path=path, encoding=encoding)
+            nx.write_gexf(self.get_network(), path=path, encoding=encoding, version='1.2draft')
         elif download_format == "GML":
             nx.write_gml(self.get_network(), path=path)
 
@@ -3290,16 +3290,17 @@ class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
                 else:
                     self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
             elif self.network_type == "reply":
-                reply_status = tweet.is_this_a_reply()
-                if reply_status:
-                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
-                    if tweet.get_reply_to_id() in self.tweets.keys():
-                        self.network.nodes[tweet.get_reply_to_id()]["followers_count"] = \
-                            self.tweets[tweet.get_reply_to_id()].get_twitter().get_followers_count()
-                    else:
-                        self.network.nodes[tweet.get_reply_to_id()]["followers_count"] = np.nan
-                else:
-                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+                self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+                # reply_status = tweet.is_this_a_reply()
+                # if reply_status:
+                #     self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+                #     if tweet.get_reply_to_id() in self.tweets.keys():
+                #         self.network.nodes[tweet.get_reply_to_id()]["followers_count"] = \
+                #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_followers_count()
+                #     else:
+                #         self.network.nodes[tweet.get_reply_to_id()]["followers_count"] = np.nan
+                # else:
+                #     self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
 
     def user_friends_count_layer(self):
         for tweet_id, tweet in self.tweets.items():
@@ -3320,16 +3321,17 @@ class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
                 else:
                     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
             elif self.network_type == "reply":
-                reply_status = tweet.is_this_a_reply()
-                if reply_status:
-                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
-                    if tweet.get_reply_to_id() in self.tweets.keys():
-                        self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = \
-                            self.tweets[tweet.get_reply_to_id()].get_twitter().get_friends_count()
-                    else:
-                        self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = np.nan
-                else:
-                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+                self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+                # reply_status = tweet.is_this_a_reply()
+                # if reply_status:
+                #     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+                #     if tweet.get_reply_to_id() in self.tweets.keys():
+                #         self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = \
+                #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_friends_count()
+                #     else:
+                #         self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = np.nan
+                # else:
+                #     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
 
     def user_role_count_layer(self):
         for tweet_id, tweet in self.tweets.items():
@@ -3350,16 +3352,83 @@ class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
                 else:
                     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
             elif self.network_type == "reply":
-                reply_status = tweet.is_this_a_reply()
-                if reply_status:
-                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
-                    if tweet.get_reply_to_id() in self.tweets.keys():
-                        self.network.nodes[tweet.get_reply_to_id()]["user_role"] = \
-                            self.tweets[tweet.get_reply_to_id()].get_twitter().get_user_role()
-                    else:
-                        self.network.nodes[tweet.get_reply_to_id()]["user_role"] = np.nan
+                self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+                # reply_status = tweet.is_this_a_reply()
+                # if reply_status:
+                #     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+                #     if tweet.get_reply_to_id() in self.tweets.keys():
+                #         self.network.nodes[tweet.get_reply_to_id()]["user_role"] = \
+                #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_user_role()
+                #     else:
+                #         self.network.nodes[tweet.get_reply_to_id()]["user_role"] = np.nan
+                # else:
+                #     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+
+    def users_with_verification_layer(self):
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                if retweet_status:
+                    self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
+                    self.network.nodes[tweet.get_retweeted().get_id()]["verified"] = \
+                        tweet.get_retweeted().get_twitter().get_user_verification_status()
                 else:
-                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+                    self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
+                    self.network.nodes[tweet.get_quote().get_id()]["verified"] = \
+                        tweet.get_quote().get_twitter().get_user_verification_status()
+                else:
+                    self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
+            elif self.network_type == "reply":
+                self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
+
+    def users_status_count_layer(self):
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                if retweet_status:
+                    self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
+                    self.network.nodes[tweet.get_retweeted().get_id()]["status_count"] = \
+                        tweet.get_retweeted().get_twitter().get_statusses_count()
+                else:
+                    self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
+                    self.network.nodes[tweet.get_quote().get_id()]["status_count"] = \
+                        tweet.get_quote().get_twitter().get_statusses_count()
+                else:
+                    self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
+            elif self.network_type == "reply":
+                self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
+
+    def users_total_likes_count_layer(self):
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                if retweet_status:
+                    self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
+                    self.network.nodes[tweet.get_retweeted().get_id()]["total_likes_count"] = \
+                        tweet.get_retweeted().get_twitter().get_user_total_likes_count()
+                else:
+                    self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
+                    self.network.nodes[tweet.get_quote().get_id()]["total_likes_count"] = \
+                        tweet.get_quote().get_twitter().get_user_total_likes_count()
+                else:
+                    self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
+            elif self.network_type == "reply":
+                self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
+
+                
+
 
 ############################################# network features #############################################
 
