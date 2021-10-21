@@ -81,6 +81,7 @@ from itertools import combinations
 #       - Summarising all those if and else where you calcualte statitical metrics for an array => maybe defining a function?
 #       - add a function to check if two tweets are posted by the same account?
 #       - replace "stdev" with "stddev"
+#       - Try to use np.nan instead of None thoroughout the code
 
 ############################################# Notes and Comments #############################################
 
@@ -2587,7 +2588,14 @@ class Network:
     #     self.network = self.network_building(network_type='reply')
 
     def get_network(self):
-        return self.network
+        return self.network## tell in
+
+    def download_network(self, download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
+
+        if download_format == "GEXF":
+            nx.write_gexf(self.get_network(), path=path, encoding=encoding)
+        elif download_format == "GML":
+            nx.write_gml(self.get_network(), path=path)
 
     def components_number(self):
         """
@@ -2686,331 +2694,331 @@ class Network:
     #     pass
 
 
-class RetweetNetwork(Network):  # node should change to nodes in order to call a particular node
-    def building_network(self):
-        """
-        This function builds the retweet network.
-        :return: This function does not return the network. It updates the class properties. To get the network, use
-        get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            trf = tweet.is_retweeted()
-            if trf is True:
-                self.network.add_edge(tweet.get_retweeted().get_id(), tweet.get_id(), kind="retweet")
-            elif trf is False:
-                self.network.add_node(tweet.get_id())
-
-    # def word_count_layer(self):
-    #     """
-    #     This function add the number of words in each tweet as a property to every node.
-    #     :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
-    #      nodes of the caller network object. To get the network, use get_network() function.
-    #     """
-    #     for tweet_id, tweet in self.tweets.items():
-    #         trf = tweet.is_retweeted()
-    #         if trf == True:
-    #             self.network.node[tweet.get_retweeted().get_id()]["word_count"] = tweet.get_retweeted().text_length()
-    #             self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
-    #         elif trf == False:
-    #             self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
-
-    def character_count_layer(self):
-        """
-        This function add the number of characters in each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet character count) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            trf = tweet.is_retweeted()
-            if trf == True:
-                self.network.node[tweet.get_retweeted().get_id()][
-                    "character_count"] = tweet.get_retweeted().text_length(length_unit="character")
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
-            elif trf == False:
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
-
-    def sentence_count_layer(self):
-        """
-        This function add the number of sentences in each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet sentence count) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            trf = tweet.is_retweeted()
-            if trf == True:
-                self.network.nodes[tweet.get_retweeted().get_id()][
-                    "character_count"] = tweet.get_retweeted().text_length(length_unit="sentence")
-                self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
-            elif trf == False:
-                self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
-
-    def word_complexity_layer(self):
-        """
-        This function add the word complexity of each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet word complexity) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            trf = tweet.is_retweeted()
-            if trf == True:
-                self.network.node[tweet.get_retweeted().get_id()][
-                    "word_complexity"] = tweet.get_retweeted().text_complexity()
-                self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
-            elif trf == False:
-                self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
-
-    def sentence_complexity_layer(self):
-        """
-        This function add the sentence complexity of each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet sentence complexity) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            trf = tweet.is_retweeted()
-            if trf == True:
-                self.network.node[tweet.get_retweeted().get_id()][
-                    "sentence_complexity"] = tweet.get_retweeted().text_complexity(complexity_unit="sentence")
-                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
-            elif trf == False:
-                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
-
-    def syllables_complexity_layer(self):
-        """
-        This function add the syllables complexity of each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet syllables complexity) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            trf = tweet.is_retweeted()
-            if trf == True:
-                self.network.node[tweet.get_retweeted().get_id()][
-                    "syllables_complexity"] = tweet.get_retweeted().text_complexity(complexity_unit="syllables")
-                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
-            elif trf == False:
-                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
-
-    def sentiment_layer(self, sentiment_engine="vader"):
-        """
-        This function add the sentiment of each tweet as a property to every node.
-        :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
-        "vad".
-        :return: This function does not return anything, instead it add the relevant attribute (sentiment score) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
-                                     "vad"]), "The sentiment_engine has to be" \
-                                              "textblob, vader, nrc," \
-                                              "hate_speech or vad"
-
-        subscores_labels = {"textblob": ["subjectivity", "polarity"],
-                            "vader": ["positivity_score", "negativity_score", "neutrality_score", "composite_score"],
-                            "nrc": ["anger_score", "anticipation_score", "disgust_score", "fear_score", "joy_score",
-                                    "sadness_score", "surprise_score", "trust_score"],
-                            "hate_speech": ["hate_speech", "offensive_language", "neither"],
-                            "vad": ["valence_score", "arousal_score", "dominance_score"]}
-        for tweet_id, tweet in self.tweets.items():
-            for i in subscores_labels[sentiment_engine]:
-                trf = tweet.is_retweeted()
-                if trf == True:
-                    self.network.node[tweet.get_retweeted().get_id()][i] = \
-                        tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)[i]
-                    self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
-                        i]
-                elif trf == False:
-                    self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
-                        i]
-
-    def readability_layer(self, readability_metric="flesch_kincaid_grade"):
-        """
-        This function add the readability of each tweet as a property to every node.
-        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
-        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
-        :return: This function does not return anything, instead it add the relevant attribute (readability score) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-
-        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
-                           "coleman_liau_index", "linsear_write_formula",
-                           "dale_chall_readability_score", ]), "The metric " \
-                                                               "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
-                                                               "automated_readability_index, coleman_liau_index, linsear_write_formula," \
-                                                               "or dale_chall_readability_score."
-
-        # for tweet_id, tweet in self.tweets.items():
-        for tweet_id in tqdm(self.tweets):
-            tweet = self.tweets[tweet_id]
-            trf = tweet.is_retweeted()
-            if trf == True:
-                self.network.node[tweet.get_retweeted().get_id()]["readability"] = eval(
-                    f'textstat.{readability_metric}(\"{tweet.get_retweeted().text_preprocessing()}\")')
-                self.network.node[tweet.get_id()]["readability"] = eval(
-                    f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
-            elif trf == False:
-                self.network.node[tweet.get_id()]["readability"] = eval(
-                    f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
-
-
-class QuoteNetwork(Network):
-    def building_network(self):
-        """
-        This function builds the quote network.
-        :return: This function does not return the network. It updates the class properties. To get the network, use
-        get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            tqf = tweet.is_quoted()
-            if tqf == True:
-                self.network.add_edge(tweet.get_quote().get_id(), tweet.get_id(), kind="quote")
-            elif tqf == False:
-                self.network.add_node(tweet.get_id())
-
-    def word_count_layer(self):
-        """
-        This function add the number of words in each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            tqf = tweet.is_quoted()
-            if tqf == True:
-                self.network.node[tweet.get_quote().get_id()]["word_count"] = tweet.get_quote().text_length()
-                self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
-            elif tqf == False:
-                self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
-
-    def character_count_layer(self):
-        """
-        This function add the number of characters in each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet character count) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            tqf = tweet.is_quoted()
-            if tqf == True:
-                self.network.node[tweet.get_quote().get_id()]["character_count"] = tweet.get_quote().text_length(
-                    length_unit="character")
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
-            elif tqf == False:
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
-
-    def sentence_count_layer(self):
-        """
-        This function add the number of sentences in each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet sentence count) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            tqf = tweet.is_quoted()
-            if tqf == True:
-                self.network.node[tweet.get_quote().get_id()]["character_count"] = tweet.get_quote().text_length(
-                    length_unit="sentence")
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
-            elif tqf == False:
-                self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
-
-    def word_complexity_layer(self):
-        """
-        This function add the word complexity of each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet word complexity) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            tqf = tweet.is_quoted()
-            if tqf == True:
-                self.network.node[tweet.get_quote().get_id()]["word_complexity"] = tweet.get_quote().text_complexity()
-                self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
-            elif tqf == False:
-                self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
-
-    def sentence_complexity_layer(self):
-        """
-        This function add the sentence complexity of each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet sentence complexity) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            tqf = tweet.is_quoted()
-            if tqf == True:
-                self.network.node[tweet.get_quote().get_id()][
-                    "sentence_complexity"] = tweet.get_quote().text_complexity(complexity_unit="sentence")
-                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
-            elif tqf == False:
-                self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
-
-    def syllables_complexity_layer(self):
-        """
-        This function add the syllables complexity of each tweet as a property to every node.
-        :return: This function does not return anything, instead it add the relevant attribute (tweet syllables complexity) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-        for tweet_id, tweet in self.tweets.items():
-            tqf = tweet.is_quoted()
-            if tqf == True:
-                self.network.node[tweet.get_quote().get_id()][
-                    "syllables_complexity"] = tweet.get_quote().text_complexity(complexity_unit="syllables")
-                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
-            elif tqf == False:
-                self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
-
-    def sentiment_layer(self, sentiment_engine="vader"):
-        """
-        This function add the sentiment of each tweet as a property to every node.
-        :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
-        "vad".
-        :return: This function does not return anything, instead it add the relevant attribute (sentiment score) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
-                                     "vad"]), "The sentiment_engine has to be" \
-                                              "textblob, vader, nrc," \
-                                              "hate_speech or vad"
-
-        subscores_labels = {"textblob": ["subjectivity", "polarity"],
-                            "vader": ["positivity_score", "negativity_score", "neutrality_score", "composite_score"],
-                            "nrc": ["anger_score", "anticipation_score", "disgust_score", "fear_score", "joy_score",
-                                    "sadness_score", "surprise_score", "trust_score"],
-                            "hate_speech": ["hate_speech", "offensive_language", "neither"],
-                            "vad": ["valence_score", "arousal_score", "dominance_score"]}
-        for tweet_id, tweet in self.tweets.items():
-            for i in subscores_labels[sentiment_engine]:
-                tqf = tweet.is_quoted()
-                if tqf == True:
-                    self.network.node[tweet.get_quote().get_id()][i] = \
-                        tweet.get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)[i]
-                    self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
-                        i]
-                elif tqf == False:
-                    self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
-                        i]
-
-    def readability_layer(self, readability_metric="flesch_kincaid_grade"):
-        """
-        This function add the readability of each tweet as a property to every node.
-        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
-        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
-        :return: This function does not return anything, instead it add the relevant attribute (readability score) to the
-         nodes of the caller network object. To get the network, use get_network() function.
-        """
-
-        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
-                           "coleman_liau_index", "linsear_write_formula",
-                           "dale_chall_readability_score", ]), "The metric " \
-                                                               "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
-                                                               "automated_readability_index, coleman_liau_index, linsear_write_formula," \
-                                                               "or dale_chall_readability_score."
-
-        for tweet_id, tweet in self.tweets.items():
-            tqf = tweet.is_quoted()
-            if tqf == True:
-                self.network.node[tweet.get_quote().get_id()]["readability"] = eval(
-                    f'textstat.{readability_metric}(\"{tweet.get_quote().text_preprocessing()}\")')
-                self.network.node[tweet.get_id()]["readability"] = eval(
-                    f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
-            elif tqf == False:
-                self.network.node[tweet.get_id()]["readability"] = eval(
-                    f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
+# class RetweetNetwork(Network):  # node should change to nodes in order to call a particular node
+#     def building_network(self):
+#         """
+#         This function builds the retweet network.
+#         :return: This function does not return the network. It updates the class properties. To get the network, use
+#         get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             trf = tweet.is_retweeted()
+#             if trf is True:
+#                 self.network.add_edge(tweet.get_retweeted().get_id(), tweet.get_id(), kind="retweet")
+#             elif trf is False:
+#                 self.network.add_node(tweet.get_id())
+#
+#     # def word_count_layer(self):
+#     #     """
+#     #     This function add the number of words in each tweet as a property to every node.
+#     #     :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
+#     #      nodes of the caller network object. To get the network, use get_network() function.
+#     #     """
+#     #     for tweet_id, tweet in self.tweets.items():
+#     #         trf = tweet.is_retweeted()
+#     #         if trf == True:
+#     #             self.network.node[tweet.get_retweeted().get_id()]["word_count"] = tweet.get_retweeted().text_length()
+#     #             self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
+#     #         elif trf == False:
+#     #             self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
+#
+#     def character_count_layer(self):
+#         """
+#         This function add the number of characters in each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet character count) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             trf = tweet.is_retweeted()
+#             if trf == True:
+#                 self.network.node[tweet.get_retweeted().get_id()][
+#                     "character_count"] = tweet.get_retweeted().text_length(length_unit="character")
+#                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
+#             elif trf == False:
+#                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
+#
+#     def sentence_count_layer(self):
+#         """
+#         This function add the number of sentences in each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet sentence count) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             trf = tweet.is_retweeted()
+#             if trf == True:
+#                 self.network.nodes[tweet.get_retweeted().get_id()][
+#                     "character_count"] = tweet.get_retweeted().text_length(length_unit="sentence")
+#                 self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
+#             elif trf == False:
+#                 self.network.nodes[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
+#
+#     def word_complexity_layer(self):
+#         """
+#         This function add the word complexity of each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet word complexity) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             trf = tweet.is_retweeted()
+#             if trf == True:
+#                 self.network.node[tweet.get_retweeted().get_id()][
+#                     "word_complexity"] = tweet.get_retweeted().text_complexity()
+#                 self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
+#             elif trf == False:
+#                 self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
+#
+#     def sentence_complexity_layer(self):
+#         """
+#         This function add the sentence complexity of each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet sentence complexity) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             trf = tweet.is_retweeted()
+#             if trf == True:
+#                 self.network.node[tweet.get_retweeted().get_id()][
+#                     "sentence_complexity"] = tweet.get_retweeted().text_complexity(complexity_unit="sentence")
+#                 self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
+#             elif trf == False:
+#                 self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
+#
+#     def syllables_complexity_layer(self):
+#         """
+#         This function add the syllables complexity of each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet syllables complexity) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             trf = tweet.is_retweeted()
+#             if trf == True:
+#                 self.network.node[tweet.get_retweeted().get_id()][
+#                     "syllables_complexity"] = tweet.get_retweeted().text_complexity(complexity_unit="syllables")
+#                 self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
+#             elif trf == False:
+#                 self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
+#
+#     def sentiment_layer(self, sentiment_engine="vader"):
+#         """
+#         This function add the sentiment of each tweet as a property to every node.
+#         :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
+#         "vad".
+#         :return: This function does not return anything, instead it add the relevant attribute (sentiment score) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#
+#         assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+#                                      "vad"]), "The sentiment_engine has to be" \
+#                                               "textblob, vader, nrc," \
+#                                               "hate_speech or vad"
+#
+#         subscores_labels = {"textblob": ["subjectivity", "polarity"],
+#                             "vader": ["positivity_score", "negativity_score", "neutrality_score", "composite_score"],
+#                             "nrc": ["anger_score", "anticipation_score", "disgust_score", "fear_score", "joy_score",
+#                                     "sadness_score", "surprise_score", "trust_score"],
+#                             "hate_speech": ["hate_speech", "offensive_language", "neither"],
+#                             "vad": ["valence_score", "arousal_score", "dominance_score"]}
+#         for tweet_id, tweet in self.tweets.items():
+#             for i in subscores_labels[sentiment_engine]:
+#                 trf = tweet.is_retweeted()
+#                 if trf == True:
+#                     self.network.node[tweet.get_retweeted().get_id()][i] = \
+#                         tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)[i]
+#                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
+#                         i]
+#                 elif trf == False:
+#                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
+#                         i]
+#
+#     def readability_layer(self, readability_metric="flesch_kincaid_grade"):
+#         """
+#         This function add the readability of each tweet as a property to every node.
+#         :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+#         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
+#         :return: This function does not return anything, instead it add the relevant attribute (readability score) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#
+#         assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+#                            "coleman_liau_index", "linsear_write_formula",
+#                            "dale_chall_readability_score", ]), "The metric " \
+#                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+#                                                                "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+#                                                                "or dale_chall_readability_score."
+#
+#         # for tweet_id, tweet in self.tweets.items():
+#         for tweet_id in tqdm(self.tweets):
+#             tweet = self.tweets[tweet_id]
+#             trf = tweet.is_retweeted()
+#             if trf == True:
+#                 self.network.node[tweet.get_retweeted().get_id()]["readability"] = eval(
+#                     f'textstat.{readability_metric}(\"{tweet.get_retweeted().text_preprocessing()}\")')
+#                 self.network.node[tweet.get_id()]["readability"] = eval(
+#                     f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
+#             elif trf == False:
+#                 self.network.node[tweet.get_id()]["readability"] = eval(
+#                     f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
+#
+#
+# class QuoteNetwork(Network):
+#     def building_network(self):
+#         """
+#         This function builds the quote network.
+#         :return: This function does not return the network. It updates the class properties. To get the network, use
+#         get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             tqf = tweet.is_quoted()
+#             if tqf == True:
+#                 self.network.add_edge(tweet.get_quote().get_id(), tweet.get_id(), kind="quote")
+#             elif tqf == False:
+#                 self.network.add_node(tweet.get_id())
+#
+#     def word_count_layer(self):
+#         """
+#         This function add the number of words in each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             tqf = tweet.is_quoted()
+#             if tqf == True:
+#                 self.network.node[tweet.get_quote().get_id()]["word_count"] = tweet.get_quote().text_length()
+#                 self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
+#             elif tqf == False:
+#                 self.network.node[tweet.get_id()]["word_count"] = tweet.text_length()
+#
+#     def character_count_layer(self):
+#         """
+#         This function add the number of characters in each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet character count) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             tqf = tweet.is_quoted()
+#             if tqf == True:
+#                 self.network.node[tweet.get_quote().get_id()]["character_count"] = tweet.get_quote().text_length(
+#                     length_unit="character")
+#                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
+#             elif tqf == False:
+#                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="character")
+#
+#     def sentence_count_layer(self):
+#         """
+#         This function add the number of sentences in each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet sentence count) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             tqf = tweet.is_quoted()
+#             if tqf == True:
+#                 self.network.node[tweet.get_quote().get_id()]["character_count"] = tweet.get_quote().text_length(
+#                     length_unit="sentence")
+#                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
+#             elif tqf == False:
+#                 self.network.node[tweet.get_id()]["character_count"] = tweet.text_length(length_unit="sentence")
+#
+#     def word_complexity_layer(self):
+#         """
+#         This function add the word complexity of each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet word complexity) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             tqf = tweet.is_quoted()
+#             if tqf == True:
+#                 self.network.node[tweet.get_quote().get_id()]["word_complexity"] = tweet.get_quote().text_complexity()
+#                 self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
+#             elif tqf == False:
+#                 self.network.node[tweet.get_id()]["word_complexity"] = tweet.text_complexity()
+#
+#     def sentence_complexity_layer(self):
+#         """
+#         This function add the sentence complexity of each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet sentence complexity) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             tqf = tweet.is_quoted()
+#             if tqf == True:
+#                 self.network.node[tweet.get_quote().get_id()][
+#                     "sentence_complexity"] = tweet.get_quote().text_complexity(complexity_unit="sentence")
+#                 self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
+#             elif tqf == False:
+#                 self.network.node[tweet.get_id()]["sentence_complexity"] = tweet.text_complexity(complexity_unit="sentence")
+#
+#     def syllables_complexity_layer(self):
+#         """
+#         This function add the syllables complexity of each tweet as a property to every node.
+#         :return: This function does not return anything, instead it add the relevant attribute (tweet syllables complexity) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#         for tweet_id, tweet in self.tweets.items():
+#             tqf = tweet.is_quoted()
+#             if tqf == True:
+#                 self.network.node[tweet.get_quote().get_id()][
+#                     "syllables_complexity"] = tweet.get_quote().text_complexity(complexity_unit="syllables")
+#                 self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
+#             elif tqf == False:
+#                 self.network.node[tweet.get_id()]["syllables_complexity"] = tweet.text_complexity(complexity_unit="syllables")
+#
+#     def sentiment_layer(self, sentiment_engine="vader"):
+#         """
+#         This function add the sentiment of each tweet as a property to every node.
+#         :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
+#         "vad".
+#         :return: This function does not return anything, instead it add the relevant attribute (sentiment score) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#
+#         assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+#                                      "vad"]), "The sentiment_engine has to be" \
+#                                               "textblob, vader, nrc," \
+#                                               "hate_speech or vad"
+#
+#         subscores_labels = {"textblob": ["subjectivity", "polarity"],
+#                             "vader": ["positivity_score", "negativity_score", "neutrality_score", "composite_score"],
+#                             "nrc": ["anger_score", "anticipation_score", "disgust_score", "fear_score", "joy_score",
+#                                     "sadness_score", "surprise_score", "trust_score"],
+#                             "hate_speech": ["hate_speech", "offensive_language", "neither"],
+#                             "vad": ["valence_score", "arousal_score", "dominance_score"]}
+#         for tweet_id, tweet in self.tweets.items():
+#             for i in subscores_labels[sentiment_engine]:
+#                 tqf = tweet.is_quoted()
+#                 if tqf == True:
+#                     self.network.node[tweet.get_quote().get_id()][i] = \
+#                         tweet.get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)[i]
+#                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
+#                         i]
+#                 elif tqf == False:
+#                     self.network.node[tweet.get_id()][i] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)[
+#                         i]
+#
+#     def readability_layer(self, readability_metric="flesch_kincaid_grade"):
+#         """
+#         This function add the readability of each tweet as a property to every node.
+#         :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+#         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
+#         :return: This function does not return anything, instead it add the relevant attribute (readability score) to the
+#          nodes of the caller network object. To get the network, use get_network() function.
+#         """
+#
+#         assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+#                            "coleman_liau_index", "linsear_write_formula",
+#                            "dale_chall_readability_score", ]), "The metric " \
+#                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+#                                                                "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+#                                                                "or dale_chall_readability_score."
+#
+#         for tweet_id, tweet in self.tweets.items():
+#             tqf = tweet.is_quoted()
+#             if tqf == True:
+#                 self.network.node[tweet.get_quote().get_id()]["readability"] = eval(
+#                     f'textstat.{readability_metric}(\"{tweet.get_quote().text_preprocessing()}\")')
+#                 self.network.node[tweet.get_id()]["readability"] = eval(
+#                     f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
+#             elif tqf == False:
+#                 self.network.node[tweet.get_id()]["readability"] = eval(
+#                     f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
 
 
 # class TimeDependentLocationDependentTweetNetworkFeatures:
@@ -3138,20 +3146,20 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
                     if quote_status and quote_include:
                         quote = tweet.get_retweeted().get_quote().text_complexity(complexity_unit=complexity_unit)
                         self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
-                        self.network.nodes[tweet.get_id()][unit] = retweet + quote
+                        self.network.nodes[tweet_id][unit] = retweet + quote
                     else:
                         self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
-                        self.network.nodes[tweet.get_id()][unit] = retweet
+                        self.network.nodes[tweet_id][unit] = retweet
                 else:
-                    self.network.nodes[tweet.get_id()][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+                    self.network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
             elif self.network_type == "quote":
                 quote_status = tweet.is_quoted()
                 if quote_status:
                     self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
                         text_complexity(complexity_unit=complexity_unit)
-                    self.network.nodes[tweet.get_id()][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+                    self.network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
                 else:
-                    self.network.nodes[tweet.get_id()][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+                    self.network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
 
 
 
@@ -3175,26 +3183,37 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
                 retweet_status = tweet.is_retweeted()
                 quote_status = tweet.get_retweeted().is_quoted()
                 if retweet_status:
-                    retweet = tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)
+                    retweet_text = tweet.get_retweeted().get_text()
                     if quote_status and quote_include:
-                        quote = tweet.get_retweeted().get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)
-                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
-                        self.network.nodes[tweet.get_id()][unit] = retweet + quote
+                        quote_text = tweet.get_retweeted().get_quote().get_text()
+                        sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine,
+                                                             input_text=retweet_text + " " + quote_text)
+                        for dimension, value in sentiment.items():
+                            self.network.nodes[tweet.get_retweeted().get_id()][dimension] = value
+                            self.network.nodes[tweet.get_id()][dimension] = value
                     else:
-                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
-                        self.network.nodes[tweet.get_id()][unit] = retweet
+                        sentiment = tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)
+                        for dimension, value in sentiment.items():
+                            self.network.nodes[tweet.get_retweeted().get_id()][dimension] = value
+                            self.network.nodes[tweet.get_id()][dimension] = value
                 else:
-                    self.network.nodes[tweet.get_id()][unit] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
+                    sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
+                    for dimension, value in sentiment.items():
+                        self.network.nodes[tweet.get_id()][dimension] = value
             elif self.network_type == "quote":
                 quote_status = tweet.is_quoted()
                 if quote_status:
-                    self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
-                        sentiment_analysis(sentiment_engine=sentiment_engine)
-                    self.network.nodes[tweet.get_id()][unit] = tweet.\
-                        sentiment_analysis(sentiment_engine=sentiment_engine)
+                    quote_sentiment = tweet.get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)
+                    tweet_sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
+                    for dimension, value in quote_sentiment.items():
+                        self.network.nodes[tweet.get_quote().get_id()][dimension] = value
+                    for dimension, value in tweet_sentiment.items():
+                        self.network.nodes[tweet.get_id()][dimension] = value
                 else:
-                    self.network.nodes[tweet.get_id()][unit] = tweet.\
-                        sentiment_analysis(sentiment_engine=sentiment_engine)
+                    tweet_sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
+                    for dimension, value in tweet_sentiment.items():
+                        self.network.nodes[tweet.get_id()][dimension] = value
+
 
 
 
@@ -3250,9 +3269,97 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
         #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
 
 
-class TimeIndependentLocationIndependentUserNetworkFeatures:
-    def test(self):
-        print("test")
+class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
+
+    def user_followers_count_layer(self):
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                if retweet_status:
+                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+                    self.network.nodes[tweet.get_retweeted().get_id()]["followers_count"] = \
+                        tweet.get_retweeted().get_twitter().get_followers_count()
+                else:
+                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+                    self.network.nodes[tweet.get_quote().get_id()]["followers_count"] = \
+                        tweet.get_quote().get_twitter().get_followers_count()
+                else:
+                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+            elif self.network_type == "reply":
+                reply_status = tweet.is_this_a_reply()
+                if reply_status:
+                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+                    if tweet.get_reply_to_id() in self.tweets.keys():
+                        self.network.nodes[tweet.get_reply_to_id()]["followers_count"] = \
+                            self.tweets[tweet.get_reply_to_id()].get_twitter().get_followers_count()
+                    else:
+                        self.network.nodes[tweet.get_reply_to_id()]["followers_count"] = np.nan
+                else:
+                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+
+    def user_friends_count_layer(self):
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                if retweet_status:
+                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+                    self.network.nodes[tweet.get_retweeted().get_id()]["friends_count"] = \
+                        tweet.get_retweeted().get_twitter().get_friends_count()
+                else:
+                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+                    self.network.nodes[tweet.get_quote().get_id()]["friends_count"] = \
+                        tweet.get_quote().get_twitter().get_friends_count()
+                else:
+                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+            elif self.network_type == "reply":
+                reply_status = tweet.is_this_a_reply()
+                if reply_status:
+                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+                    if tweet.get_reply_to_id() in self.tweets.keys():
+                        self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = \
+                            self.tweets[tweet.get_reply_to_id()].get_twitter().get_friends_count()
+                    else:
+                        self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = np.nan
+                else:
+                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+
+    def user_role_count_layer(self):
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                if retweet_status:
+                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+                    self.network.nodes[tweet.get_retweeted().get_id()]["user_role"] = \
+                        tweet.get_retweeted().get_twitter().get_user_role()
+                else:
+                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+                    self.network.nodes[tweet.get_quote().get_id()]["user_role"] = \
+                        tweet.get_quote().get_twitter().get_user_role()
+                else:
+                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+            elif self.network_type == "reply":
+                reply_status = tweet.is_this_a_reply()
+                if reply_status:
+                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+                    if tweet.get_reply_to_id() in self.tweets.keys():
+                        self.network.nodes[tweet.get_reply_to_id()]["user_role"] = \
+                            self.tweets[tweet.get_reply_to_id()].get_twitter().get_user_role()
+                    else:
+                        self.network.nodes[tweet.get_reply_to_id()]["user_role"] = np.nan
+                else:
+                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
 
 ############################################# network features #############################################
 
