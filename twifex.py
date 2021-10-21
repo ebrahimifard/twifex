@@ -3082,7 +3082,7 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
     # def readability_layer(self):
     #     pass
 
-    def tweet_length_layer(self, length_unit="word"):
+    def tweet_length_layer(self, length_unit="word", quote_include=True):
         """
         This function add the number of words in each tweet as a property to every node.
         :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
@@ -3091,18 +3091,23 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
         unit = length_unit+"_count"
         for tweet_id, tweet in self.tweets.items():
             if self.network_type == "retweet":
-                tweet_status = tweet.is_retweeted()
-                if tweet_status:
-                    self.network.nodes[tweet.get_retweeted().get_id()][unit] = \
-                        tweet.get_retweeted().text_length(length_unit=length_unit)
-                    self.network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
+                retweet_status = tweet.is_retweeted()
+                quote_status = tweet.get_retweeted().is_quoted()
+                if retweet_status:
+                    retweet = tweet.get_retweeted().text_length(length_unit=length_unit)
+                    if quote_status and quote_include:
+                        quote = tweet.get_retweeted().get_quote().text_length(length_unit=length_unit)
+                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
+                        self.network.nodes[tweet.get_id()][unit] = retweet + quote
+                    else:
+                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
+                        self.network.nodes[tweet.get_id()][unit] = retweet
                 else:
                     self.network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
             elif self.network_type == "quote":
-                tweet_status = tweet.is_quoted()
-                if tweet_status:
-                    self.network.nodes[tweet.get_quote().get_id()][unit] = \
-                        tweet.get_quote().text_length(length_unit=length_unit)
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().text_length(length_unit=length_unit)
                     self.network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
                 else:
                     self.network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
@@ -3116,6 +3121,134 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
         #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
         #     elif trf is False:
         #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
+
+    def tweet_complexity_layer(self, complexity_unit="word", quote_include=True):
+        """
+        This function add the number of words in each tweet as a property to every node.
+        :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
+         nodes of the caller network object. To get the network, use get_network() function.
+        """
+        unit = complexity_unit+"_complexity"
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                quote_status = tweet.get_retweeted().is_quoted()
+                if retweet_status:
+                    retweet = tweet.get_retweeted().text_complexity(complexity_unit=complexity_unit)
+                    if quote_status and quote_include:
+                        quote = tweet.get_retweeted().get_quote().text_complexity(complexity_unit=complexity_unit)
+                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
+                        self.network.nodes[tweet.get_id()][unit] = retweet + quote
+                    else:
+                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
+                        self.network.nodes[tweet.get_id()][unit] = retweet
+                else:
+                    self.network.nodes[tweet.get_id()][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
+                        text_complexity(complexity_unit=complexity_unit)
+                    self.network.nodes[tweet.get_id()][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+                else:
+                    self.network.nodes[tweet.get_id()][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+
+
+
+        # for tweet_id, tweet in self.tweets.items():
+        #     trf = tweet.is_retweeted()
+        #     if trf is True:
+        #         self.network.nodes[tweet.get_retweeted().get_id()]["word_count"] = tweet.get_retweeted().text_length()
+        #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
+        #     elif trf is False:
+        #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
+
+    def tweet_sentiment_layer(self, sentiment_engine="vader", quote_include=True):
+        """
+        This function add the number of words in each tweet as a property to every node.
+        :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
+         nodes of the caller network object. To get the network, use get_network() function.
+        """
+        unit = "sentiment"
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                quote_status = tweet.get_retweeted().is_quoted()
+                if retweet_status:
+                    retweet = tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)
+                    if quote_status and quote_include:
+                        quote = tweet.get_retweeted().get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)
+                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
+                        self.network.nodes[tweet.get_id()][unit] = retweet + quote
+                    else:
+                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
+                        self.network.nodes[tweet.get_id()][unit] = retweet
+                else:
+                    self.network.nodes[tweet.get_id()][unit] = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
+                        sentiment_analysis(sentiment_engine=sentiment_engine)
+                    self.network.nodes[tweet.get_id()][unit] = tweet.\
+                        sentiment_analysis(sentiment_engine=sentiment_engine)
+                else:
+                    self.network.nodes[tweet.get_id()][unit] = tweet.\
+                        sentiment_analysis(sentiment_engine=sentiment_engine)
+
+
+
+        # for tweet_id, tweet in self.tweets.items():
+        #     trf = tweet.is_retweeted()
+        #     if trf is True:
+        #         self.network.nodes[tweet.get_retweeted().get_id()]["word_count"] = tweet.get_retweeted().text_length()
+        #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
+        #     elif trf is False:
+        #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
+
+    def tweet_readability_layer(self, readability_metric="flesch_kincaid_grade", quote_include=True):
+        """
+        This function add the number of words in each tweet as a property to every node.
+        :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
+         nodes of the caller network object. To get the network, use get_network() function.
+        """
+        unit = "readability"
+        for tweet_id, tweet in self.tweets.items():
+            if self.network_type == "retweet":
+                retweet_status = tweet.is_retweeted()
+                quote_status = tweet.get_retweeted().is_quoted()
+                if retweet_status:
+                    retweet = tweet.get_retweeted().readability(readability_metric=readability_metric)
+                    if quote_status and quote_include:
+                        quote = tweet.get_retweeted().get_quote().readability(readability_metric=readability_metric)
+                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
+                        self.network.nodes[tweet.get_id()][unit] = retweet + quote
+                    else:
+                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
+                        self.network.nodes[tweet.get_id()][unit] = retweet
+                else:
+                    self.network.nodes[tweet.get_id()][unit] = tweet.readability(readability_metric=readability_metric)
+            elif self.network_type == "quote":
+                quote_status = tweet.is_quoted()
+                if quote_status:
+                    self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
+                        readability(readability_metric=readability_metric)
+                    self.network.nodes[tweet.get_id()][unit] = tweet.\
+                        readability(readability_metric=readability_metric)
+                else:
+                    self.network.nodes[tweet.get_id()][unit] = tweet.\
+                        readability(readability_metric=readability_metric)
+
+
+
+        # for tweet_id, tweet in self.tweets.items():
+        #     trf = tweet.is_retweeted()
+        #     if trf is True:
+        #         self.network.nodes[tweet.get_retweeted().get_id()]["word_count"] = tweet.get_retweeted().text_length()
+        #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
+        #     elif trf is False:
+        #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
+
 
 class TimeIndependentLocationIndependentUserNetworkFeatures:
     def test(self):
