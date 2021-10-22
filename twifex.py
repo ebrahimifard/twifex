@@ -3122,37 +3122,41 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
     # def readability_layer(self):
     #     pass
 
-    def tweet_length_layer(self, length_unit="word", quote_include=True):
+    def tweet_length_layer(self, length_unit="word", network_type=None, quote_include=True):
         """
         This function add the number of words in each tweet as a property to every node.
         :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
          nodes of the caller network object. To get the network, use get_network() function.
         """
-        unit = length_unit+"_count"
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                quote_status = tweet.get_retweeted().is_quoted()
-                if retweet_status:
-                    retweet = tweet.get_retweeted().text_length(length_unit=length_unit)
-                    if quote_status and quote_include:
-                        quote = tweet.get_retweeted().get_quote().text_length(length_unit=length_unit)
-                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
-                        self.network.nodes[tweet.get_id()][unit] = retweet + quote
+        if network_type in self.network_type_list:
+            unit = length_unit+"_count"
+            network = self.get_network(network_type=network_type)
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        quote_status = tweet.get_retweeted().is_quoted()
+                        retweet = tweet.get_retweeted().text_length(length_unit=length_unit)
+                        if quote_status and quote_include:
+                            quote = tweet.get_retweeted().get_quote().text_length(length_unit=length_unit)
+                            network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
+                            network.nodes[tweet.get_id()][unit] = retweet + quote
+                        else:
+                            network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
+                            network.nodes[tweet.get_id()][unit] = retweet
                     else:
-                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
-                        self.network.nodes[tweet.get_id()][unit] = retweet
-                else:
-                    self.network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().text_length(length_unit=length_unit)
-                    self.network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
-                else:
-                    self.network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
-
-
+                        network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().text_length(length_unit=length_unit)
+                        network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
+                    else:
+                        network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
+                elif network_type == "reply":
+                    network.nodes[tweet.get_id()][unit] = tweet.text_length(length_unit=length_unit)
+        else:
+            print("The network type you indicated has not been created yet.")
 
         # for tweet_id, tweet in self.tweets.items():
         #     trf = tweet.is_retweeted()
@@ -3162,38 +3166,43 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
         #     elif trf is False:
         #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
 
-    def tweet_complexity_layer(self, complexity_unit="word", quote_include=True):
+    def tweet_complexity_layer(self, complexity_unit="word", network_type=None, quote_include=True):
         """
         This function add the number of words in each tweet as a property to every node.
         :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
          nodes of the caller network object. To get the network, use get_network() function.
         """
-        unit = complexity_unit+"_complexity"
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                quote_status = tweet.get_retweeted().is_quoted()
-                if retweet_status:
-                    retweet = tweet.get_retweeted().text_complexity(complexity_unit=complexity_unit)
-                    if quote_status and quote_include:
-                        quote = tweet.get_retweeted().get_quote().text_complexity(complexity_unit=complexity_unit)
-                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
-                        self.network.nodes[tweet_id][unit] = retweet + quote
+
+        if network_type in self.network_type_list:
+            unit = complexity_unit+"_complexity"
+            network = self.get_network(network_type=network_type)
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        quote_status = tweet.get_retweeted().is_quoted()
+                        retweet = tweet.get_retweeted().text_complexity(complexity_unit=complexity_unit)
+                        if quote_status and quote_include:
+                            quote = tweet.get_retweeted().get_quote().text_complexity(complexity_unit=complexity_unit)
+                            network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
+                            network.nodes[tweet_id][unit] = retweet + quote
+                        else:
+                            network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
+                            network.nodes[tweet_id][unit] = retweet
                     else:
-                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
-                        self.network.nodes[tweet_id][unit] = retweet
-                else:
-                    self.network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
-                        text_complexity(complexity_unit=complexity_unit)
-                    self.network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
-                else:
-                    self.network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
-
-
+                        network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
+                            text_complexity(complexity_unit=complexity_unit)
+                        network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+                elif network_type == "reply":
+                    network.nodes[tweet.get_id()][unit] = tweet.text_complexity(complexity_unit=complexity_unit)
+        else:
+            print("The network type you indicated has not been created yet.")
 
         # for tweet_id, tweet in self.tweets.items():
         #     trf = tweet.is_retweeted()
@@ -3203,51 +3212,56 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
         #     elif trf is False:
         #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
 
-    def tweet_sentiment_layer(self, sentiment_engine="vader", quote_include=True):
+    def tweet_sentiment_layer(self, sentiment_engine="vader", network_type=None, quote_include=True):
         """
         This function add the number of words in each tweet as a property to every node.
         :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
          nodes of the caller network object. To get the network, use get_network() function.
         """
-        unit = "sentiment"
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                quote_status = tweet.get_retweeted().is_quoted()
-                if retweet_status:
-                    retweet_text = tweet.get_retweeted().get_text()
-                    if quote_status and quote_include:
-                        quote_text = tweet.get_retweeted().get_quote().get_text()
-                        sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine,
-                                                             input_text=retweet_text + " " + quote_text)
+        if network_type in self.network_type_list:
+            unit = "sentiment"
+            network = self.get_network(network_type=network_type)
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        quote_status = tweet.get_retweeted().is_quoted()
+                        retweet_text = tweet.get_retweeted().get_text()
+                        if quote_status and quote_include:
+                            quote_text = tweet.get_retweeted().get_quote().get_text()
+                            sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine,
+                                                                 input_text=retweet_text + " " + quote_text)
+                            for dimension, value in sentiment.items():
+                                network.nodes[tweet.get_retweeted().get_id()][dimension] = value
+                                network.nodes[tweet.get_id()][dimension] = value
+                        else:
+                            sentiment = tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)
+                            for dimension, value in sentiment.items():
+                                network.nodes[tweet.get_retweeted().get_id()][dimension] = value
+                                network.nodes[tweet.get_id()][dimension] = value
+                    else:
+                        sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
                         for dimension, value in sentiment.items():
-                            self.network.nodes[tweet.get_retweeted().get_id()][dimension] = value
-                            self.network.nodes[tweet.get_id()][dimension] = value
+                            network.nodes[tweet.get_id()][dimension] = value
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        quote_sentiment = tweet.get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)
+                        tweet_sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
+                        for dimension, value in quote_sentiment.items():
+                            network.nodes[tweet.get_quote().get_id()][dimension] = value
+                        for dimension, value in tweet_sentiment.items():
+                            network.nodes[tweet.get_id()][dimension] = value
                     else:
-                        sentiment = tweet.get_retweeted().sentiment_analysis(sentiment_engine=sentiment_engine)
-                        for dimension, value in sentiment.items():
-                            self.network.nodes[tweet.get_retweeted().get_id()][dimension] = value
-                            self.network.nodes[tweet.get_id()][dimension] = value
-                else:
-                    sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
-                    for dimension, value in sentiment.items():
-                        self.network.nodes[tweet.get_id()][dimension] = value
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    quote_sentiment = tweet.get_quote().sentiment_analysis(sentiment_engine=sentiment_engine)
-                    tweet_sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
-                    for dimension, value in quote_sentiment.items():
-                        self.network.nodes[tweet.get_quote().get_id()][dimension] = value
-                    for dimension, value in tweet_sentiment.items():
-                        self.network.nodes[tweet.get_id()][dimension] = value
-                else:
+                        tweet_sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
+                        for dimension, value in tweet_sentiment.items():
+                            network.nodes[tweet.get_id()][dimension] = value
+                elif network_type == "reply":
                     tweet_sentiment = tweet.sentiment_analysis(sentiment_engine=sentiment_engine)
                     for dimension, value in tweet_sentiment.items():
-                        self.network.nodes[tweet.get_id()][dimension] = value
-
-
-
+                        network.nodes[tweet.get_id()][dimension] = value
+        else:
+            print("The network type you indicated has not been created yet.")
 
         # for tweet_id, tweet in self.tweets.items():
         #     trf = tweet.is_retweeted()
@@ -3257,38 +3271,47 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
         #     elif trf is False:
         #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
 
-    def tweet_readability_layer(self, readability_metric="flesch_kincaid_grade", quote_include=True):
+    def tweet_readability_layer(self, readability_metric="flesch_kincaid_grade", network_type=None, quote_include=True):
         """
         This function add the number of words in each tweet as a property to every node.
         :return: This function does not return anything, instead it add the relevant attribute (tweet word count) to the
          nodes of the caller network object. To get the network, use get_network() function.
         """
-        unit = "readability"
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                quote_status = tweet.get_retweeted().is_quoted()
-                if retweet_status:
-                    retweet = tweet.get_retweeted().readability(readability_metric=readability_metric)
-                    if quote_status and quote_include:
-                        quote = tweet.get_retweeted().get_quote().readability(readability_metric=readability_metric)
-                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
-                        self.network.nodes[tweet.get_id()][unit] = retweet + quote
+
+        if network_type in self.network_type_list:
+            unit = "readability"
+            network = self.get_network(network_type=network_type)
+            for tweet_id, tweet in self.tweets.items():
+
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        quote_status = tweet.get_retweeted().is_quoted()
+                        retweet = tweet.get_retweeted().readability(readability_metric=readability_metric)
+                        if quote_status and quote_include:
+                            quote = tweet.get_retweeted().get_quote().readability(readability_metric=readability_metric)
+                            network.nodes[tweet.get_retweeted().get_id()][unit] = retweet + quote
+                            network.nodes[tweet.get_id()][unit] = retweet + quote
+                        else:
+                            network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
+                            network.nodes[tweet.get_id()][unit] = retweet
                     else:
-                        self.network.nodes[tweet.get_retweeted().get_id()][unit] = retweet
-                        self.network.nodes[tweet.get_id()][unit] = retweet
-                else:
-                    self.network.nodes[tweet.get_id()][unit] = tweet.readability(readability_metric=readability_metric)
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
+                        network.nodes[tweet.get_id()][unit] = tweet.readability(readability_metric=readability_metric)
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet.get_quote().get_id()][unit] = tweet.get_quote().\
+                            readability(readability_metric=readability_metric)
+                        network.nodes[tweet.get_id()][unit] = tweet.\
+                            readability(readability_metric=readability_metric)
+                    else:
+                        network.nodes[tweet.get_id()][unit] = tweet.\
+                            readability(readability_metric=readability_metric)
+                elif network_type == "reply":
+                    network.nodes[tweet.get_id()][unit] = tweet. \
                         readability(readability_metric=readability_metric)
-                    self.network.nodes[tweet.get_id()][unit] = tweet.\
-                        readability(readability_metric=readability_metric)
-                else:
-                    self.network.nodes[tweet.get_id()][unit] = tweet.\
-                        readability(readability_metric=readability_metric)
+        else:
+            print("The network type you indicated has not been created yet.")
 
 
 
@@ -3303,161 +3326,186 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
 
 class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
 
-    def user_followers_count_layer(self):
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                if retweet_status:
-                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
-                    self.network.nodes[tweet.get_retweeted().get_id()]["followers_count"] = \
-                        tweet.get_retweeted().get_twitter().get_followers_count()
-                else:
-                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
-                    self.network.nodes[tweet.get_quote().get_id()]["followers_count"] = \
-                        tweet.get_quote().get_twitter().get_followers_count()
-                else:
-                    self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
-            elif self.network_type == "reply":
-                self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
-                # reply_status = tweet.is_this_a_reply()
-                # if reply_status:
-                #     self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
-                #     if tweet.get_reply_to_id() in self.tweets.keys():
-                #         self.network.nodes[tweet.get_reply_to_id()]["followers_count"] = \
-                #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_followers_count()
-                #     else:
-                #         self.network.nodes[tweet.get_reply_to_id()]["followers_count"] = np.nan
-                # else:
-                #     self.network.nodes[tweet_id]["followers_count"] = tweet.get_twitter().get_followers_count()
+    def user_followers_count_layer(self, network_type=None):
+        if network_type in self.network_type_list:
+            unit = "followers_count"
+            network = self.get_network(network_type=network_type)
 
-    def user_friends_count_layer(self):
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                if retweet_status:
-                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
-                    self.network.nodes[tweet.get_retweeted().get_id()]["friends_count"] = \
-                        tweet.get_retweeted().get_twitter().get_friends_count()
-                else:
-                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
-                    self.network.nodes[tweet.get_quote().get_id()]["friends_count"] = \
-                        tweet.get_quote().get_twitter().get_friends_count()
-                else:
-                    self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
-            elif self.network_type == "reply":
-                self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
-                # reply_status = tweet.is_this_a_reply()
-                # if reply_status:
-                #     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
-                #     if tweet.get_reply_to_id() in self.tweets.keys():
-                #         self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = \
-                #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_friends_count()
-                #     else:
-                #         self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = np.nan
-                # else:
-                #     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
+                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
+                            tweet.get_retweeted().get_twitter().get_followers_count()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
+                        network.nodes[tweet.get_quote().get_id()][unit] = \
+                            tweet.get_quote().get_twitter().get_followers_count()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
+                elif network_type == "reply":
+                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
+        else:
+            print("The network type you indicated has not been created yet.")
 
-    def user_role_count_layer(self):
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                if retweet_status:
-                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
-                    self.network.nodes[tweet.get_retweeted().get_id()]["user_role"] = \
-                        tweet.get_retweeted().get_twitter().get_user_role()
-                else:
-                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
-                    self.network.nodes[tweet.get_quote().get_id()]["user_role"] = \
-                        tweet.get_quote().get_twitter().get_user_role()
-                else:
-                    self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
-            elif self.network_type == "reply":
-                self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
-                # reply_status = tweet.is_this_a_reply()
-                # if reply_status:
-                #     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
-                #     if tweet.get_reply_to_id() in self.tweets.keys():
-                #         self.network.nodes[tweet.get_reply_to_id()]["user_role"] = \
-                #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_user_role()
-                #     else:
-                #         self.network.nodes[tweet.get_reply_to_id()]["user_role"] = np.nan
-                # else:
-                #     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+    def user_friends_count_layer(self, network_type=None):
+        if network_type in self.network_type_list:
+            unit = "friends_count"
+            network = self.get_network(network_type=network_type)
 
-    def users_with_verification_layer(self):
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                if retweet_status:
-                    self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
-                    self.network.nodes[tweet.get_retweeted().get_id()]["verified"] = \
-                        tweet.get_retweeted().get_twitter().get_user_verification_status()
-                else:
-                    self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
-                    self.network.nodes[tweet.get_quote().get_id()]["verified"] = \
-                        tweet.get_quote().get_twitter().get_user_verification_status()
-                else:
-                    self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
-            elif self.network_type == "reply":
-                self.network.nodes[tweet_id]["verified"] = tweet.get_twitter().get_user_verification_status()
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
+                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
+                            tweet.get_retweeted().get_twitter().get_friends_count()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
+                        network.nodes[tweet.get_quote().get_id()][unit] = \
+                            tweet.get_quote().get_twitter().get_friends_count()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
+                elif network_type == "reply":
+                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
+                    # reply_status = tweet.is_this_a_reply()
+                    # if reply_status:
+                    #     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+                    #     if tweet.get_reply_to_id() in self.tweets.keys():
+                    #         self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = \
+                    #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_friends_count()
+                    #     else:
+                    #         self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = np.nan
+                    # else:
+                    #     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+        else:
+            print("The network type you indicated has not been created yet.")
 
-    def users_status_count_layer(self):
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                if retweet_status:
-                    self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
-                    self.network.nodes[tweet.get_retweeted().get_id()]["status_count"] = \
-                        tweet.get_retweeted().get_twitter().get_statusses_count()
-                else:
-                    self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
-                    self.network.nodes[tweet.get_quote().get_id()]["status_count"] = \
-                        tweet.get_quote().get_twitter().get_statusses_count()
-                else:
-                    self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
-            elif self.network_type == "reply":
-                self.network.nodes[tweet_id]["status_count"] = tweet.get_twitter().get_statusses_count()
+    def user_role_count_layer(self, network_type=None):
+        if network_type in self.network_type_list:
+            unit = "user_role"
+            network = self.get_network(network_type=network_type)
 
-    def users_total_likes_count_layer(self):
-        for tweet_id, tweet in self.tweets.items():
-            if self.network_type == "retweet":
-                retweet_status = tweet.is_retweeted()
-                if retweet_status:
-                    self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
-                    self.network.nodes[tweet.get_retweeted().get_id()]["total_likes_count"] = \
-                        tweet.get_retweeted().get_twitter().get_user_total_likes_count()
-                else:
-                    self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
-            elif self.network_type == "quote":
-                quote_status = tweet.is_quoted()
-                if quote_status:
-                    self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
-                    self.network.nodes[tweet.get_quote().get_id()]["total_likes_count"] = \
-                        tweet.get_quote().get_twitter().get_user_total_likes_count()
-                else:
-                    self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
-            elif self.network_type == "reply":
-                self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
+                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
+                            tweet.get_retweeted().get_twitter().get_user_role()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
+                        network.nodes[tweet.get_quote().get_id()][unit] = \
+                            tweet.get_quote().get_twitter().get_user_role()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
+                elif network_type == "reply":
+                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
+                    # reply_status = tweet.is_this_a_reply()
+                    # if reply_status:
+                    #     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+                    #     if tweet.get_reply_to_id() in self.tweets.keys():
+                    #         self.network.nodes[tweet.get_reply_to_id()]["user_role"] = \
+                    #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_user_role()
+                    #     else:
+                    #         self.network.nodes[tweet.get_reply_to_id()]["user_role"] = np.nan
+                    # else:
+                    #     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+        else:
+            print("The network type you indicated has not been created yet.")
+
+    def users_with_verification_layer(self, network_type=None):
+        if network_type in self.network_type_list:
+            unit = "verified"
+            network = self.get_network(network_type=network_type)
+
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
+                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
+                            tweet.get_retweeted().get_twitter().get_user_verification_status()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
+                        network.nodes[tweet.get_quote().get_id()][unit] = \
+                            tweet.get_quote().get_twitter().get_user_verification_status()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
+                elif network_type == "reply":
+                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
+        else:
+            print("The network type you indicated has not been created yet.")
+
+    def users_status_count_layer(self, network_type=None):
+        if network_type in self.network_type_list:
+            unit = "status_count"
+            network = self.get_network(network_type=network_type)
+
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
+                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
+                            tweet.get_retweeted().get_twitter().get_statusses_count()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
+                        network.nodes[tweet.get_quote().get_id()][unit] = \
+                            tweet.get_quote().get_twitter().get_statusses_count()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
+                elif network_type == "reply":
+                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
+        else:
+            print("The network type you indicated has not been created yet.")
+
+    def users_total_likes_count_layer(self, network_type=None):
+        if network_type in self.network_type_list:
+            unit = "total_likes_count"
+            network = self.get_network(network_type=network_type)
+            for tweet_id, tweet in self.tweets.items():
+                if network_type == "retweet":
+                    retweet_status = tweet.is_retweeted()
+                    if retweet_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
+                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
+                            tweet.get_retweeted().get_twitter().get_user_total_likes_count()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
+                elif network_type == "quote":
+                    quote_status = tweet.is_quoted()
+                    if quote_status:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
+                        network.nodes[tweet.get_quote().get_id()][unit] = \
+                            tweet.get_quote().get_twitter().get_user_total_likes_count()
+                    else:
+                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
+                elif network_type == "reply":
+                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
+        else:
+            print("The network type you indicated has not been created yet.")
 
 
 
