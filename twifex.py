@@ -2551,11 +2551,15 @@ class Network:
         """
         # self.network = nx.DiGraph()
         self.tweets = tweets
-        self.network = nx.DiGraph()
-        self.network_type = None
+        # self.network = nx.DiGraph()
+        self.retweet_network = nx.DiGraph()
+        self.quote_network = nx.DiGraph()
+        self.reply_network = nx.DiGraph()
+        self.network_type_list = []
 
     def network_building(self, network_type='retweet'):
-        self.network_type = network_type
+        # self.network_type = network_type
+        self.network_type_list.append(network_type)
         network = nx.DiGraph()
         for tweet_id, tweet in self.tweets.items():
             if network_type == "retweet":
@@ -2576,7 +2580,14 @@ class Network:
                     network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
                 elif reply_condition is False:
                     network.add_node(tweet.get_id())
-        self.network = network
+        # self.network = network
+
+        if network_type == "retweet":
+            self.retweet_network = network
+        elif network_type == "quote":
+            self.quote_network = network
+        elif network_type == "reply":
+            self.reply_network = network
 
     # def make_retweet_network(self):
     #     self.network = self.network_building(network_type='retweet')
@@ -2587,24 +2598,36 @@ class Network:
     # def make_reply_network(self):
     #     self.network = self.network_building(network_type='reply')
 
-    def get_network(self):
-        return self.network## tell in
+    def get_network(self, network_type=None):
+        if network_type == "retweet" and "retweet" in self.network_type_list:
+            return self.retweet_network
+        elif network_type == "quote" and "quote" in self.network_type_list:
+            return self.quote_network
+        elif network_type == "reply" and "reply" in self.network_type_list:
+            return self.reply_network
 
-    def download_network(self, download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
+        # return self.network## tell in
 
-        if download_format == "GEXF":
-            nx.write_gexf(self.get_network(), path=path, encoding=encoding, version='1.2draft')
-        elif download_format == "GML":
-            nx.write_gml(self.get_network(), path=path)
+    def download_network(self, network_type=None, download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
+        if network_type in self.network_type_list:
+            if download_format == "GEXF":
+                nx.write_gexf(self.get_network(network_type=network_type), path=path, encoding=encoding, version='1.2draft')
+            elif download_format == "GML":
+                nx.write_gml(self.get_network(network_type=network_type), path=path)
+        else:
+            print("The network you have requested has not been created yet.")
 
-    def components_number(self):
+    def components_number(self, network_type=None):
         """
         This function calculates the number of connected components in the desired network.
         :return: an integer that shows the number of connected components.
         """
-        return nx.number_connected_components(self.network.to_undirected())
+        if network_type in self.network_type_list:
+            return nx.number_connected_components(self.get_network(network_type=network_type).to_undirected())
+        else:
+            print("The network type you indicated has not been created yet.")
 
-    def centrality_measures(self, metric="degree"):
+    def centrality_measures(self, network_type=None, metric="degree"):
         """
         This function measures network centrality based on the chosen metric.
         :param metric: metric can be "degree", "closeness", "betweenness", "eigenvector", "katz", and "pagerank". Please
@@ -2617,38 +2640,43 @@ class Network:
                            "pagerank"]), "The metric has to be" \
                                          " degree, closeness, betweenness, " \
                                          "eigenvector, katz, or pagerank."
-        if metric == "degree":
-            degree_centrality = nx.centrality.degree_centrality(self.network)
-            for node_id in degree_centrality:
-                self.network.nodes[node_id]["degree_centrality"] = degree_centrality[node_id]
-            in_degree_centrality = nx.centrality.in_degree_centrality(self.network)
-            for node_id in in_degree_centrality:
-                self.network.nodes[node_id]["in_degree_centrality"] = in_degree_centrality[node_id]
-            out_degree_centrality = nx.centrality.out_degree_centrality(self.network)
-            for node_id in out_degree_centrality:
-                self.network.nodes[node_id]["out_degree_centrality"] = out_degree_centrality[node_id]
-        elif metric == "closeness":
-            closeness_centrality = nx.centrality.closeness_centrality(self.network)
-            for node_id in closeness_centrality:
-                self.network.nodes[node_id]["closeness_centrality"] = closeness_centrality[node_id]
-        elif metric == "betweenness":
-            betweenness_centrality = nx.centrality.betweenness_centrality(self.network)
-            for node_id in betweenness_centrality:
-                self.network.nodes[node_id]["betweenness_centrality"] = betweenness_centrality[node_id]
-        elif metric == "eigenvector":
-            eigenvector_centrality = nx.centrality.eigenvector_centrality_numpy(self.network)
-            for node_id in eigenvector_centrality:
-                self.network.nodes[node_id]["eigenvector_centrality"] = eigenvector_centrality[node_id]
-        elif metric == "katz":
-            katz_centrality = nx.centrality.katz_centrality_numpy(self.network)
-            for node_id in katz_centrality:
-                self.network.nodes[node_id]["katz_centrality"] = katz_centrality[node_id]
-        elif metric == "pagerank":
-            pagerank_centrality = nx.pagerank_numpy(self.network)
-            for node_id in pagerank_centrality:
-                self.network.nodes[node_id]["pagerank_centrality"] = pagerank_centrality[node_id]
 
-    def community_detection(self, return_type="network"):
+        if network_type in self.network_type_list:
+            if metric == "degree":
+                network = self.get_network(network_type=network_type)
+                degree_centrality = nx.centrality.degree_centrality(network)
+                for node_id in degree_centrality:
+                    network.nodes[node_id]["degree_centrality"] = degree_centrality[node_id]
+                in_degree_centrality = nx.centrality.in_degree_centrality(network)
+                for node_id in in_degree_centrality:
+                    network.nodes[node_id]["in_degree_centrality"] = in_degree_centrality[node_id]
+                out_degree_centrality = nx.centrality.out_degree_centrality(network)
+                for node_id in out_degree_centrality:
+                    network.nodes[node_id]["out_degree_centrality"] = out_degree_centrality[node_id]
+            elif metric == "closeness":
+                closeness_centrality = nx.centrality.closeness_centrality(network)
+                for node_id in closeness_centrality:
+                    network.nodes[node_id]["closeness_centrality"] = closeness_centrality[node_id]
+            elif metric == "betweenness":
+                betweenness_centrality = nx.centrality.betweenness_centrality(network)
+                for node_id in betweenness_centrality:
+                    network.nodes[node_id]["betweenness_centrality"] = betweenness_centrality[node_id]
+            elif metric == "eigenvector":
+                eigenvector_centrality = nx.centrality.eigenvector_centrality_numpy(network)
+                for node_id in eigenvector_centrality:
+                    network.nodes[node_id]["eigenvector_centrality"] = eigenvector_centrality[node_id]
+            elif metric == "katz":
+                katz_centrality = nx.centrality.katz_centrality_numpy(network)
+                for node_id in katz_centrality:
+                    network.nodes[node_id]["katz_centrality"] = katz_centrality[node_id]
+            elif metric == "pagerank":
+                pagerank_centrality = nx.pagerank_numpy(network)
+                for node_id in pagerank_centrality:
+                    network.nodes[node_id]["pagerank_centrality"] = pagerank_centrality[node_id]
+        else:
+            print("The network type you indicated has not been created yet.")
+
+    def community_detection(self, network_type=None, return_type="network"):
         """
         This function identified communities in the network using Louvain algorithm. PLease note that, it uses the undirected
         version of the network.
@@ -2657,17 +2685,21 @@ class Network:
         key-value pairs corresponding to community_id and all the nodes belonging to that community.
         :return: Depending on the value of return_type parameter the output of this function varies.
         """
-        partition = community.best_partition(self.network.to_undirected())
-        if return_type == "network":
-            for node_id in partition:
-                self.network.nodes[node_id]["community"] = partition[node_id]
-        elif return_type == "node-community":
-            return partition
-        elif return_type == "community-nodes":
-            communities = {}
-            for k, v in partition.items():
-                communities[v] = communities.get(v, []) + [k]
-            return communities
+        network = self.get_network(network_type=network_type)
+        if network_type in self.network_type_list:
+            partition = community.best_partition(network.to_undirected())
+            if return_type == "network":
+                for node_id in partition:
+                    network.nodes[node_id]["community"] = partition[node_id]
+            elif return_type == "node-community":
+                return partition
+            elif return_type == "community-nodes":
+                communities = {}
+                for k, v in partition.items():
+                    communities[v] = communities.get(v, []) + [k]
+                return communities
+        else:
+            print("The network type you indicated has not been created yet.")
 
     # def word_count_layer(self):
     #     pass
@@ -3427,7 +3459,7 @@ class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
             elif self.network_type == "reply":
                 self.network.nodes[tweet_id]["total_likes_count"] = tweet.get_twitter().get_user_total_likes_count()
 
-                
+
 
 
 ############################################# network features #############################################
