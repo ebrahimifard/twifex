@@ -52,38 +52,23 @@ for file in tqdm([i for i in os.listdir(path3) if os.path.isfile(path3+i)]):
     else:
         pass
 ###################################################################################
-_tweets = new_tweets
-
-
-f1, f2, f3, f4 = [], [], [], []
-for tweet in tqdm(_tweets):
-    if tweet.is_retweeted():
-        if tweet.get_retweeted().is_quoted():
-            f4.append(tweet)
-        else:
-            f2.append(tweet)
-    elif tweet.is_quoted():
-        f3.append(tweet)
-    else:
-        f1.append(tweet)
-
+_tweets = timeline_tweets
 
 p = twifex.collective_tweets(_tweets).topology_based_features().time_independent_features().time_independent_location_independent_network_features().tweet_features()
-p.network_building(network_type="retweet")
-print("hi1")
-try:
-    p.tweet_length_layer()
-except:
-    print("exception")
-print("hi2")
-
-
-
 q = twifex.collective_tweets(_tweets).topology_based_features().time_independent_features().time_independent_location_independent_network_features().user_features()
-q.network_building(network_type="reply")
-q.user_followers_count_layer()
-q.user_friends_count_layer()
-q.user_role_count_layer()
-q.download_network(path="./net5.gexf")
 
-print("hi3")
+p.network_building(network_type="retweet")
+p.network_building(network_type="quote")
+p.network_building(network_type="reply")
+p.network_building(network_type="quote-reply")
+p.network_building(network_type="retweet-reply")
+p.network_building(network_type="retweet-quote")
+p.network_building(network_type="retweet-quote-reply")
+
+p.download_network(network_type="retweet", path="./n1.gexf")
+p.download_network(network_type="quote", path="./n2.gexf")
+p.download_network(network_type="reply", path="./n3.gexf")
+p.download_network(network_type="quote-reply", path="./n4.gexf")
+p.download_network(network_type="retweet-reply", path="./n5.gexf")
+p.download_network(network_type="retweet-quote", path="./n6.gexf")
+p.download_network(network_type="retweet-quote-reply", path="./n7.gexf")

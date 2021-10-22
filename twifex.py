@@ -217,14 +217,19 @@ class Twifex:
     def single_tweet(self, path):
         """
         :param path: The path to a tweet json
-        :return: A singleTweet object for the tweet json
+        :return: A SingleTweet object for the tweet json
         """
-        return singleTweet(path, self.params)
+
+        # s = SingleTweet(param=self.params)
+        # s.tweet_loader(tweet_path=path)
+        # print("hi")
+
+        return SingleTweet(param=self.params).tweet_loader(tweet_path=path)
 
     def collective_tweets(self, tweets):
         """
-        :param tweets: a list of singleTweet objects
-        :return: a collectiveTweet object which comprises the list of singleTweet objects
+        :param tweets: a list of SingleTweet objects
+        :return: a collectiveTweet object which comprises the list of SingleTweet objects
         """
         return CollectiveTweets({tweet.get_id(): tweet for tweet in tweets})
 
@@ -232,19 +237,19 @@ class Twifex:
 class CollectiveTweets:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def mass_based_features(self):
         """
-        :return: a MassBasedFeatures object which comprises the singleTweet objects
+        :return: a MassBasedFeatures object which comprises the SingleTweet objects
         """
         return MassBasedFeatures(self.tweets)
 
     def topology_based_features(self):
         """
-        :return: a topologyBasedFeatures object which comprises the singleTweet objects
+        :return: a topologyBasedFeatures object which comprises the SingleTweet objects
         """
         return TopologyBasedFeatures(self.tweets)  # Shouldn't this be topologyBasedFeatures?
 
@@ -258,19 +263,19 @@ class CollectiveTweets:
 class MassBasedFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def time_dependent_features(self):
         """
-        :return: an object of massTweetFeatures which comprises the singleTweet objects
+        :return: an object of massTweetFeatures which comprises the SingleTweet objects
         """
         return TimeDependentMassFeatures(self.tweets)
 
     def time_independent_features(self):
         """
-        :return: an object of massUserFeatures which comprises the singleTweet objects
+        :return: an object of massUserFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentMassFeatures(self.tweets)
 
@@ -278,7 +283,7 @@ class MassBasedFeatures:
 class TimeIndependentMassFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
@@ -292,7 +297,7 @@ class TimeIndependentMassFeatures:
 class TimeDependentMassFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
@@ -306,19 +311,19 @@ class TimeDependentMassFeatures:
 class TimeDependentLocationDependentMassFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def tweet_features(self):
         """
-        :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentTweetMassFeatures which comprises the SingleTweet objects
         """
         return TimeDependentLocationDependentTweetMassFeatures(self.tweets)
 
     def user_features(self):
         """
-        :return: an object of timeDependentUserMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentUserMassFeatures which comprises the SingleTweet objects
         """
         return TimeDependentLocationDependentUserMassFeatures(self.tweets)
 
@@ -326,19 +331,19 @@ class TimeDependentLocationDependentMassFeatures:
 class TimeDependentLocationIndependentMassFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def tweet_features(self):
         """
-        :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentTweetMassFeatures which comprises the SingleTweet objects
         """
         return TimeDependentLocationIndependentTweetMassFeatures(self.tweets)
 
     def user_features(self):
         """
-        :return: an object of timeDependentUserMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentUserMassFeatures which comprises the SingleTweet objects
         """
         return TimeDependentLocationIndependentUserMassFeatures(self.tweets)
 
@@ -346,19 +351,19 @@ class TimeDependentLocationIndependentMassFeatures:
 class TimeIndependentLocationDependentMassFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def tweet_features(self):
         """
-        :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentTweetMassFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentLocationDependentTweetMassFeatures(self.tweets)
 
     def user_features(self):
         """
-        :return: an object of timeDependentUserMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentUserMassFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentLocationDependentUserMassFeatures(self.tweets)
 
@@ -366,19 +371,19 @@ class TimeIndependentLocationDependentMassFeatures:
 class TimeIndependentLocationIndependentMassFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def tweet_features(self):
         """
-        :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentTweetMassFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentLocationIndependentTweetMassFeatures(self.tweets)
 
     def user_features(self):
         """
-        :return: an object of timeDependentUserMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentUserMassFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentLocationIndependentUserMassFeatures(self.tweets)
 
@@ -386,7 +391,7 @@ class TimeIndependentLocationIndependentMassFeatures:
 class TemporalFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
@@ -494,14 +499,14 @@ class TemporalFeatures:
 class PlaceFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def geotagged_tweets(self):
         """
         This function filters out all tweets without geo location.
-        :return: a dictionary that maps every geotagged tweet_id to its corresponding singleTweet object
+        :return: a dictionary that maps every geotagged tweet_id to its corresponding SingleTweet object
         """
         return {p: q for p, q in self.tweets.items() if q.get_place() != None}
 
@@ -2418,19 +2423,19 @@ class TopologyBasedFeatures:
     def __init__(self, tweets):
         """
         This is a constructor for tweetNetwork class
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
         """
         self.tweets = tweets
 
     def time_dependent_features(self):
         """
-        :return: an object of networkTweetFeatures which comprises the singleTweet objects
+        :return: an object of networkTweetFeatures which comprises the SingleTweet objects
         """
         return TimeDependentNetworkFeatures(self.tweets)
 
     def time_independent_features(self):
         """
-        :return: an object of networkUserFeatures which comprises the singleTweet objects
+        :return: an object of networkUserFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentNetworkFeatures(self.tweets)
 
@@ -2438,7 +2443,7 @@ class TopologyBasedFeatures:
 class TimeDependentNetworkFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
@@ -2452,7 +2457,7 @@ class TimeDependentNetworkFeatures:
 class TimeIndependentNetworkFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
@@ -2466,19 +2471,19 @@ class TimeIndependentNetworkFeatures:
 class TimeDependentLocationDependentNetworkFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def tweet_features(self):
         """
-        :return: an object of timeDependentTweetNetworkFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentTweetNetworkFeatures which comprises the SingleTweet objects
         """
         return TimeDependentLocationDependentTweetNetworkFeatures(self.tweets)
 
     def user_features(self):
         """
-        :return: an object of timeDependentUserNetworkFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentUserNetworkFeatures which comprises the SingleTweet objects
         """
         return TimeDependentLocationDependentUserNetworkFeatures(self.tweets)
 
@@ -2486,19 +2491,19 @@ class TimeDependentLocationDependentNetworkFeatures:
 class TimeDependentLocationIndependentNetworkFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def tweet_features(self):
         """
-        :return: an object of timeDependentTweetMassFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentTweetMassFeatures which comprises the SingleTweet objects
         """
         return TimeDependentLocationIndependentTweetNetworkFeatures(self.tweets)
 
     def user_features(self):
         """
-        :return: an object of timeDependentUserNetworkFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentUserNetworkFeatures which comprises the SingleTweet objects
         """
         return TimeDependentLocationIndependentUserNetworkFeatures(self.tweets)
 
@@ -2506,19 +2511,19 @@ class TimeDependentLocationIndependentNetworkFeatures:
 class TimeIndependentLocationDependentNetworkFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def tweet_features(self):
         """
-        :return: an object of timeDependentTweetNetworkFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentTweetNetworkFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentLocationDependentTweetNetworkFeatures(self.tweets)
 
     def user_features(self):
         """
-        :return: an object of timeDependentUserNetworkFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentUserNetworkFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentLocationDependentUserNetworkFeatures(self.tweets)
 
@@ -2526,19 +2531,19 @@ class TimeIndependentLocationDependentNetworkFeatures:
 class TimeIndependentLocationIndependentNetworkFeatures:
     def __init__(self, tweets):
         """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
         """
         self.tweets = tweets
 
     def tweet_features(self):
         """
-        :return: an object of timeDependentTweetNetworkFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentTweetNetworkFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentLocationIndependentTweetNetworkFeatures(self.tweets)
 
     def user_features(self):
         """
-        :return: an object of timeDependentUserNetworkFeatures which comprises the singleTweet objects
+        :return: an object of timeDependentUserNetworkFeatures which comprises the SingleTweet objects
         """
         return TimeIndependentLocationIndependentUserNetworkFeatures(self.tweets)
 
@@ -2547,7 +2552,7 @@ class Network:
     def __init__(self, tweets):
         """
         This is a constructor of a network class.
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
         """
         # self.network = nx.DiGraph()
         self.tweets = tweets
@@ -2555,6 +2560,10 @@ class Network:
         self.retweet_network = nx.DiGraph()
         self.quote_network = nx.DiGraph()
         self.reply_network = nx.DiGraph()
+        self.quote_reply_network = nx.DiGraph()
+        self.retweet_reply_network = nx.DiGraph()
+        self.retweet_quote_network = nx.DiGraph()
+        self.retweet_quote_reply_network = nx.DiGraph()
         self.network_type_list = []
 
     def network_building(self, network_type='retweet'):
@@ -2562,24 +2571,160 @@ class Network:
         self.network_type_list.append(network_type)
         network = nx.DiGraph()
         for tweet_id, tweet in self.tweets.items():
+            retweet_condition = tweet.is_retweeted()
+            quote_condition = tweet.is_quote_available()
+            reply_condition = tweet.is_this_a_reply()
+
             if network_type == "retweet":
-                retweet_condition = tweet.is_retweeted()
-                if retweet_condition is True:
+                # retweet_condition = tweet.is_retweeted()
+                if retweet_condition:
                     network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                elif retweet_condition is False:
+                else:
                     network.add_node(tweet.get_id())
+
             elif network_type == "quote":
-                quote_condition = tweet.is_quoted()
-                if quote_condition is True:
+                # quote_condition = tweet.is_quoted()
+                if quote_condition:
                     network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                elif quote_condition is False:
+                    inner_quote_condition = tweet.get_quote().is_quoted()
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
+                else:
                     network.add_node(tweet.get_id())
+
             elif network_type == "reply":
-                reply_condition = tweet.is_this_a_reply()
-                if reply_condition is True:
+                # reply_condition = tweet.is_this_a_reply()
+                if reply_condition:
                     network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                elif reply_condition is False:
+                else:
                     network.add_node(tweet.get_id())
+
+            elif network_type == "quote-reply":
+                # quote_condition = tweet.is_quoted()
+                # reply_condition = tweet.is_this_a_reply()
+                if quote_condition is True and reply_condition is True:
+                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                    inner_reply_condition = tweet.get_quote().is_this_a_reply()
+                    inner_quote_condition = tweet.get_quote().is_quoted()
+                    if inner_reply_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
+                elif quote_condition is True and reply_condition is False:
+                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                    inner_reply_condition = tweet.get_quote().is_this_a_reply()
+                    inner_quote_condition = tweet.get_quote().is_quoted()
+                    if inner_reply_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
+                elif quote_condition is False and reply_condition is True:
+                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                elif quote_condition is False and reply_condition is False:
+                    network.add_node(tweet.get_id())
+
+            elif network_type == "retweet-reply":
+                # retweet_condition = tweet.is_retweeted()
+                # reply_condition = tweet.is_this_a_reply()
+                if retweet_condition is True and reply_condition is True: #######This condition seems impossible to happen
+                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                    inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+                    if inner_reply_condition:
+                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(), kind="reply")
+                elif retweet_condition is True and reply_condition is False:
+                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                    inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+                    if inner_reply_condition:
+                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(), kind="reply")
+                elif retweet_condition is False and reply_condition is True:
+                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                elif retweet_condition is False and reply_condition is False:
+                    network.add_node(tweet.get_id())
+
+            elif network_type == "retweet-quote":
+                # retweet_condition = tweet.is_retweeted()
+                # quote_condition = tweet.is_quoted()
+
+
+                ####### if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
+                if retweet_condition is True and quote_condition is False:
+                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                    inner_quote_condition = tweet.get_retweeted().is_quoted()
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind="quote")
+                elif retweet_condition is False and quote_condition is True:
+                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                    inner_quote_condition = tweet.get_quote().is_quoted()
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
+                elif retweet_condition is False and quote_condition is False:
+                    network.add_node(tweet.get_id())
+
+            elif network_type == "retweet-quote-reply":
+                # retweet_condition = tweet.is_retweeted()
+                # quote_condition = tweet.is_quoted()
+                # reply_condition = tweet.is_this_a_reply()
+
+                # The first two conditions never occur
+                # if retweet_condition is True and quote_condition is True and reply_condition is True:
+                # elif retweet_condition is True and quote_condition is True and reply_condition is False:
+                if retweet_condition is True and quote_condition is False and reply_condition is True: #######This condition seems impossible to happen
+                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                    inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+                    inner_quote_condition = tweet.get_retweeted().is_quoted()
+                    if inner_reply_condition:
+                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(), kind="reply")
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind="quote")
+                elif retweet_condition is True and quote_condition is False and reply_condition is False:
+                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                    inner_quote_condition = tweet.get_retweeted().is_quoted()
+                    inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind="quote")
+                    if inner_reply_condition:
+                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(), kind="reply")
+                elif retweet_condition is False and quote_condition is True and reply_condition is True:
+                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                    inner_reply_condition = tweet.get_quote().is_this_a_reply()
+                    inner_quote_condition = tweet.get_quote().is_quoted()
+                    if inner_reply_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
+                elif retweet_condition is False and quote_condition is True and reply_condition is False:
+                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                    inner_reply_condition = tweet.get_quote().is_this_a_reply()
+                    inner_quote_condition = tweet.get_quote().is_quoted()
+                    if inner_reply_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
+                    if inner_quote_condition:
+                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
+                elif retweet_condition is False and quote_condition is False and reply_condition is True:
+                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                elif retweet_condition is False and quote_condition is False and reply_condition is False:
+                    network.add_node(tweet.get_id())
+
+
+                # # if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
+                # if retweet_condition is True and quote_condition is False:
+                #     network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                #     inner_quote_condition = tweet.get_retweeted().is_quoted()
+                #     if inner_quote_condition:
+                #         network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind="quote")
+                # elif retweet_condition is False and quote_condition is True:
+                #     network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                # elif retweet_condition is False and quote_condition is False:
+                #     network.add_node(tweet.get_id())
+
+
+            # elif network_type == "retweet-reply":
+            # elif network_type == "retweet_quote":
+            # elif network_type == "retweet-quote-reply":
         # self.network = network
 
         if network_type == "retweet":
@@ -2588,6 +2733,14 @@ class Network:
             self.quote_network = network
         elif network_type == "reply":
             self.reply_network = network
+        elif network_type == "quote-reply":
+            self.quote_reply_network = network
+        elif network_type == "retweet-reply":
+            self.retweet_reply_network = network
+        elif network_type == "retweet-quote":
+            self.retweet_quote_network = network
+        elif network_type == "retweet-quote-reply":
+            self.retweet_quote_reply_network = network
 
     # def make_retweet_network(self):
     #     self.network = self.network_building(network_type='retweet')
@@ -2605,6 +2758,14 @@ class Network:
             return self.quote_network
         elif network_type == "reply" and "reply" in self.network_type_list:
             return self.reply_network
+        elif network_type == "quote-reply" and "quote-reply" in self.network_type_list:
+            return self.quote_reply_network
+        elif network_type == "retweet-reply" and "retweet-reply" in self.network_type_list:
+            return self.retweet_reply_network
+        elif network_type == "retweet-quote" and "retweet-quote" in self.network_type_list:
+            return self.retweet_quote_network
+        elif network_type == "retweet-quote-reply" and "retweet-quote-reply" in self.network_type_list:
+            return self.retweet_quote_reply_network
 
         # return self.network## tell in
 
@@ -2642,8 +2803,9 @@ class Network:
                                          "eigenvector, katz, or pagerank."
 
         if network_type in self.network_type_list:
+            network = self.get_network(network_type=network_type)
             if metric == "degree":
-                network = self.get_network(network_type=network_type)
+                # network = self.get_network(network_type=network_type)
                 degree_centrality = nx.centrality.degree_centrality(network)
                 for node_id in degree_centrality:
                     network.nodes[node_id]["degree_centrality"] = degree_centrality[node_id]
@@ -2724,8 +2886,6 @@ class Network:
     #
     # def readability_layer(self):
     #     pass
-
-
 # class RetweetNetwork(Network):  # node should change to nodes in order to call a particular node
 #     def building_network(self):
 #         """
@@ -3081,7 +3241,7 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
     # def __init__(self, tweets, retweet_network=True, quote_network=True, reply_network=True):
     #     """
     #     This is a constructor for TimeIndependentLocationIndependentTweetNetworkFeatures class
-    #     :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
+    #     :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
     #     :param retweet_network: a boolean parameter that indicates whether the retweet network is created or not.
     #     :param quote_network: a boolean parameter that indicates whether the quote network is created or not.
     #     :param reply_network: a boolean parameter that indicates whether the reply network is created or not.
@@ -3323,7 +3483,6 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
         #     elif trf is False:
         #         self.network.nodes[tweet.get_id()]["word_count"] = tweet.text_length()
 
-
 class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
 
     def user_followers_count_layer(self, network_type=None):
@@ -3508,72 +3667,70 @@ class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
             print("The network type you indicated has not been created yet.")
 
 
-
-
 ############################################# network features #############################################
 
 #### => 8 classes based on 4 above classes
 
 
-class TweetTopologyFeatures:
-    def __init__(self, tweets):
-        """
-        This is a constructor for tweetNetwork class
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
-        """
-        self.tweets = tweets
-
-    def retweet_network(self):
-        """
-        This function creates the network of retweets from the dataset.
-        :return: a retweetNetwork object.
-        """
-        return RetweetNetwork(self.tweets)
-
-    def quote_network(self):
-        """
-        This function creates the network of quotes from the dataset.
-        :return: a quoteNetwork object.
-        """
-        return QuoteNetwork(self.tweets)
-
-    def reply_network(self):  # not yet deployed
-        """
-        This function creates the network of replies from the dataset.
-        :return: a replyNetwork object.
-        """
-        return ReplyNetwork(self.tweets)
-    # def retweet_quote_network(self):
-    #     """
-    #     This function creates the network of retweet-quote from the dataset.
-    #     :return: a retweetQuoteNetwork object.
-    #     """
-    #     return retweetQuoteNetwork(self.tweets)
-    # def retweet_reply_network(self):  # Not yet deplyed
-    #     """
-    #     This function creates the network of retweet-reply from the dataset.
-    #     :return: a retweetReplyNetwork object.
-    #     """
-    #     return retweetReplyNetwork(self.tweets)
-    # def quote_reply_network(self):  # not yet deployed
-    #     """
-    #     This function creates the network of quote-reply from the dataset.
-    #     :return: a quoteReplyNetwork object.
-    #     """
-    #     return quoteReplyNetwork(self.tweets)
-    # def retweet_quote_reply_network(self):  # not yet deployed
-    #     """
-    #     This function creates the network of retweet_quote_reply from the dataset.
-    #     :return: a retweetQuoteReplyNetwork object.
-    #     """
-    #     return retweetQuoteReplyNetwork(self.tweets)
+# class TweetTopologyFeatures:
+#     def __init__(self, tweets):
+#         """
+#         This is a constructor for tweetNetwork class
+#         :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
+#         """
+#         self.tweets = tweets
+#
+#     def retweet_network(self):
+#         """
+#         This function creates the network of retweets from the dataset.
+#         :return: a retweetNetwork object.
+#         """
+#         return RetweetNetwork(self.tweets)
+#
+#     def quote_network(self):
+#         """
+#         This function creates the network of quotes from the dataset.
+#         :return: a quoteNetwork object.
+#         """
+#         return QuoteNetwork(self.tweets)
+#
+#     def reply_network(self):  # not yet deployed
+#         """
+#         This function creates the network of replies from the dataset.
+#         :return: a replyNetwork object.
+#         """
+#         return ReplyNetwork(self.tweets)
+#     # def retweet_quote_network(self):
+#     #     """
+#     #     This function creates the network of retweet-quote from the dataset.
+#     #     :return: a retweetQuoteNetwork object.
+#     #     """
+#     #     return retweetQuoteNetwork(self.tweets)
+#     # def retweet_reply_network(self):  # Not yet deplyed
+#     #     """
+#     #     This function creates the network of retweet-reply from the dataset.
+#     #     :return: a retweetReplyNetwork object.
+#     #     """
+#     #     return retweetReplyNetwork(self.tweets)
+#     # def quote_reply_network(self):  # not yet deployed
+#     #     """
+#     #     This function creates the network of quote-reply from the dataset.
+#     #     :return: a quoteReplyNetwork object.
+#     #     """
+#     #     return quoteReplyNetwork(self.tweets)
+#     # def retweet_quote_reply_network(self):  # not yet deployed
+#     #     """
+#     #     This function creates the network of retweet_quote_reply from the dataset.
+#     #     :return: a retweetQuoteReplyNetwork object.
+#     #     """
+#     #     return retweetQuoteReplyNetwork(self.tweets)
 
 
 class UserTopologyFeatures:
     def __init__(self, tweets):
         """
         This is a constructor for tweetNetwork class
-        :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
         """
         self.tweets = tweets
 
@@ -3634,7 +3791,7 @@ class UserTopologyFeatures:
 #     def __init__(self, tweets):
 #         """
 #         This is a constructor of a network class.
-#         :param tweets: a dictionary that maps every tweet_id to its corresponding singleTweet object.
+#         :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
 #         """
 #         # self.network = nx.DiGraph()
 #         self.tweets = tweets
@@ -4328,18 +4485,22 @@ class user:
                 }
 
 
-class singleTweet: #Update docstring and assertions
-    def __init__(self, tweet_path, param):
+class SingleTweet: #Update docstring and assertions
+    def __init__(self, param):
         """
-        This is the constructor of singleTweet.
+        This is the constructor of SingleTweet.
         :param tweet_path: an individual tweet path.
         :param param: a dictionary of necessary objects and modules.
         """
-        self.tweet = json.load(open(tweet_path))
+        self.tweet = None
         self.parameters = param
         self.text = ""
 
 #entities
+    def tweet_loader(self, tweet_path):
+        self.tweet = json.load(open(tweet_path))
+        return self
+
     def get_entities(self): #There is an assumption here and that is the "truncated" variable is always False
         """
         This function extracts the full tweet entities including hashtags, mentions, urls, photos, videos, gifs, and symbols
@@ -4621,19 +4782,40 @@ class singleTweet: #Update docstring and assertions
         """
         :return: a boolean showing whether this is a quoted tweet or not..
         """
+        # return True if "quoted_status" in self.tweet.keys() else False
+        return self.tweet["is_quote_status"]
+
+    def is_quote_available(self):
         return True if "quoted_status" in self.tweet.keys() else False
 
     def get_quote(self): #go to the buttom of this
         """
         :return: it returns the quoted part of the this tweet..
         """
-        return quoteClass(self.tweet["quoted_status"], self.parameters) if self.is_quoted() else None
+        if self.is_quote_available():
+            return QuoteClass(self.tweet["quoted_status"], self.parameters)
+        else:
+            print("This tweet does not contain a quote status object")
+
+        # return QuoteClass(self.tweet["quoted_status"], self.parameters) if self.is_quoted() else None
 
     def get_retweeted(self): #go to the buttom of this
         """
         :return: it returns the retweeted part of this tweet.
         """
-        return retweetedClass(self.tweet["retweeted_status"], self.parameters) if self.is_retweeted() else None
+        if self.is_retweeted():
+            return RetweetedClass(self.tweet["retweeted_status"], self.parameters)
+        else:
+            print("This tweet does not contain a retweet status object")
+
+    def get_quote_status_id(self, return_format='int'):
+        if self.is_quoted():
+            if return_format == "int":
+                return self.tweet["quoted_status_id"]
+            elif return_format == "string":
+                return self.tweet["quoted_status_id_str"]
+        else:
+            print("This tweet does not contain a quote status")
 
     def tweet_source_status(self): #Where do these official sources come from?
         """
@@ -5702,15 +5884,15 @@ class singleTweet: #Update docstring and assertions
                 return ("the error code: ", response.status_code)
 
 
-class retweetedClass(singleTweet):
-    def __init__(self, twt, para):
+class RetweetedClass(SingleTweet):
+    def __init__(self, tweet, param):
         """
-        This is the constructor for the retweetedClass.
+        This is the constructor for the RetweetedClass.
         :param twt: a tweet object.
         :param para: a dictionary of necessary objects and modules.
         """
-        self.tweet = twt
-        self.parameters = para
+        super().__init__(param=param)
+        self.tweet = tweet
 
     def get_entities(self):
         """
@@ -5742,15 +5924,16 @@ class retweetedClass(singleTweet):
         return tweet_text
 
 
-class quoteClass(singleTweet):
-    def __init__(self, twt, para):
+class QuoteClass(SingleTweet):
+    def __init__(self, tweet, param):
         """
-        This is the constructor for the quoteClass.
+        This is the constructor for the QuoteClass.
         :param twt: a tweet object.
         :param para: a dictionary of necessary objects and modules.
         """
-        self.tweet = twt
-        self.parameters = para
+
+        super().__init__(param=param)
+        self.tweet = tweet
 
     def get_entities(self):
         """
