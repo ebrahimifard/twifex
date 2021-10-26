@@ -2557,230 +2557,529 @@ class Network:
         # self.network = nx.DiGraph()
         self.tweets = tweets
         # self.network = nx.DiGraph()
-        self.retweet_network = nx.DiGraph()
-        self.quote_network = nx.DiGraph()
-        self.reply_network = nx.DiGraph()
-        self.quote_reply_network = nx.DiGraph()
-        self.retweet_reply_network = nx.DiGraph()
-        self.retweet_quote_network = nx.DiGraph()
-        self.retweet_quote_reply_network = nx.DiGraph()
-        self.network_type_list = []
 
-    def network_building(self, network_type='retweet'):
+        ### The network here should be DiGraph and not MultiGraph becasue it is not possible to have multiple edges for retweet, quote, and reply networks.
+        self.tweet_level_retweet_network = nx.DiGraph()
+        self.tweet_level_quote_network = nx.DiGraph()
+        self.tweet_level_reply_network = nx.DiGraph()
+        self.tweet_level_quote_reply_network = nx.DiGraph()
+        self.tweet_level_retweet_reply_network = nx.DiGraph()
+        self.tweet_level_retweet_quote_network = nx.DiGraph()
+        self.tweet_level_retweet_quote_reply_network = nx.DiGraph()
 
-        assert (network_type in ["retweet", "quote", "reply", "quote-reply", "retweet-reply", "retweet-quote", 
-                                 "retweet-quote-reply"]), "The type of the network could be either retweet, " \
-                                                          "quote, reply, quote-reply, retweet-reply, or retweet-quote"
-        
+        ### But here we need to have a multi graph becasue a user can retweet/quote/reply to the other user at the same time
+        self.user_level_retweet_network = nx.DiGraph()
+        self.user_level_quote_network = nx.DiGraph()
+        self.user_level_reply_network = nx.DiGraph()
+        self.user_level_quote_reply_network = nx.MultiDiGraph()
+        self.user_level_retweet_reply_network = nx.MultiDiGraph()
+        self.user_level_retweet_quote_network = nx.MultiDiGraph()
+        self.user_level_retweet_quote_reply_network = nx.MultiDiGraph()
+
+        self.network_repository = []
+
+    def network_building(self, level_of_resolution='tweet', network_type='retweet'):
+
+        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
+                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
+                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
+                                                          "or retweet_quote_reply"
+
+        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
+
         # self.network_type = network_type
-        self.network_type_list.append(network_type)
+        self.network_repository.append(level_of_resolution+"_level_"+network_type)
         network = nx.DiGraph()
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-            quote_condition = tweet.is_quote_available()
-            reply_condition = tweet.is_this_a_reply()
+        multi_network = nx.MultiDiGraph()
 
-            if network_type == "retweet":
-                # retweet_condition = tweet.is_retweeted()
-                if retweet_condition:
-                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                else:
-                    network.add_node(tweet.get_id())
+        if level_of_resolution == "tweet":
+            for tweet_id, tweet in self.tweets.items():
+                retweet_condition = tweet.is_retweeted()
+                quote_condition = tweet.is_quote_available()
+                reply_condition = tweet.is_this_a_reply()
 
-            elif network_type == "quote":
-                # quote_condition = tweet.is_quoted()
-                if quote_condition:
-                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                    inner_quote_condition = tweet.get_quote().is_quoted()
-                    if inner_quote_condition:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
-                                         kind="quote")
-                else:
-                    network.add_node(tweet.get_id())
+                if network_type == "retweet":
+                    # retweet_condition = tweet.is_retweeted()
+                    if retweet_condition:
+                        network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
+                    else:
+                        network.add_node(tweet.get_id())
 
-            elif network_type == "reply":
-                # reply_condition = tweet.is_this_a_reply()
-                if reply_condition:
-                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                else:
-                    network.add_node(tweet.get_id())
+                elif network_type == "quote":
+                    # quote_condition = tweet.is_quoted()
+                    if quote_condition:
+                        network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+                        inner_quote_condition = tweet.get_quote().is_quoted()
+                        if inner_quote_condition:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                                             kind=network_type)
+                    else:
+                        network.add_node(tweet.get_id())
 
-            elif network_type == "quote-reply":
-                # quote_condition = tweet.is_quoted()
-                # reply_condition = tweet.is_this_a_reply()
-                if quote_condition is True and reply_condition is True:
-                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                    inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
-                    inner_quote_condition_level_one = tweet.get_quote().is_quoted()
-                    if inner_reply_condition_level_one:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
-                    if inner_quote_condition_level_one:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
-                                         kind="quote")
-                elif quote_condition is True and reply_condition is False:
-                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                    inner_reply_condition = tweet.get_quote().is_this_a_reply()
-                    inner_quote_condition = tweet.get_quote().is_quoted()
-                    if inner_reply_condition:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
-                    if inner_quote_condition:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
-                                         kind="quote")
-                elif quote_condition is False and reply_condition is True:
-                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                elif quote_condition is False and reply_condition is False:
-                    network.add_node(tweet.get_id())
+                elif network_type == "reply":
+                    # reply_condition = tweet.is_this_a_reply()
+                    if reply_condition:
+                        network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind=network_type)
+                    else:
+                        network.add_node(tweet.get_id())
 
-            elif network_type == "retweet-reply":
-                # retweet_condition = tweet.is_retweeted()
-                # reply_condition = tweet.is_this_a_reply()
-                if retweet_condition is True and reply_condition is True: #######This condition seems impossible to happen
-                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                    inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
-                    if inner_reply_condition:
-                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
-                                         kind="reply")
-                elif retweet_condition is True and reply_condition is False:
-                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                    inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
-                    if inner_reply_condition:
-                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(), kind="reply")
-                elif retweet_condition is False and reply_condition is True:
-                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                elif retweet_condition is False and reply_condition is False:
-                    network.add_node(tweet.get_id())
+                elif network_type == "quote-reply":
+                    # quote_condition = tweet.is_quoted()
+                    # reply_condition = tweet.is_this_a_reply()
+                    if quote_condition is True and reply_condition is True:
+                        network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+                        network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind=network_type)
+                        inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+                        inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+                        if inner_reply_condition_level_one:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind=network_type)
+                        if inner_quote_condition_level_one:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                                             kind=network_type)
+                    elif quote_condition is True and reply_condition is False:
+                        network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+                        inner_reply_condition = tweet.get_quote().is_this_a_reply()
+                        inner_quote_condition = tweet.get_quote().is_quoted()
+                        if inner_reply_condition:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind=network_type)
+                        if inner_quote_condition:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                                             kind=network_type)
+                    elif quote_condition is False and reply_condition is True:
+                        network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind=network_type)
+                    elif quote_condition is False and reply_condition is False:
+                        network.add_node(tweet.get_id())
 
-            elif network_type == "retweet-quote":
-                # retweet_condition = tweet.is_retweeted()
-                # quote_condition = tweet.is_quoted()
+                elif network_type == "retweet-reply":
+                    # retweet_condition = tweet.is_retweeted()
+                    # reply_condition = tweet.is_this_a_reply()
+                    if retweet_condition is True and reply_condition is True: #######This condition seems impossible to happen
+                        network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
+                        network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind=network_type)
+                        inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+                        if inner_reply_condition:
+                            network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
+                                             kind=network_type)
+                    elif retweet_condition is True and reply_condition is False:
+                        network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
+                        inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+                        if inner_reply_condition:
+                            network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(), kind=network_type)
+                    elif retweet_condition is False and reply_condition is True:
+                        network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind=network_type)
+                    elif retweet_condition is False and reply_condition is False:
+                        network.add_node(tweet.get_id())
 
-
-                ####### if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
-                if retweet_condition is True and quote_condition is False:
-                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                    inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-                    if inner_quote_condition_level_one:
-                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
-                                         kind="quote")
-                        inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                        if inner_quote_condition_level_two:
-                            network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                             tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
-                elif retweet_condition is False and quote_condition is True:
-                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                    inner_quote_condition = tweet.get_quote().is_quoted()
-                    if inner_quote_condition:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
-                                         kind="quote")
-                elif retweet_condition is False and quote_condition is False:
-                    network.add_node(tweet.get_id())
-
-            elif network_type == "retweet-quote-reply":
-                # retweet_condition = tweet.is_retweeted()
-                # quote_condition = tweet.is_quoted()
-                # reply_condition = tweet.is_this_a_reply()
-
-                # The first two conditions never occur
-                # if retweet_condition is True and quote_condition is True and reply_condition is True:
-                # elif retweet_condition is True and quote_condition is True and reply_condition is False:
-                if retweet_condition is True and quote_condition is False and reply_condition is True: #######This condition seems impossible to happen
-                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                    inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
-                    inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-                    if inner_reply_condition_level_one:
-                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
-                                         kind="reply")
-                    if inner_quote_condition_level_one:
-                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
-                                         kind="quote")
-                        inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                        inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
-                        if inner_quote_condition_level_two:
-                            network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                             tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
-                        if inner_reply_condition_level_two:
-                            network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                             tweet.get_retweeted().get_quote().get_reply_to_id(), kind="reply")
-
-                elif retweet_condition is True and quote_condition is False and reply_condition is False:
-                    network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                    inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
-                    inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-                    if inner_reply_condition_level_one:
-                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
-                                         kind="reply")
-                    if inner_quote_condition_level_one:
-                        network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
-                                         kind="quote")
-                        inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                        inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
-                        if inner_quote_condition_level_two:
-                            network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                             tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
-                        if inner_reply_condition_level_two:
-                            network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                             tweet.get_retweeted().get_quote().get_reply_to_id(), kind="reply")
-
-                elif retweet_condition is False and quote_condition is True and reply_condition is True:
-                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                    inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
-                    inner_quote_condition_level_one = tweet.get_quote().is_quoted()
-                    if inner_reply_condition_level_one:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
-                    if inner_quote_condition_level_one:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
-
-                elif retweet_condition is False and quote_condition is True and reply_condition is False:
-                    network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                    inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
-                    inner_quote_condition_level_one = tweet.get_quote().is_quoted()
-                    if inner_reply_condition_level_one:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
-                    if inner_quote_condition_level_one:
-                        network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
-                                         kind="quote")
-
-                elif retweet_condition is False and quote_condition is False and reply_condition is True:
-                    network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                elif retweet_condition is False and quote_condition is False and reply_condition is False:
-                    network.add_node(tweet.get_id())
+                elif network_type == "retweet-quote":
+                    # retweet_condition = tweet.is_retweeted()
+                    # quote_condition = tweet.is_quoted()
 
 
-                # # if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
-                # if retweet_condition is True and quote_condition is False:
-                #     network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                #     inner_quote_condition = tweet.get_retweeted().is_quoted()
-                #     if inner_quote_condition:
-                #         network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind="quote")
-                # elif retweet_condition is False and quote_condition is True:
-                #     network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                # elif retweet_condition is False and quote_condition is False:
-                #     network.add_node(tweet.get_id())
+                    ####### if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
+                    if retweet_condition is True and quote_condition is False:
+                        network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
+                        inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+                        if inner_quote_condition_level_one:
+                            network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
+                                             kind=network_type)
+                            inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+                            if inner_quote_condition_level_two:
+                                network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                                                 tweet.get_retweeted().get_quote().get_quote_status_id(), kind=network_type)
+                    elif retweet_condition is False and quote_condition is True:
+                        network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+                        inner_quote_condition = tweet.get_quote().is_quoted()
+                        if inner_quote_condition:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                                             kind=network_type)
+                    elif retweet_condition is False and quote_condition is False:
+                        network.add_node(tweet.get_id())
 
+                elif network_type == "retweet-quote-reply":
+                    # retweet_condition = tweet.is_retweeted()
+                    # quote_condition = tweet.is_quoted()
+                    # reply_condition = tweet.is_this_a_reply()
+
+                    # The first two conditions never occur
+                    # if retweet_condition is True and quote_condition is True and reply_condition is True:
+                    # elif retweet_condition is True and quote_condition is True and reply_condition is False:
+                    if retweet_condition is True and quote_condition is False and reply_condition is True: #######This condition seems impossible to happen
+                        network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
+                        network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind=network_type)
+                        inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
+                        inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+                        if inner_reply_condition_level_one:
+                            network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
+                                             kind=network_type)
+                        if inner_quote_condition_level_one:
+                            network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
+                                             kind=network_type)
+                            inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+                            inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
+                            if inner_quote_condition_level_two:
+                                network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                                                 tweet.get_retweeted().get_quote().get_quote_status_id(), kind=network_type)
+                            if inner_reply_condition_level_two:
+                                network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                                                 tweet.get_retweeted().get_quote().get_reply_to_id(), kind=network_type)
+
+                    elif retweet_condition is True and quote_condition is False and reply_condition is False:
+                        network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
+                        inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
+                        inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+                        if inner_reply_condition_level_one:
+                            network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
+                                             kind=network_type)
+                        if inner_quote_condition_level_one:
+                            network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
+                                             kind=network_type)
+                            inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+                            inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
+                            if inner_quote_condition_level_two:
+                                network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                                                 tweet.get_retweeted().get_quote().get_quote_status_id(), kind=network_type)
+                            if inner_reply_condition_level_two:
+                                network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                                                 tweet.get_retweeted().get_quote().get_reply_to_id(), kind=network_type)
+
+                    elif retweet_condition is False and quote_condition is True and reply_condition is True:
+                        network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+                        network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind=network_type)
+                        inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+                        inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+                        if inner_reply_condition_level_one:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind=network_type)
+                        if inner_quote_condition_level_one:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind=network_type)
+
+                    elif retweet_condition is False and quote_condition is True and reply_condition is False:
+                        network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+                        inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+                        inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+                        if inner_reply_condition_level_one:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind=network_type)
+                        if inner_quote_condition_level_one:
+                            network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                                             kind=network_type)
+
+                    elif retweet_condition is False and quote_condition is False and reply_condition is True:
+                        network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind=network_type)
+                    elif retweet_condition is False and quote_condition is False and reply_condition is False:
+                        network.add_node(tweet.get_id())
+
+
+                    # # if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
+                    # if retweet_condition is True and quote_condition is False:
+                    #     network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
+                    #     inner_quote_condition = tweet.get_retweeted().is_quoted()
+                    #     if inner_quote_condition:
+                    #         network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind=network_type)
+                    # elif retweet_condition is False and quote_condition is True:
+                    #     network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+                    # elif retweet_condition is False and quote_condition is False:
+                    #     network.add_node(tweet.get_id())
 
             # elif network_type == "retweet-reply":
             # elif network_type == "retweet_quote":
             # elif network_type == "retweet-quote-reply":
         # self.network = network
+        elif level_of_resolution == "user":
+            for tweet_id, tweet in self.tweets.items():
+                retweet_condition = tweet.is_retweeted()
+                quote_condition = tweet.is_quote_available()
+                reply_condition = tweet.is_this_a_reply()
 
-        if network_type == "retweet":
-            self.retweet_network = network
-        elif network_type == "quote":
-            self.quote_network = network
-        elif network_type == "reply":
-            self.reply_network = network
-        elif network_type == "quote-reply":
-            self.quote_reply_network = network
-        elif network_type == "retweet-reply":
-            self.retweet_reply_network = network
-        elif network_type == "retweet-quote":
-            self.retweet_quote_network = network
-        elif network_type == "retweet-quote-reply":
-            self.retweet_quote_reply_network = network
+                if network_type == "retweet":
+                    # retweet_condition = tweet.is_retweeted()
+                    if retweet_condition:
+                        source = tweet.get_twitter().get_screen_name()
+                        destination = tweet.get_retweeted().get_twitter().get_screen_name()
+                        if network.has_edge(source, destination):
+                            network.edges[source, destination]["weight"] += 1
+                        else:
+                            network.add_edge(source, destination, kind=network_type, weight=1)
+                    else:
+                        network.add_node(tweet.get_twitter().get_screen_name())
+
+                elif network_type == "quote":
+                    # quote_condition = tweet.is_quoted()
+                    if quote_condition:
+                        source = tweet.get_twitter().get_screen_name()
+                        destination = tweet.get_quote().get_twitter().get_screen_name()
+                        if network.has_edge(source, destination):
+                            network.edges[source, destination]["weight"] += 1
+                        else:
+                            network.add_edge(source, destination, kind=network_type, weight=1)
+                        inner_quote_condition = tweet.get_quote().is_quoted()
+                        if inner_quote_condition:
+                            inner_source = tweet.get_quote().get_twitter().get_screen_name()
+                            inner_destination = tweet.get_quote().get_inner_quote_screen_name()
+                            if network.has_edge(inner_source, inner_destination):
+                                network.edges[inner_source, inner_destination]["weight"] += 1
+                            else:
+                                network.add_edge(inner_source, inner_destination, kind=network_type, weight=1)
+                            # network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+                    else:
+                        network.add_node(tweet.get_twitter().get_screen_name())
+
+                elif network_type == "reply":
+                    # reply_condition = tweet.is_this_a_reply()
+                    if reply_condition:
+                        source = tweet.get_twitter().get_screen_name()
+                        destination = tweet.get_in_reply_to_screen_name()
+                        if network.has_edge(source, destination):
+                            network.edges[source, destination]["weight"] += 1
+                        else:
+                            network.add_edge(source, destination, kind=network_type, weight=1)
+                    else:
+                        network.add_node(tweet.get_twitter().get_screen_name())
+
+                elif network_type == "quote-reply":
+                    if quote_condition is True and reply_condition is True:
+                        source = tweet.get_twitter().get_screen_name()
+                        quote_destination = tweet.get_quote().get_twitter().get_screen_name()
+                        key_keepers = {}
+                        key_code=0
+                        if (source, quote_destination, network_type) in key_keepers.keys():
+                            multi_network.edges[source, quote_destination, key_keepers[(source, quote_destination, network_type)]]["weight"] += 1
+                        else:
+                            key_keepers[(source, quote_destination, network_type)] = key_code
+                            key_code += 1
+                            multi_network.add_edge(source, quote_destination, key=key_keepers[(source, quote_destination, network_type)], kind=network_type, weight=1)
+
+                        reply_destination = tweet.get_in_reply_to_screen_name()
+                        if (source, reply_destination, network_type) in key_keepers.keys():
+                                                        multi_network.edges[
+                                source, reply_destination, key_keepers[(source, reply_destination, network_type)]][
+                                "weight"] += 1
+                        else:
+                            key_keepers[(source, reply_destination, network_type)] = key_code
+                            key_code += 1
+                            multi_network.add_edge(source, reply_destination, key=key_keepers[(source, reply_destination, network_type)], kind=network_type, weight=1)
+
+                        inner_quote_condition = tweet.get_quote().is_quoted()
+                        if inner_quote_condition:
+                            inner_source = tweet.get_quote().get_twitter().get_screen_name()
+                            inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
+                            if (inner_source, inner_quote_destination, network_type) in key_keepers.keys():
+                                multi_network.edges[
+                                    source, quote_destination, key_keepers[(source, quote_destination, network_type)]][
+                                    "weight"] += 1
+                            else:
+                                key_keepers[(source, quote_destination, network_type)] = key_code
+                                key_code += 1
+                                multi_network.add_edge(source, quote_destination,
+                                                       key=key_keepers[(source, quote_destination, network_type)],
+                                                       kind=network_type, weight=1)
+                            inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
+                            if inner_reply_destination:
+                                if (inner_source, inner_reply_destination, network_type) in key_keepers.keys():
+                                    multi_network.edges[
+                                        source, inner_reply_destination, key_keepers[
+                                            (source, inner_reply_destination, network_type)]][
+                                        "weight"] += 1
+                                else:
+                                    key_keepers[(source, inner_reply_destination, network_type)] = key_code
+                                    key_code += 1
+                                    multi_network.add_edge(source, quote_destination,
+                                                           key=key_keepers[(source, inner_reply_destination, network_type)],
+                                                           kind=network_type, weight=1)
+
+
+            key_keepers = {}
+
+
+
+                    elif quote_condition is True and reply_condition is True:
+
+                    elif quote_condition is True and reply_condition is True:
+
+                    elif quote_condition is True and reply_condition is True:
+
+
+                # elif network_type == "quote-reply":
+                #     # quote_condition = tweet.is_quoted()
+                #     # reply_condition = tweet.is_this_a_reply()
+                #     if quote_condition is True and reply_condition is True:
+                #         network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                #         network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                #         inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+                #         inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+                #         if inner_reply_condition_level_one:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(),
+                #                              kind="reply")
+                #         if inner_quote_condition_level_one:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                #                              kind="quote")
+                #     elif quote_condition is True and reply_condition is False:
+                #         network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                #         inner_reply_condition = tweet.get_quote().is_this_a_reply()
+                #         inner_quote_condition = tweet.get_quote().is_quoted()
+                #         if inner_reply_condition:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(),
+                #                              kind="reply")
+                #         if inner_quote_condition:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                #                              kind="quote")
+                #     elif quote_condition is False and reply_condition is True:
+                #         network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                #     elif quote_condition is False and reply_condition is False:
+                #         network.add_node(tweet.get_id())
+                #
+                # elif network_type == "retweet-reply":
+                #     # retweet_condition = tweet.is_retweeted()
+                #     # reply_condition = tweet.is_this_a_reply()
+                #     if retweet_condition is True and reply_condition is True:  #######This condition seems impossible to happen
+                #         network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                #         network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                #         inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+                #         if inner_reply_condition:
+                #             network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
+                #                              kind="reply")
+                #     elif retweet_condition is True and reply_condition is False:
+                #         network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                #         inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+                #         if inner_reply_condition:
+                #             network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
+                #                              kind="reply")
+                #     elif retweet_condition is False and reply_condition is True:
+                #         network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                #     elif retweet_condition is False and reply_condition is False:
+                #         network.add_node(tweet.get_id())
+                #
+                # elif network_type == "retweet-quote":
+                #     # retweet_condition = tweet.is_retweeted()
+                #     # quote_condition = tweet.is_quoted()
+                #
+                #     ####### if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
+                #     if retweet_condition is True and quote_condition is False:
+                #         network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                #         inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+                #         if inner_quote_condition_level_one:
+                #             network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
+                #                              kind="quote")
+                #             inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+                #             if inner_quote_condition_level_two:
+                #                 network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                #                                  tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
+                #     elif retweet_condition is False and quote_condition is True:
+                #         network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                #         inner_quote_condition = tweet.get_quote().is_quoted()
+                #         if inner_quote_condition:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                #                              kind="quote")
+                #     elif retweet_condition is False and quote_condition is False:
+                #         network.add_node(tweet.get_id())
+                #
+                # elif network_type == "retweet-quote-reply":
+                #     # retweet_condition = tweet.is_retweeted()
+                #     # quote_condition = tweet.is_quoted()
+                #     # reply_condition = tweet.is_this_a_reply()
+                #
+                #     # The first two conditions never occur
+                #     # if retweet_condition is True and quote_condition is True and reply_condition is True:
+                #     # elif retweet_condition is True and quote_condition is True and reply_condition is False:
+                #     if retweet_condition is True and quote_condition is False and reply_condition is True:  #######This condition seems impossible to happen
+                #         network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                #         network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                #         inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
+                #         inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+                #         if inner_reply_condition_level_one:
+                #             network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
+                #                              kind="reply")
+                #         if inner_quote_condition_level_one:
+                #             network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
+                #                              kind="quote")
+                #             inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+                #             inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
+                #             if inner_quote_condition_level_two:
+                #                 network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                #                                  tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
+                #             if inner_reply_condition_level_two:
+                #                 network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                #                                  tweet.get_retweeted().get_quote().get_reply_to_id(), kind="reply")
+                #
+                #     elif retweet_condition is True and quote_condition is False and reply_condition is False:
+                #         network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+                #         inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
+                #         inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+                #         if inner_reply_condition_level_one:
+                #             network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
+                #                              kind="reply")
+                #         if inner_quote_condition_level_one:
+                #             network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
+                #                              kind="quote")
+                #             inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+                #             inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
+                #             if inner_quote_condition_level_two:
+                #                 network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                #                                  tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
+                #             if inner_reply_condition_level_two:
+                #                 network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+                #                                  tweet.get_retweeted().get_quote().get_reply_to_id(), kind="reply")
+                #
+                #     elif retweet_condition is False and quote_condition is True and reply_condition is True:
+                #         network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                #         network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                #         inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+                #         inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+                #         if inner_reply_condition_level_one:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(),
+                #                              kind="reply")
+                #         if inner_quote_condition_level_one:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                #                              kind="quote")
+                #
+                #     elif retweet_condition is False and quote_condition is True and reply_condition is False:
+                #         network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+                #         inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+                #         inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+                #         if inner_reply_condition_level_one:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(),
+                #                              kind="reply")
+                #         if inner_quote_condition_level_one:
+                #             network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(),
+                #                              kind="quote")
+                #
+                #     elif retweet_condition is False and quote_condition is False and reply_condition is True:
+                #         network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+                #     elif retweet_condition is False and quote_condition is False and reply_condition is False:
+                #         network.add_node(tweet.get_id())
+
+
+
+        if level_of_resolution == "tweet":
+            if network_type == "retweet":
+                self.tweet_level_retweet_network = network
+            elif network_type == "quote":
+                self.tweet_level_quote_network = network
+            elif network_type == "reply":
+                self.tweet_level_reply_network = network
+            elif network_type == "quote-reply":
+                self.tweet_level_quote_reply_network = network
+            elif network_type == "retweet-reply":
+                self.tweet_level_retweet_reply_network = network
+            elif network_type == "retweet-quote":
+                self.tweet_level_retweet_quote_network = network
+            elif network_type == "retweet-quote-reply":
+                self.tweet_level_retweet_quote_reply_network = network
+
+        elif level_of_resolution == "user":
+            if network_type == "retweet":
+                self.user_level_retweet_network = network
+            elif network_type == "quote":
+                self.user_level_quote_network = network
+            elif network_type == "reply":
+                self.user_level_reply_network = network
+            elif network_type == "quote-reply":
+                self.user_level_quote_reply_network = network
+            elif network_type == "retweet-reply":
+                self.user_level_retweet_reply_network = network
+            elif network_type == "retweet-quote":
+                self.user_level_retweet_quote_network = network
+            elif network_type == "retweet-quote-reply":
+                self.user_level_retweet_quote_reply_network = network
+
 
     # def make_retweet_network(self):
     #     self.network = self.network_building(network_type='retweet')
@@ -2791,44 +3090,119 @@ class Network:
     # def make_reply_network(self):
     #     self.network = self.network_building(network_type='reply')
 
-    def get_network(self, network_type=None):
-        if network_type == "retweet" and "retweet" in self.network_type_list:
-            return self.retweet_network
-        elif network_type == "quote" and "quote" in self.network_type_list:
-            return self.quote_network
-        elif network_type == "reply" and "reply" in self.network_type_list:
-            return self.reply_network
-        elif network_type == "quote-reply" and "quote-reply" in self.network_type_list:
-            return self.quote_reply_network
-        elif network_type == "retweet-reply" and "retweet-reply" in self.network_type_list:
-            return self.retweet_reply_network
-        elif network_type == "retweet-quote" and "retweet-quote" in self.network_type_list:
-            return self.retweet_quote_network
-        elif network_type == "retweet-quote-reply" and "retweet-quote-reply" in self.network_type_list:
-            return self.retweet_quote_reply_network
+    def get_network(self, level_of_resolution='tweet', network_type='retweet'):
+
+        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
+                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
+                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
+                                                          "or retweet_quote_reply"
+
+        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
+
+        requested_network = level_of_resolution + "_level_" + network_type
+        if requested_network in self.network_repository:
+            if level_of_resolution == "tweet":
+                if network_type == "retweet":
+                    return self.tweet_level_retweet_network
+                if network_type == "quote":
+                    return self.tweet_level_quote_network
+                if network_type == "reply":
+                    return self.tweet_level_reply_network
+                if network_type == "quote_reply":
+                    return self.tweet_level_quote_reply_network
+                if network_type == "retweet_reply":
+                    return self.tweet_level_retweet_reply_network
+                if network_type == "quote_reply":
+                    return self.tweet_level_quote_reply_network
+                if network_type == "retweet_quote_reply":
+                    return self.tweet_level_retweet_quote_reply_network
+            elif level_of_resolution == "user":
+                if network_type == "retweet":
+                    return self.user_level_retweet_network
+                if network_type == "quote":
+                    return self.user_level_quote_network
+                if network_type == "reply":
+                    return self.user_level_reply_network
+                if network_type == "quote_reply":
+                    return self.user_level_quote_reply_network
+                if network_type == "retweet_reply":
+                    return self.user_level_retweet_reply_network
+                if network_type == "quote_reply":
+                    return self.user_level_quote_reply_network
+                if network_type == "retweet_quote_reply":
+                    return self.user_level_retweet_quote_reply_network
+
+
+
+
+
+        # if level_of_resolution == "tweet":
+        #     if network_type == "retweet" and element in self.network_type_list:
+        #         return self.retweet_network
+        #     elif network_type == "quote" and "quote" in self.network_type_list:
+        #         return self.quote_network
+        #     elif network_type == "reply" and "reply" in self.network_type_list:
+        #         return self.reply_network
+        #     elif network_type == "quote-reply" and "quote-reply" in self.network_type_list:
+        #         return self.quote_reply_network
+        #     elif network_type == "retweet-reply" and "retweet-reply" in self.network_type_list:
+        #         return self.retweet_reply_network
+        #     elif network_type == "retweet-quote" and "retweet-quote" in self.network_type_list:
+        #         return self.retweet_quote_network
+        #     elif network_type == "retweet-quote-reply" and "retweet-quote-reply" in self.network_type_list:
+        #         return self.retweet_quote_reply_network
+
+        # elif level_of_resolution == "user":
 
         # return self.network## tell in
 
-    def download_network(self, network_type=None, download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
-        if network_type in self.network_type_list:
+    def download_network(self, level_of_resolution='tweet', network_type='retweet', download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
+
+        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
+                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
+                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
+                                                          "or retweet_quote_reply"
+
+        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
+        assert (download_format in ["GEXF", "GML"]), "The available output formats are GEXF and GML"
+
+        requested_network = level_of_resolution + "_level_" + network_type
+        if requested_network in self.network_repository:
             if download_format == "GEXF":
-                nx.write_gexf(self.get_network(network_type=network_type), path=path, encoding=encoding, version='1.2draft')
+                nx.write_gexf(self.get_network(level_of_resolution=level_of_resolution, network_type=network_type), path=path, encoding=encoding, version='1.2draft')
             elif download_format == "GML":
-                nx.write_gml(self.get_network(network_type=network_type), path=path)
+                nx.write_gml(self.get_network(level_of_resolution=level_of_resolution, network_type=network_type), path=path)
         else:
             print("The network you have requested has not been created yet.")
 
-    def components_number(self, network_type=None):
+        # if network_type in self.network_type_list:
+        #     if download_format == "GEXF":
+        #         nx.write_gexf(self.get_network(network_type=network_type), path=path, encoding=encoding, version='1.2draft')
+        #     elif download_format == "GML":
+        #         nx.write_gml(self.get_network(network_type=network_type), path=path)
+        # else:
+        #     print("The network you have requested has not been created yet.")
+
+    def components_number(self, level_of_resolution='tweet', network_type='retweet'):
         """
         This function calculates the number of connected components in the desired network.
         :return: an integer that shows the number of connected components.
         """
-        if network_type in self.network_type_list:
-            return nx.number_connected_components(self.get_network(network_type=network_type).to_undirected())
+
+        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
+                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
+                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
+                                                          "or retweet_quote_reply"
+
+        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
+
+        requested_network = level_of_resolution + "_level_" + network_type
+        if requested_network in self.network_repository:
+            return nx.number_connected_components(self.get_network(level_of_resolution=level_of_resolution, network_type=network_type).to_undirected())
         else:
             print("The network type you indicated has not been created yet.")
 
-    def centrality_measures(self, network_type=None, metric="degree"):
+    def centrality_measures(self, level_of_resolution='tweet', network_type='retweet'):
         """
         This function measures network centrality based on the chosen metric.
         :param metric: metric can be "degree", "closeness", "betweenness", "eigenvector", "katz", and "pagerank". Please
@@ -2841,9 +3215,16 @@ class Network:
                            "pagerank"]), "The metric has to be" \
                                          " degree, closeness, betweenness, " \
                                          "eigenvector, katz, or pagerank."
+        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
+                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
+                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
+                                                          "or retweet_quote_reply"
 
-        if network_type in self.network_type_list:
-            network = self.get_network(network_type=network_type)
+        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
+
+        requested_network = level_of_resolution + "_level_" + network_type
+        if requested_network in self.network_repository:
+            network = self.get_network(level_of_resolution=level_of_resolution, network_type=network_type)
             if metric == "degree":
                 # network = self.get_network(network_type=network_type)
                 degree_centrality = nx.centrality.degree_centrality(network)
@@ -2878,7 +3259,7 @@ class Network:
         else:
             print("The network type you indicated has not been created yet.")
 
-    def community_detection(self, network_type=None, return_type="network"):
+    def community_detection(self,level_of_resolution='tweet', network_type='retweet', return_type="network"):
         """
         This function identified communities in the network using Louvain algorithm. PLease note that, it uses the undirected
         version of the network.
@@ -2887,8 +3268,18 @@ class Network:
         key-value pairs corresponding to community_id and all the nodes belonging to that community.
         :return: Depending on the value of return_type parameter the output of this function varies.
         """
-        network = self.get_network(network_type=network_type)
-        if network_type in self.network_type_list:
+
+        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
+                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
+                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
+                                                          "or retweet_quote_reply"
+
+        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
+        assert (return_type in ["network", "node-community", "community-nodes"]), "The type of the output could be either network, node-community, or community-nodes"
+
+        requested_network = level_of_resolution + "_level_" + network_type
+        if requested_network in self.network_repository:
+            network = self.get_network(level_of_resolution=level_of_resolution, network_type=network_type)
             partition = community.best_partition(network.to_undirected())
             if return_type == "network":
                 for node_id in partition:
@@ -4592,6 +4983,12 @@ class SingleTweet: #Update docstring and assertions
         """
         return "https://twitter.com/" + self.get_twitter().get_screen_name() + "/status/" + \
                self.get_id(return_format="string")
+
+    def get_inner_quote_screen_name(self): #no docstring
+        return findall("status.*", self.tweet["quoted_status_permalink"]["expanded"])[0].replace("status/","")
+
+    def get_in_reply_to_screen_name(self):
+        return self.tweet["in_reply_to_screen_name"]
 
     def get_twitter(self):
         """
