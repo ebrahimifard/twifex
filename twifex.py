@@ -2576,6 +2576,8 @@ class Network:
         self.user_level_retweet_quote_network = nx.MultiDiGraph()
         self.user_level_retweet_quote_reply_network = nx.MultiDiGraph()
 
+        self.tweet_hashtag_network = nx.Graph()
+
         self.network_repository = []
 
         self.quote_reply_key_keepers = {}
@@ -3675,11 +3677,36 @@ class Network:
             elif network_type == "retweet-quote-reply":
                 self.user_level_retweet_quote_reply_network = network
 
-    def mention_network(self):
-
+    # def mention_network(self):
+    #
     def hashtag_network(self):
 
-    def co_occurence_network(self):
+        self.network_repository.append("hashtag_network")
+
+        tweets_keys = list(self.tweets.keys())
+        for i in range(len(self.tweets)):
+            tweet1 = self.tweets[tweets_keys[i]]
+            tweet1_hashtags = tweet1.get_hashtags()
+            j = i+1
+            while j != len(tweets_keys):
+                tweet2 = self.tweets[tweets_keys[j]]
+                tweet2_hashtags = tweet2.get_hashtags()
+
+                for ht1 in tweet1_hashtags:
+                    for ht2 in tweet2_hashtags:
+                        if ht1 == ht2:
+                            if (tweet1.get_id(), tweet2.get_id()) in self.tweet_hashtag_network.edges:
+                                self.tweet_hashtag_network.edges[tweet1.get_id(), tweet2.get_id()]["weight"] += 1
+                                edge_label = "-"+ht1
+                                self.tweet_hashtag_network.edges[tweet1.get_id(), tweet2.get_id()]["hashtags"] += edge_label
+                            else:
+                                self.tweet_hashtag_network.add_edge(tweet1.get_id(), tweet2.get_id(), weight=1, hashtags=ht1)
+                j += 1
+
+
+
+
+    # def co_occurence_network(self):
 
 
 
@@ -5679,7 +5706,8 @@ class SingleTweet: #Update docstring and assertions
         """
         entities = self.get_entities()
         if "hashtags" in entities:
-            return entities["hashtags"]
+            return [element['text'] for element in entities["hashtags"]]
+            # return entities["hashtags"]
         else:
             return []
 
