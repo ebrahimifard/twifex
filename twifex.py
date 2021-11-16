@@ -2577,6 +2577,7 @@ class Network:
         self.user_level_retweet_quote_reply_network = nx.MultiDiGraph()
 
         self.tweet_hashtag_network = nx.Graph()
+        self.user_mention_network = nx.DiGraph()
 
         self.network_repository = []
 
@@ -2586,6 +2587,7 @@ class Network:
         self.retweet_quote_reply_key_keepers = {}
 
     def tweet_level_retweet_network_building(self):
+        self.network_repository.append("tweet_level_retweet_network")
         for tweet_id, tweet in self.tweets.items():
             retweet_condition = tweet.is_retweeted()
 
@@ -2596,7 +2598,7 @@ class Network:
                 self.tweet_level_retweet_network.add_node(tweet.get_id())
 
     def tweet_level_quote_network_building(self):
-
+        self.network_repository.append("tweet_level_quote_network")
         for tweet_id, tweet in self.tweets.items():
             quote_condition = tweet.is_quote_available()
 
@@ -2610,6 +2612,7 @@ class Network:
                 self.tweet_level_quote_network.add_node(tweet.get_id())
 
     def tweet_level_reply_network_building(self):
+        self.network_repository.append("tweet_level_reply_network")
         for tweet_id, tweet in self.tweets.items():
             reply_condition = tweet.is_this_a_reply()
 
@@ -2619,6 +2622,7 @@ class Network:
                 self.tweet_level_reply_network.add_node(tweet.get_id())
 
     def tweet_level_quote_reply_network_building(self):
+        self.network_repository.append("tweet_level_quote_reply_network")
         for tweet_id, tweet in self.tweets.items():
             quote_condition = tweet.is_quote_available()
             reply_condition = tweet.is_this_a_reply()
@@ -2651,6 +2655,7 @@ class Network:
                 self.tweet_level_quote_reply_network.add_node(tweet.get_id())
 
     def tweet_level_retweet_reply_network_building(self):
+        self.network_repository.append("tweet_level_retweet_reply_network")
         for tweet_id, tweet in self.tweets.items():
             retweet_condition = tweet.is_retweeted()
             reply_condition = tweet.is_this_a_reply()
@@ -2674,6 +2679,7 @@ class Network:
                 self.tweet_level_retweet_reply_network.add_node(tweet.get_id())
 
     def tweet_level_retweet_quote_network_building(self):
+        self.network_repository.append("tweet_level_retweet_quote_network")
         for tweet_id, tweet in self.tweets.items():
             retweet_condition = tweet.is_retweeted()
             quote_condition = tweet.is_quote_available()
@@ -2699,6 +2705,7 @@ class Network:
                 self.tweet_level_retweet_quote_network.add_node(tweet.get_id())
 
     def tweet_level_retweet_quote_reply_network_building(self):
+        self.network_repository.append("tweet_level_retweet_quote_reply_network")
         for tweet_id, tweet in self.tweets.items():
             retweet_condition = tweet.is_retweeted()
             quote_condition = tweet.is_quote_available()
@@ -2781,6 +2788,7 @@ class Network:
             #     network.add_node(tweet.get_id())
 
     def user_level_retweet_network_building(self):
+        self.network_repository.append("user_level_retweet_network")
         for tweet_id, tweet in self.tweets.items():
             retweet_condition = tweet.is_retweeted()
             source = tweet.get_twitter().get_screen_name()
@@ -2794,6 +2802,7 @@ class Network:
                 self.user_level_retweet_network.add_node(source)
 
     def user_level_quote_network_building(self):
+        self.network_repository.append("user_level_quote_network")
         for tweet_id, tweet in self.tweets.items():
             quote_condition = tweet.is_quote_available()
 
@@ -2817,6 +2826,7 @@ class Network:
                 self.user_level_quote_network.add_node(source)
 
     def user_level_reply_network_building(self):
+        self.network_repository.append("user_level_reply_network")
         for tweet_id, tweet in self.tweets.items():
             reply_condition = tweet.is_this_a_reply()
 
@@ -2831,6 +2841,7 @@ class Network:
                 self.user_level_reply_network.add_node(source)
 
     def user_level_quote_reply_network_building(self):
+        self.network_repository.append("user_level_quote_reply_network")
         for tweet_id, tweet in self.tweets.items():
             quote_condition = tweet.is_quote_available()
             reply_condition = tweet.is_this_a_reply()
@@ -2966,6 +2977,7 @@ class Network:
                 self.user_level_quote_reply_network.add_node(source)
 
     def user_level_retweet_reply_network_building(self):
+        self.network_repository.append("user_level_retweet_reply_network")
         for tweet_id, tweet in self.tweets.items():
             retweet_condition = tweet.is_retweeted()
             reply_condition = tweet.is_this_a_reply()
@@ -3071,6 +3083,7 @@ class Network:
                 self.user_level_retweet_reply_network.add_node(source)
 
     def user_level_retweet_quote_network_building(self):
+        self.network_repository.append("user_level_retweet_quote_network")
         for tweet_id, tweet in self.tweets.items():
             retweet_condition = tweet.is_retweeted()
             quote_condition = tweet.is_quote_available()
@@ -3165,6 +3178,7 @@ class Network:
                 self.user_level_retweet_quote_network.add_node(source)
 
     def user_level_retweet_quote_reply_network_building(self):
+        self.network_repository.append("user_level_retweet_quote_reply_network")
         for tweet_id, tweet in self.tweets.items():
             retweet_condition = tweet.is_retweeted()
             quote_condition = tweet.is_quote_available()
@@ -3505,9 +3519,61 @@ class Network:
             elif retweet_condition is False and quote_condition is False and reply_condition is False:
                 self.user_level_retweet_quote_reply_network.add_node(source)
 
-    # def mention_network(self):
-    #
-    def hashtag_network(self):
+    def mention_network_building(self):
+        self.network_repository.append("user_mention_network")
+        for tweet_id, tweet in self.tweets.items():
+            source = tweet.get_twitter().get_screen_name()
+            mention_list = tweet.get_mentions()
+
+            for mention in mention_list:
+                if self.user_mention_network.has_edge(source, mention):
+                    self.user_mention_network.edges[source, mention]["weight"] += 1
+                    self.user_mention_network.edges[source, mention]["shared_content"] += tweet.get_text()
+                else:
+                    self.user_mention_network.add_edge(source, mention, kind="mention", weight=1, shared_content=tweet.get_text())
+
+            if tweet.is_retweeted():
+                source = tweet.get_retweeted().get_twitter().get_screen_name()
+                mention_list = tweet.get_mentions()
+                for mention in mention_list:
+
+                    if self.user_mention_network.has_edge(source, mention):
+                        self.user_mention_network.edges[source, mention]["weight"] += 1
+                        self.user_mention_network.edges[source, mention]["shared_content"] += tweet.get_retweeted().get_text()
+                    else:
+                        self.user_mention_network.add_edge(source, mention, kind="mention", weight=1,
+                                                            shared_content=tweet.get_retweeted().get_text())
+                if tweet.get_retweeted().is_quote_available():
+                    source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+                    mention_list = tweet.get_retweeted().get_quote().get_mentions()
+                    for mention in mention_list:
+
+                        if self.user_mention_network.has_edge(source, mention):
+                            self.user_mention_network.edges[source, mention]["weight"] += 1
+                            self.user_mention_network.edges[source, mention][
+                                "shared_content"] += tweet.get_retweeted().get_quote().get_text()
+                        else:
+                            self.user_mention_network.add_edge(source, mention, kind="mention", weight=1,
+                                                               shared_content=tweet.get_retweeted().get_quote().get_text())
+            elif tweet.is_quote_available():
+                source = tweet.get_quote().get_twitter().get_screen_name()
+                mention_list = tweet.get_quote().get_mentions()
+                for mention in mention_list:
+
+                    if self.user_mention_network.has_edge(source, mention):
+                        self.user_mention_network.edges[source, mention]["weight"] += 1
+                        self.user_mention_network.edges[source, mention][
+                            "shared_content"] += tweet.get_quote().get_text()
+                    else:
+                        self.user_mention_network.add_edge(source, mention, kind="mention", weight=1,
+                                                           shared_content=tweet.get_quote().get_text())
+
+
+
+
+    # def co_occurence_network(self):
+
+    def hashtag_network_building(self):
 
         self.network_repository.append("hashtag_network")
 
@@ -3531,135 +3597,64 @@ class Network:
                                 self.tweet_hashtag_network.add_edge(tweet1.get_id(), tweet2.get_id(), weight=1, hashtags=ht1)
                 j += 1
 
+    def get_network(self, requested_network="tweet_level_retweet_network"):
 
-
-
-    # def co_occurence_network(self):
-
-
-
-    # def make_retweet_network(self):
-    #     self.network = self.network_building(network_type='retweet')
-    #
-    # def make_quote_network(self):
-    #     self.network = self.network_building(network_type='quote')
-    #
-    # def make_reply_network(self):
-    #     self.network = self.network_building(network_type='reply')
-
-    def get_network(self, level_of_resolution='tweet', network_type='retweet'):
-
-        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
-                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
-                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
-                                                          "or retweet_quote_reply"
-
-        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
-
-        requested_network = level_of_resolution + "_level_" + network_type
         if requested_network in self.network_repository:
-            if level_of_resolution == "tweet":
-                if network_type == "retweet":
+                if requested_network == "tweet_level_retweet_network":
                     return self.tweet_level_retweet_network
-                if network_type == "quote":
+                elif requested_network == "tweet_level_quote_network":
                     return self.tweet_level_quote_network
-                if network_type == "reply":
+                elif requested_network == "tweet_level_reply_network":
                     return self.tweet_level_reply_network
-                if network_type == "quote_reply":
+                elif requested_network == "tweet_level_quote_reply_network":
                     return self.tweet_level_quote_reply_network
-                if network_type == "retweet_reply":
+                elif requested_network == "tweet_level_retweet_reply_network":
                     return self.tweet_level_retweet_reply_network
-                if network_type == "quote_reply":
+                elif requested_network == "tweet_level_quote_reply_network":
                     return self.tweet_level_quote_reply_network
-                if network_type == "retweet_quote_reply":
+                elif requested_network == "tweet_level_retweet_quote_reply_network":
                     return self.tweet_level_retweet_quote_reply_network
-            elif level_of_resolution == "user":
-                if network_type == "retweet":
+                elif requested_network == "tweet_level_retweet_network":
                     return self.user_level_retweet_network
-                if network_type == "quote":
+                elif requested_network == "tweet_level_quote_network":
                     return self.user_level_quote_network
-                if network_type == "reply":
+                elif requested_network == "tweet_level_reply_network":
                     return self.user_level_reply_network
-                if network_type == "quote_reply":
+                elif requested_network == "tweet_level_quote_reply_network":
                     return self.user_level_quote_reply_network
-                if network_type == "retweet_reply":
+                elif requested_network == "tweet_level_retweet_reply_network":
                     return self.user_level_retweet_reply_network
-                if network_type == "quote_reply":
+                elif requested_network == "tweet_level_quote_reply_network":
                     return self.user_level_quote_reply_network
-                if network_type == "retweet_quote_reply":
+                elif requested_network == "tweet_level_retweet_quote_reply_network":
                     return self.user_level_retweet_quote_reply_network
+                elif requested_network == "user_mention_network":
+                    return self.user_mention_network
 
+    def download_network(self, requested_network="tweet_level_retweet_network", download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
 
-
-
-
-        # if level_of_resolution == "tweet":
-        #     if network_type == "retweet" and element in self.network_type_list:
-        #         return self.retweet_network
-        #     elif network_type == "quote" and "quote" in self.network_type_list:
-        #         return self.quote_network
-        #     elif network_type == "reply" and "reply" in self.network_type_list:
-        #         return self.reply_network
-        #     elif network_type == "quote-reply" and "quote-reply" in self.network_type_list:
-        #         return self.quote_reply_network
-        #     elif network_type == "retweet-reply" and "retweet-reply" in self.network_type_list:
-        #         return self.retweet_reply_network
-        #     elif network_type == "retweet-quote" and "retweet-quote" in self.network_type_list:
-        #         return self.retweet_quote_network
-        #     elif network_type == "retweet-quote-reply" and "retweet-quote-reply" in self.network_type_list:
-        #         return self.retweet_quote_reply_network
-
-        # elif level_of_resolution == "user":
-
-        # return self.network## tell in
-
-    def download_network(self, level_of_resolution='tweet', network_type='retweet', download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
-
-        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
-                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
-                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
-                                                          "or retweet_quote_reply"
-
-        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
         assert (download_format in ["GEXF", "GML"]), "The available output formats are GEXF and GML"
 
-        requested_network = level_of_resolution + "_level_" + network_type
         if requested_network in self.network_repository:
             if download_format == "GEXF":
-                nx.write_gexf(self.get_network(level_of_resolution=level_of_resolution, network_type=network_type), path=path, encoding=encoding, version='1.2draft')
+                nx.write_gexf(self.get_network(requested_network=requested_network), path=path, encoding=encoding, version='1.2draft')
             elif download_format == "GML":
-                nx.write_gml(self.get_network(level_of_resolution=level_of_resolution, network_type=network_type), path=path)
+                nx.write_gml(self.get_network(requested_network=requested_network), path=path)
         else:
             print("The network you have requested has not been created yet.")
 
-        # if network_type in self.network_type_list:
-        #     if download_format == "GEXF":
-        #         nx.write_gexf(self.get_network(network_type=network_type), path=path, encoding=encoding, version='1.2draft')
-        #     elif download_format == "GML":
-        #         nx.write_gml(self.get_network(network_type=network_type), path=path)
-        # else:
-        #     print("The network you have requested has not been created yet.")
-
-    def components_number(self, level_of_resolution='tweet', network_type='retweet'):
+    def components_number(self, requested_network="tweet_level_retweet_network"):
         """
         This function calculates the number of connected components in the desired network.
         :return: an integer that shows the number of connected components.
         """
-
-        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
-                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
-                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
-                                                          "or retweet_quote_reply"
-
-        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
-
         requested_network = level_of_resolution + "_level_" + network_type
         if requested_network in self.network_repository:
-            return nx.number_connected_components(self.get_network(level_of_resolution=level_of_resolution, network_type=network_type).to_undirected())
+            return nx.number_connected_components(self.get_network(requested_network=requested_network).to_undirected())
         else:
             print("The network type you indicated has not been created yet.")
 
-    def centrality_measures(self, level_of_resolution='tweet', network_type='retweet'):
+    def centrality_measures(self, metric="degree", requested_network="tweet_level_retweet_network"):
         """
         This function measures network centrality based on the chosen metric.
         :param metric: metric can be "degree", "closeness", "betweenness", "eigenvector", "katz", and "pagerank". Please
@@ -3672,16 +3667,9 @@ class Network:
                            "pagerank"]), "The metric has to be" \
                                          " degree, closeness, betweenness, " \
                                          "eigenvector, katz, or pagerank."
-        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
-                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
-                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
-                                                          "or retweet_quote_reply"
 
-        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
-
-        requested_network = level_of_resolution + "_level_" + network_type
         if requested_network in self.network_repository:
-            network = self.get_network(level_of_resolution=level_of_resolution, network_type=network_type)
+            network = self.get_network(requested_network=requested_network)
             if metric == "degree":
                 # network = self.get_network(network_type=network_type)
                 degree_centrality = nx.centrality.degree_centrality(network)
@@ -3716,7 +3704,7 @@ class Network:
         else:
             print("The network type you indicated has not been created yet.")
 
-    def community_detection(self,level_of_resolution='tweet', network_type='retweet', return_type="network"):
+    def community_detection(self, requested_network="tweet_level_retweet_network", return_type="network"):
         """
         This function identified communities in the network using Louvain algorithm. PLease note that, it uses the undirected
         version of the network.
@@ -3726,17 +3714,10 @@ class Network:
         :return: Depending on the value of return_type parameter the output of this function varies.
         """
 
-        assert (network_type in ["retweet", "quote", "reply", "quote_reply", "retweet_reply", "retweet_quote",
-                                 "retweet_quote_reply"]), "The type of the network could be either retweet, " \
-                                                          "quote, reply, quote_reply, retweet_reply, retweet_quote, " \
-                                                          "or retweet_quote_reply"
-
-        assert (level_of_resolution in ["tweet", "user"]), "The type of the network could be either tweet or user."
         assert (return_type in ["network", "node-community", "community-nodes"]), "The type of the output could be either network, node-community, or community-nodes"
 
-        requested_network = level_of_resolution + "_level_" + network_type
         if requested_network in self.network_repository:
-            network = self.get_network(level_of_resolution=level_of_resolution, network_type=network_type)
+            network = self.get_network(requested_network=requested_network)
             partition = community.best_partition(network.to_undirected())
             if return_type == "network":
                 for node_id in partition:
@@ -5539,14 +5520,23 @@ class SingleTweet: #Update docstring and assertions
         else:
             return []
 
-    def get_mentions(self):#make it more neat! don't return the entire array of nonesense
-                # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
+    def get_mentions(self, return_format="screen_name"):
+
         """
         :return: a list of mentions in this tweet.
         """
         entities = self.get_entities()
         if "user_mentions" in entities:
-            return entities["user_mentions"]
+            if return_format == "screen_name":
+                return [element['screen_name'] for element in entities["user_mentions"]]
+            elif return_format == "name":
+                return [element['name'] for element in entities["user_mentions"]]
+            elif return_format == "id":
+                return [element['id'] for element in entities["user_mentions"]]
+            elif return_format == "id_str":
+                return [element['id_str'] for element in entities["user_mentions"]]
+            elif return_format == "entire_object":
+                return entities["user_mentions"]
         else:
             return []
 
