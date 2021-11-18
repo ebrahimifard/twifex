@@ -2566,6 +2566,9 @@ class Network:
         self.tweet_level_retweet_reply_network = nx.DiGraph()
         self.tweet_level_retweet_quote_network = nx.DiGraph()
         self.tweet_level_retweet_quote_reply_network = nx.DiGraph()
+        self.tweet_level_hashtag_network = nx.Graph()
+        self.tweet_level_mention_network = nx.Graph()
+        self.tweet_level_url_network = nx.Graph()
 
         ### But here we need to have a multi graph becasue a user can retweet/quote/reply to the other user at the same time
         self.user_level_retweet_network = nx.DiGraph()
@@ -2575,8 +2578,9 @@ class Network:
         self.user_level_retweet_reply_network = nx.MultiDiGraph()
         self.user_level_retweet_quote_network = nx.MultiDiGraph()
         self.user_level_retweet_quote_reply_network = nx.MultiDiGraph()
+        self.user_level_hashtag_network = nx.Graph()
+        self.user_level_mention_network = nx.Graph()
 
-        self.tweet_hashtag_network = nx.Graph()
         self.user_mention_network = nx.DiGraph()
 
         self.network_repository = []
@@ -2786,6 +2790,81 @@ class Network:
             #     network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
             # elif retweet_condition is False and quote_condition is False:
             #     network.add_node(tweet.get_id())
+
+    def tweet_level_hashtag_network_building(self):
+        self.network_repository.append("tweet_level_hashtag_network")
+
+        tweets_keys = list(self.tweets.keys())
+        for i in range(len(tweets_keys)):
+            tweet1 = self.tweets[tweets_keys[i]]
+            tweet1_hashtags = tweet1.get_hashtags()
+            j = i+1
+            self.tweet_level_hashtag_network.add_node(tweet1.get_id())
+
+            while j != len(tweets_keys):
+                tweet2 = self.tweets[tweets_keys[j]]
+                tweet2_hashtags = tweet2.get_hashtags()
+
+                for ht1 in tweet1_hashtags:
+                    for ht2 in tweet2_hashtags:
+                        if ht1 == ht2:
+                            if (tweet1.get_id(), tweet2.get_id()) in self.tweet_level_hashtag_network.edges:
+                                self.tweet_level_hashtag_network.edges[tweet1.get_id(), tweet2.get_id()]["weight"] += 1
+                                edge_label = "-"+ht1
+                                self.tweet_level_hashtag_network.edges[tweet1.get_id(), tweet2.get_id()]["hashtags"] += edge_label
+                            else:
+                                self.tweet_level_hashtag_network.add_edge(tweet1.get_id(), tweet2.get_id(), weight=1, hashtags=ht1)
+                j += 1
+
+    def tweet_level_mention_network_building(self):
+        self.network_repository.append("tweet_level_mention_network")
+
+        tweets_keys = list(self.tweets.keys())
+        for i in range(len(tweets_keys)):
+            tweet1 = self.tweets[tweets_keys[i]]
+            tweet1_mentions = tweet1.get_mentions()
+            j = i+1
+            self.tweet_level_mention_network.add_node(tweet1.get_id())
+
+            while j != len(tweets_keys):
+                tweet2 = self.tweets[tweets_keys[j]]
+                tweet2_mentions = tweet2.get_mentions()
+
+                for mt1 in tweet1_mentions:
+                    for mt2 in tweet2_mentions:
+                        if mt1 == mt2:
+                            if (tweet1.get_id(), tweet2.get_id()) in self.tweet_level_mention_network.edges:
+                                self.tweet_level_mention_network.edges[tweet1.get_id(), tweet2.get_id()]["weight"] += 1
+                                edge_label = "-"+mt1
+                                self.tweet_level_mention_network.edges[tweet1.get_id(), tweet2.get_id()]["mentions"] += edge_label
+                            else:
+                                self.tweet_level_mention_network.add_edge(tweet1.get_id(), tweet2.get_id(), weight=1, mentions=mt1)
+                j += 1
+
+    def tweet_level_url_network_building(self):
+        self.network_repository.append("tweet_level_url_network")
+
+        tweets_keys = list(self.tweets.keys())
+        for i in range(len(tweets_keys)):
+            tweet1 = self.tweets[tweets_keys[i]]
+            tweet1_urls = tweet1.get_tweet_urls(return_format="expanded_url")
+            j = i+1
+            self.tweet_level_url_network.add_node(tweet1.get_id())
+
+            while j != len(tweets_keys):
+                tweet2 = self.tweets[tweets_keys[j]]
+                tweet2_urls = tweet2.get_tweet_urls(return_format="expanded_url")
+
+                for url1 in tweet1_urls:
+                    for url2 in tweet2_urls:
+                        if url1 == url2:
+                            if (tweet1.get_id(), tweet2.get_id()) in self.tweet_level_url_network.edges:
+                                self.tweet_level_url_network.edges[tweet1.get_id(), tweet2.get_id()]["weight"] += 1
+                                edge_label = "-"+url1
+                                self.tweet_level_url_network.edges[tweet1.get_id(), tweet2.get_id()]["urls"] += edge_label
+                            else:
+                                self.tweet_level_url_network.add_edge(tweet1.get_id(), tweet2.get_id(), weight=1, urls=url1)
+                j += 1
 
     def user_level_retweet_network_building(self):
         self.network_repository.append("user_level_retweet_network")
@@ -3519,6 +3598,197 @@ class Network:
             elif retweet_condition is False and quote_condition is False and reply_condition is False:
                 self.user_level_retweet_quote_reply_network.add_node(source)
 
+    def user_level_hashtag_network_building(self):
+        self.network_repository.append("user_level_hashtag_network")
+
+        tweets_keys = list(self.tweets.keys())
+        for i in range(len(tweets_keys)):
+            tweet1 = self.tweets[tweets_keys[i]]
+            user1 = tweet1.get_twitter().get_screen_name()
+            tweet1_hashtags = tweet1.get_hashtags()
+            j = i + 1
+            self.user_level_hashtag_network.add_node(user1)
+
+            tweet1_retweet_condition = tweet1.is_retweeted()
+            tweet1_quote_condition = tweet1.is_quote_available()
+
+            if tweet1_retweet_condition:
+                tweet1_rt = tweet1.get_retweeted()
+                user1_rt = tweet1_rt.get_twitter().get_screen_name()
+                for ht in tweet1_hashtags:
+                    if (user1, user1_rt) in self.user_level_hashtag_network.edges:
+                        if (tweet1.get_id(), tweet1_rt.get_id()) not in self.user_level_hashtag_network.edges[
+                            user1, user1_rt] and (tweet1_rt.get_id(), tweet1.get_id()) not in \
+                                self.user_level_hashtag_network.edges[user1, user1_rt]:
+                            self.user_level_hashtag_network.edges[user1, user1_rt]["weight"] += 1
+                            edge_label = "-" + ht
+                            self.user_level_hashtag_network.edges[user1, user1_rt]["hashtags"] += edge_label
+                            self.user_level_hashtag_network.edges[user1, user1_rt]["tweets"] += [
+                                (tweet1.get_id(), tweet1_rt.get_id())]
+                    else:
+                        self.user_level_hashtag_network.add_edge(user1, user1_rt, weight=1, hashtags=ht,
+                                                                 tweets=[(tweet1.get_id(), tweet1_rt.get_id())])
+
+                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                if tweet1_inner_quote_condition:
+                    tweet1_rt_qt = tweet1_rt.get_quote()
+                    user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+                    tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+
+                    for ht1 in tweet1_hashtags:
+                        for ht2 in tweet1_rt_qt_hashtags:
+                            if ht1 == ht2:
+                                if (user1, user1_rt_qt) in self.user_level_hashtag_network.edges:
+                                    if (tweet1.get_id(), tweet1_rt_qt.get_id()) not in \
+                                            self.user_level_hashtag_network.edges[user1, user1_rt_qt] and (
+                                    tweet1_rt_qt.get_id(), tweet1.get_id()) not in \
+                                            self.user_level_hashtag_network.edges[user1, user1_rt_qt]:
+                                        self.user_level_hashtag_network.edges[user1, user1_rt_qt]["weight"] += 1
+                                        edge_label = "-" + ht1
+                                        self.user_level_hashtag_network.edges[user1, user1_rt_qt][
+                                            "hashtags"] += edge_label
+                                        self.user_level_hashtag_network.edges[user1, user1_rt_qt]["tweets"] += [
+                                            (tweet1.get_id(), tweet1_rt_qt.get_id())]
+                                else:
+                                    self.user_level_hashtag_network.add_edge(user1, user1_rt_qt, weight=1, hashtags=ht1,
+                                                                             tweets=[(tweet1.get_id(),
+                                                                                      tweet1_rt_qt.get_id())])
+
+                                if (user1_rt, user1_rt_qt) in self.user_level_hashtag_network.edges:
+                                    if (tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+                                            self.user_level_hashtag_network.edges[user1_rt, user1_rt_qt] and (
+                                    tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+                                            self.user_level_hashtag_network.edges[user1_rt, user1_rt_qt]:
+                                        self.user_level_hashtag_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
+                                        edge_label = "-" + ht1
+                                        self.user_level_hashtag_network.edges[user1_rt, user1_rt_qt][
+                                            "hashtags"] += edge_label
+                                        self.user_level_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"] += \
+                                            [(tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
+                                else:
+                                    self.user_level_hashtag_network.add_edge(user1_rt, user1_rt_qt, weight=1,
+                                                                             hashtags=ht1, tweets=[
+                                            (tweet1_rt.get_id(), tweet1_rt_qt.get_id())])
+
+            if tweet1_quote_condition:
+                tweet1_qt = tweet1.get_quote()
+                user1_qt = tweet1_qt.get_twitter().get_screen_name()
+                tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+                for ht1 in tweet1_hashtags:
+                    for ht2 in tweet1_qt_hashtags:
+                        if ht1 == ht2:
+                            if (user1, user1_qt) in self.user_level_hashtag_network.edges:
+                                if (tweet1.get_id(), tweet1_qt.get_id()) not in self.user_level_hashtag_network.edges[
+                                    user1, user1_qt] and (tweet1_qt.get_id(), tweet1.get_id()) not in \
+                                        self.user_level_hashtag_network.edges[user1, user1_qt]:
+                                    self.user_level_hashtag_network.edges[user1, user1_qt]["weight"] += 1
+                                    edge_label = "-" + ht1
+                                    self.user_level_hashtag_network.edges[user1, user1_qt]["hashtags"] += edge_label
+                                    self.user_level_hashtag_network.edges[user1, user1_qt]["tweets"] += [
+                                        (tweet1.get_id(), tweet1_qt.get_id())]
+                            else:
+                                self.user_level_hashtag_network.add_edge(user1, user1_qt, weight=1, hashtags=ht1,
+                                                                         tweets=[(tweet1.get_id(), tweet1_qt.get_id())])
+
+            while j != len(tweets_keys):
+                tweet2 = self.tweets[tweets_keys[j]]
+                user2 = tweet2.get_twitter().get_screen_name()
+                tweet2_hashtags = tweet2.get_hashtags()
+
+                tweet2_retweet_condition = tweet2.is_retweeted()
+                tweet2_quote_condition = tweet2.is_quote_available()
+
+                if tweet2_retweet_condition:
+                    tweet2_rt = tweet2.get_retweeted()
+                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
+                    for ht1 in tweet1_hashtags:
+                        for ht2 in tweet2_hashtags:
+                            if ht1 == ht2:
+                                if (user1, user2_rt) in self.user_level_hashtag_network.edges:
+                                    if (tweet1.get_id(), tweet2_rt.get_id()) not in self.user_level_hashtag_network.edges[
+                                        user1, user2_rt] and (tweet2_rt.get_id(), tweet1.get_id()) not in \
+                                            self.user_level_hashtag_network.edges[user1, user2_rt]:
+                                        self.user_level_hashtag_network.edges[user1, user2_rt]["weight"] += 1
+                                        edge_label = "-" + ht1
+                                        self.user_level_hashtag_network.edges[user1, user2_rt]["hashtags"] += edge_label
+                                        self.user_level_hashtag_network.edges[user1, user2_rt]["tweets"] += [
+                                            (tweet1.get_id(), tweet2_rt.get_id())]
+                                else:
+                                    self.user_level_hashtag_network.add_edge(user1, user2_rt, weight=1, hashtags=ht1,
+                                                                             tweets=[(tweet1.get_id(), tweet2_rt.get_id())])
+
+                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+                    if tweet2_inner_quote_condition:
+                        tweet2_rt_qt = tweet2_rt.get_quote()
+                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+                        tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+
+                        for ht1 in tweet1_hashtags:
+                            for ht2 in tweet2_rt_qt_hashtags:
+                                if ht1 == ht2:
+                                    if (user1, user2_rt_qt) in self.user_level_hashtag_network.edges:
+                                        if (tweet1.get_id(), tweet2_rt_qt.get_id()) not in \
+                                                self.user_level_hashtag_network.edges[user1, user2_rt_qt] and (
+                                                tweet2_rt_qt.get_id(), tweet1.get_id()) not in \
+                                                self.user_level_hashtag_network.edges[user1, user2_rt_qt]:
+                                            self.user_level_hashtag_network.edges[user1, user2_rt_qt]["weight"] += 1
+                                            edge_label = "-" + ht1
+                                            self.user_level_hashtag_network.edges[user1, user2_rt_qt][
+                                                "hashtags"] += edge_label
+                                            self.user_level_hashtag_network.edges[user1, user2_rt_qt]["tweets"] += [
+                                                (tweet1.get_id(), tweet2_rt_qt.get_id())]
+                                    else:
+                                        self.user_level_hashtag_network.add_edge(user1, user2_rt_qt, weight=1, hashtags=ht1, tweets=[(tweet1.get_id(), tweet2_rt_qt.get_id())])
+
+                if tweet2_quote_condition:
+
+                if tweet1_retweet_condition and tweet2_retweet_condition:
+                    tweet1_rt = tweet1.get_retweeted()
+                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
+                    tweet2_rt = tweet2.get_retweeted()
+                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
+
+                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+
+                if tweet2_quote_condition and tweet2_quote_condition:
+
+                if tweet1_retweet_condition and tweet2_quote_condition:
+                    tweet1_rt = tweet1.get_retweeted()
+                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
+                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+
+                if tweet2_retweet_condition and tweet1_quote_condition:
+                    tweet2_rt = tweet2.get_retweeted()
+                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
+                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+
+
+                for ht1 in tweet1_hashtags:
+                    for ht2 in tweet2_hashtags:
+                        if ht1 == ht2:
+                            if (user1, user2) in self.user_level_hashtag_network.edges:
+                                if (tweet1.get_id(), tweet2.get_id()) not in self.user_level_hashtag_network.edges[
+                                    user1, user2] and (tweet2.get_id(), tweet1.get_id()) not in \
+                                        self.user_level_hashtag_network.edges[user1, user2]:
+                                    self.user_level_hashtag_network.edges[user1, user2]["weight"] += 1
+                                    edge_label = "-" + ht1
+                                    self.user_level_hashtag_network.edges[user1, user2]["hashtags"] += edge_label
+                                    self.user_level_hashtag_network.edges[user1, user2]["tweets"] += [
+                                        (tweet1.get_id(), tweet2.get_id())]
+                            else:
+                                self.user_level_hashtag_network.add_edge(user1, user2, weight=1, hashtags=ht1,
+                                                                         tweets=[(tweet1.get_id(), tweet2.get_id())])
+                j += 1
+
+        for edge in self.user_level_hashtag_network.edges:
+            del self.user_level_hashtag_network.edges[edge]["tweets"]
+
+    def user_level_mention_network(self):
+        print("test")
+    def user_level_url_network(self):
+        print("test")
+
     def mention_network_building(self):
         self.network_repository.append("user_mention_network")
         for tweet_id, tweet in self.tweets.items():
@@ -3567,69 +3837,59 @@ class Network:
                     else:
                         self.user_mention_network.add_edge(source, mention, kind="mention", weight=1,
                                                            shared_content=tweet.get_quote().get_text())
+        print("test")
+
 
 
 
 
     # def co_occurence_network(self):
 
-    def hashtag_network_building(self):
 
-        self.network_repository.append("hashtag_network")
-
-        tweets_keys = list(self.tweets.keys())
-        for i in range(len(self.tweets)):
-            tweet1 = self.tweets[tweets_keys[i]]
-            tweet1_hashtags = tweet1.get_hashtags()
-            j = i+1
-            while j != len(tweets_keys):
-                tweet2 = self.tweets[tweets_keys[j]]
-                tweet2_hashtags = tweet2.get_hashtags()
-
-                for ht1 in tweet1_hashtags:
-                    for ht2 in tweet2_hashtags:
-                        if ht1 == ht2:
-                            if (tweet1.get_id(), tweet2.get_id()) in self.tweet_hashtag_network.edges:
-                                self.tweet_hashtag_network.edges[tweet1.get_id(), tweet2.get_id()]["weight"] += 1
-                                edge_label = "-"+ht1
-                                self.tweet_hashtag_network.edges[tweet1.get_id(), tweet2.get_id()]["hashtags"] += edge_label
-                            else:
-                                self.tweet_hashtag_network.add_edge(tweet1.get_id(), tweet2.get_id(), weight=1, hashtags=ht1)
-                j += 1
 
     def get_network(self, requested_network="tweet_level_retweet_network"):
 
         if requested_network in self.network_repository:
-                if requested_network == "tweet_level_retweet_network":
-                    return self.tweet_level_retweet_network
-                elif requested_network == "tweet_level_quote_network":
-                    return self.tweet_level_quote_network
-                elif requested_network == "tweet_level_reply_network":
-                    return self.tweet_level_reply_network
-                elif requested_network == "tweet_level_quote_reply_network":
-                    return self.tweet_level_quote_reply_network
-                elif requested_network == "tweet_level_retweet_reply_network":
-                    return self.tweet_level_retweet_reply_network
-                elif requested_network == "tweet_level_quote_reply_network":
-                    return self.tweet_level_quote_reply_network
-                elif requested_network == "tweet_level_retweet_quote_reply_network":
-                    return self.tweet_level_retweet_quote_reply_network
-                elif requested_network == "tweet_level_retweet_network":
-                    return self.user_level_retweet_network
-                elif requested_network == "tweet_level_quote_network":
-                    return self.user_level_quote_network
-                elif requested_network == "tweet_level_reply_network":
-                    return self.user_level_reply_network
-                elif requested_network == "tweet_level_quote_reply_network":
-                    return self.user_level_quote_reply_network
-                elif requested_network == "tweet_level_retweet_reply_network":
-                    return self.user_level_retweet_reply_network
-                elif requested_network == "tweet_level_quote_reply_network":
-                    return self.user_level_quote_reply_network
-                elif requested_network == "tweet_level_retweet_quote_reply_network":
-                    return self.user_level_retweet_quote_reply_network
-                elif requested_network == "user_mention_network":
-                    return self.user_mention_network
+            if requested_network == "tweet_level_retweet_network":
+                return self.tweet_level_retweet_network
+            elif requested_network == "tweet_level_quote_network":
+                return self.tweet_level_quote_network
+            elif requested_network == "tweet_level_reply_network":
+                return self.tweet_level_reply_network
+            elif requested_network == "tweet_level_quote_reply_network":
+                return self.tweet_level_quote_reply_network
+            elif requested_network == "tweet_level_retweet_reply_network":
+                return self.tweet_level_retweet_reply_network
+            elif requested_network == "tweet_level_retweet_quote_network":
+                return self.tweet_level_retweet_quote_network
+            elif requested_network == "tweet_level_retweet_quote_reply_network":
+                return self.tweet_level_retweet_quote_reply_network
+            elif requested_network == "tweet_level_hashtag_network":
+                return self.tweet_level_hashtag_network
+            elif requested_network == "tweet_level_mention_network":
+                return self.tweet_level_mention_network
+            elif requested_network == "tweet_level_url_network":
+                return self.tweet_level_url_network
+
+            elif requested_network == "user_level_retweet_network":
+                return self.user_level_retweet_network
+            elif requested_network == "user_level_quote_network":
+                return self.user_level_quote_network
+            elif requested_network == "user_level_reply_network":
+                return self.user_level_reply_network
+            elif requested_network == "user_level_quote_reply_network":
+                return self.user_level_quote_reply_network
+            elif requested_network == "user_level_retweet_reply_network":
+                return self.user_level_retweet_reply_network
+            elif requested_network == "user_level_retweet_quote_network":
+                return self.user_level_quote_reply_network
+            elif requested_network == "user_level_retweet_quote_reply_network":
+                return self.user_level_retweet_quote_reply_network
+            elif requested_network == "user_level_hashtag_network":
+                return self.user_level_hashtag_network
+
+            elif requested_network == "user_mention_network":
+                return self.user_mention_network
 
     def download_network(self, requested_network="tweet_level_retweet_network", download_format="GEXF", path="", encoding='utf-8'):     #### Tell in the docstring that the path has to be completed and should include the file format!
 
@@ -5502,11 +5762,19 @@ class SingleTweet: #Update docstring and assertions
         """
         return self.tweet["coordinates"]
 
-    def get_tweet_urls(self):#You should be more specific about this field, not returning bunch of fields
+    def get_tweet_urls(self, return_format="url"):
         """
         :return: a list of urls in this tweet.
         """
-        return self.get_entities()["urls"]
+
+        urls = self.get_entities()["urls"]
+        if return_format == "url":
+            return [element['url'] for element in urls]
+        elif return_format == "expanded_url":
+            return [element['expanded_url'] for element in urls]
+        elif return_format == "display_url":
+            return [element['display_url'] for element in urls]
+
 
     def get_hashtags(self): #make it more neat! don't return the entire array of nonesense
         #https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
