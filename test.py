@@ -12,6 +12,7 @@ path2 = "./tests/people_timeline/"
 path3 = "./tests/modified_tweets/"
 path4 = "./tests/searched_tweets/"
 path5 = "./tests/data/"
+path6 = "./tests/just_to_test_hashtag_network/"
 
 twifex = Twifex()
 
@@ -51,24 +52,18 @@ for file in tqdm([i for i in os.listdir(path3) if os.path.isfile(path3+i)]):
         modified_tweets.append(twifex.single_tweet(path3+file))
     else:
         pass
+
+hashtag_tweets = []
+for file in tqdm([i for i in os.listdir(path6) if os.path.isfile(path6+i)]):
+    if ".json" in file:
+        hashtag_tweets.append(twifex.single_tweet(path6+file))
+    else:
+        pass
 ###################################################################################
-_tweets = timeline_tweets
+_tweets = hashtag_tweets
 
 p = twifex.collective_tweets(_tweets).topology_based_features().time_independent_features().time_independent_location_independent_network_features().tweet_features()
 q = twifex.collective_tweets(_tweets).topology_based_features().time_independent_features().time_independent_location_independent_network_features().user_features()
 
-p.network_building(network_type="retweet")
-p.network_building(network_type="quote")
-p.network_building(network_type="reply")
-p.network_building(network_type="quote-reply")
-p.network_building(network_type="retweet-reply")
-p.network_building(network_type="retweet-quote")
-p.network_building(network_type="retweet-quote-reply")
-
-p.download_network(network_type="retweet", path="./n1.gexf")
-p.download_network(network_type="quote", path="./n2.gexf")
-p.download_network(network_type="reply", path="./n3.gexf")
-p.download_network(network_type="quote-reply", path="./n4.gexf")
-p.download_network(network_type="retweet-reply", path="./n5.gexf")
-p.download_network(network_type="retweet-quote", path="./n6.gexf")
-p.download_network(network_type="retweet-quote-reply", path="./n7.gexf")
+p.user_level_hashtag_network_building()
+print("Hi")
