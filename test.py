@@ -60,10 +60,21 @@ for file in tqdm([i for i in os.listdir(path6) if os.path.isfile(path6+i)]):
     else:
         pass
 ###################################################################################
-_tweets = hashtag_tweets
+# _tweets = hashtag_tweets
+_tweets = new_tweets
 
 p = twifex.collective_tweets(_tweets).topology_based_features().time_independent_features().time_independent_location_independent_network_features().tweet_features()
 q = twifex.collective_tweets(_tweets).topology_based_features().time_independent_features().time_independent_location_independent_network_features().user_features()
 
+
+
 p.user_level_hashtag_network_building()
+p.user_level_mention_network_building()
+p.user_level_url_network_building()
+p.mention_network_building()
+p.hashtag_network_building()
+p.url_network_building()
+p.tweet_level_hashtag_network_building()
+
 print("Hi")
+

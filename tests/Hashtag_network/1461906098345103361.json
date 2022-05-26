@@ -1,0 +1,486 @@
+{
+    "created_at": "Sat Nov 20 03:55:49 +0000 2021",
+    "id": 1461906098345103361,
+    "id_str": "1461906098345103361",
+    "full_text": "Update.\n\nDeaths WITH #Covid19 age 0-19 yrs as of Nov 12 2021: \n\n17 \n\nReported #vaccine adverse events age 12-17 yrs as of Nov 12 2021: \n\n711\n\n\"Canada prepares for the largest childhood #vaccination campaign since polio\" under \"Emergency Use Authorization\". There is no emergency. https://t.co/Ht5RkbqRhr https://t.co/s4kQa3vD3A",
+    "truncated": false,
+    "display_text_range":
+    [
+        0,
+        303
+    ],
+    "entities":
+    {
+        "hashtags":
+        [
+            {
+                "text": "Covid19",
+                "indices":
+                [
+                    21,
+                    29
+                ]
+            },
+            {
+                "text": "vaccine",
+                "indices":
+                [
+                    78,
+                    86
+                ]
+            },
+            {
+                "text": "vaccination",
+                "indices":
+                [
+                    185,
+                    197
+                ]
+            }
+        ],
+        "symbols":
+        [],
+        "user_mentions":
+        [],
+        "urls":
+        [
+            {
+                "url": "https://t.co/Ht5RkbqRhr",
+                "expanded_url": "https://twitter.com/elleprovocateur/status/1446974749381435394",
+                "display_url": "twitter.com/elleprovocateu…",
+                "indices":
+                [
+                    280,
+                    303
+                ]
+            }
+        ],
+        "media":
+        [
+            {
+                "id": 1461905191381475338,
+                "id_str": "1461905191381475338",
+                "indices":
+                [
+                    304,
+                    327
+                ],
+                "media_url": "http://pbs.twimg.com/media/FEm7BquXoAox41t.png",
+                "media_url_https": "https://pbs.twimg.com/media/FEm7BquXoAox41t.png",
+                "url": "https://t.co/s4kQa3vD3A",
+                "display_url": "pic.twitter.com/s4kQa3vD3A",
+                "expanded_url": "https://twitter.com/elleprovocateur/status/1461906098345103361/photo/1",
+                "type": "photo",
+                "sizes":
+                {
+                    "large":
+                    {
+                        "w": 1149,
+                        "h": 524,
+                        "resize": "fit"
+                    },
+                    "medium":
+                    {
+                        "w": 1149,
+                        "h": 524,
+                        "resize": "fit"
+                    },
+                    "thumb":
+                    {
+                        "w": 150,
+                        "h": 150,
+                        "resize": "crop"
+                    },
+                    "small":
+                    {
+                        "w": 680,
+                        "h": 310,
+                        "resize": "fit"
+                    }
+                }
+            }
+        ]
+    },
+    "extended_entities":
+    {
+        "media":
+        [
+            {
+                "id": 1461905191381475338,
+                "id_str": "1461905191381475338",
+                "indices":
+                [
+                    304,
+                    327
+                ],
+                "media_url": "http://pbs.twimg.com/media/FEm7BquXoAox41t.png",
+                "media_url_https": "https://pbs.twimg.com/media/FEm7BquXoAox41t.png",
+                "url": "https://t.co/s4kQa3vD3A",
+                "display_url": "pic.twitter.com/s4kQa3vD3A",
+                "expanded_url": "https://twitter.com/elleprovocateur/status/1461906098345103361/photo/1",
+                "type": "photo",
+                "sizes":
+                {
+                    "large":
+                    {
+                        "w": 1149,
+                        "h": 524,
+                        "resize": "fit"
+                    },
+                    "medium":
+                    {
+                        "w": 1149,
+                        "h": 524,
+                        "resize": "fit"
+                    },
+                    "thumb":
+                    {
+                        "w": 150,
+                        "h": 150,
+                        "resize": "crop"
+                    },
+                    "small":
+                    {
+                        "w": 680,
+                        "h": 310,
+                        "resize": "fit"
+                    }
+                }
+            }
+        ]
+    },
+    "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":
+    {
+        "id": 23371841,
+        "id_str": "23371841",
+        "name": "Cory Morningstar",
+        "screen_name": "elleprovocateur",
+        "location": "Canada",
+        "description": "Independent investigative journalist with artistic & intellectual tendencies, who lives and acts with little regard for conventional rules of behaviour.",
+        "url": "http://t.co/BTMfgTdW7X",
+        "entities":
+        {
+            "url":
+            {
+                "urls":
+                [
+                    {
+                        "url": "http://t.co/BTMfgTdW7X",
+                        "expanded_url": "http://theartofannihilation.com/",
+                        "display_url": "theartofannihilation.com",
+                        "indices":
+                        [
+                            0,
+                            22
+                        ]
+                    }
+                ]
+            },
+            "description":
+            {
+                "urls":
+                []
+            }
+        },
+        "protected": false,
+        "followers_count": 25919,
+        "friends_count": 1316,
+        "listed_count": 323,
+        "created_at": "Sun Mar 08 23:39:20 +0000 2009",
+        "favourites_count": 18477,
+        "utc_offset": null,
+        "time_zone": null,
+        "geo_enabled": false,
+        "verified": false,
+        "statuses_count": 66717,
+        "lang": null,
+        "contributors_enabled": false,
+        "is_translator": false,
+        "is_translation_enabled": false,
+        "profile_background_color": "1A1B1F",
+        "profile_background_image_url": "http://abs.twimg.com/images/themes/theme9/bg.gif",
+        "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme9/bg.gif",
+        "profile_background_tile": false,
+        "profile_image_url": "http://pbs.twimg.com/profile_images/520082526/wonder_woman_boot_normal.jpg",
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/520082526/wonder_woman_boot_normal.jpg",
+        "profile_banner_url": "https://pbs.twimg.com/profile_banners/23371841/1398865103",
+        "profile_link_color": "2FC2EF",
+        "profile_sidebar_border_color": "181A1E",
+        "profile_sidebar_fill_color": "252429",
+        "profile_text_color": "666666",
+        "profile_use_background_image": true,
+        "has_extended_profile": false,
+        "default_profile": false,
+        "default_profile_image": false,
+        "following": false,
+        "follow_request_sent": false,
+        "notifications": false,
+        "translator_type": "none",
+        "withheld_in_countries":
+        []
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "is_quote_status": true,
+    "quoted_status_id": 1446974749381435394,
+    "quoted_status_id_str": "1446974749381435394",
+    "quoted_status_permalink":
+    {
+        "url": "https://t.co/Ht5RkbqRhr",
+        "expanded": "https://twitter.com/elleprovocateur/status/1446974749381435394",
+        "display": "twitter.com/elleprovocateu…"
+    },
+    "quoted_status":
+    {
+        "created_at": "Sat Oct 09 23:03:58 +0000 2021",
+        "id": 1446974749381435394,
+        "id_str": "1446974749381435394",
+        "full_text": "#Canada. Pop: 38 million. \n\nDeaths WITH #Covid19 age 0-19 yrs as of Oct 8 2021: \n\n17 \n\n#Vaccine adverse events age 12-17 yrs as of Oct 1 2021: \n\n451\n\nYet, \"Canada prepares for the largest childhood #vaccination campaign since polio.\" \n\nThis is a crime. There will be tears. https://t.co/YqRJgcJnkc",
+        "truncated": false,
+        "display_text_range":
+        [
+            0,
+            273
+        ],
+        "entities":
+        {
+            "hashtags":
+            [
+                {
+                    "text": "Canada",
+                    "indices":
+                    [
+                        0,
+                        7
+                    ]
+                },
+                {
+                    "text": "Covid19",
+                    "indices":
+                    [
+                        40,
+                        48
+                    ]
+                },
+                {
+                    "text": "Vaccine",
+                    "indices":
+                    [
+                        87,
+                        95
+                    ]
+                },
+                {
+                    "text": "vaccination",
+                    "indices":
+                    [
+                        198,
+                        210
+                    ]
+                }
+            ],
+            "symbols":
+            [],
+            "user_mentions":
+            [],
+            "urls":
+            [],
+            "media":
+            [
+                {
+                    "id": 1446974303623385092,
+                    "id_str": "1446974303623385092",
+                    "indices":
+                    [
+                        274,
+                        297
+                    ],
+                    "media_url": "http://pbs.twimg.com/media/FBSvdnaXEAQFfs-.png",
+                    "media_url_https": "https://pbs.twimg.com/media/FBSvdnaXEAQFfs-.png",
+                    "url": "https://t.co/YqRJgcJnkc",
+                    "display_url": "pic.twitter.com/YqRJgcJnkc",
+                    "expanded_url": "https://twitter.com/elleprovocateur/status/1446974749381435394/photo/1",
+                    "type": "photo",
+                    "sizes":
+                    {
+                        "medium":
+                        {
+                            "w": 1138,
+                            "h": 505,
+                            "resize": "fit"
+                        },
+                        "small":
+                        {
+                            "w": 680,
+                            "h": 302,
+                            "resize": "fit"
+                        },
+                        "large":
+                        {
+                            "w": 1138,
+                            "h": 505,
+                            "resize": "fit"
+                        },
+                        "thumb":
+                        {
+                            "w": 150,
+                            "h": 150,
+                            "resize": "crop"
+                        }
+                    }
+                }
+            ]
+        },
+        "extended_entities":
+        {
+            "media":
+            [
+                {
+                    "id": 1446974303623385092,
+                    "id_str": "1446974303623385092",
+                    "indices":
+                    [
+                        274,
+                        297
+                    ],
+                    "media_url": "http://pbs.twimg.com/media/FBSvdnaXEAQFfs-.png",
+                    "media_url_https": "https://pbs.twimg.com/media/FBSvdnaXEAQFfs-.png",
+                    "url": "https://t.co/YqRJgcJnkc",
+                    "display_url": "pic.twitter.com/YqRJgcJnkc",
+                    "expanded_url": "https://twitter.com/elleprovocateur/status/1446974749381435394/photo/1",
+                    "type": "photo",
+                    "sizes":
+                    {
+                        "medium":
+                        {
+                            "w": 1138,
+                            "h": 505,
+                            "resize": "fit"
+                        },
+                        "small":
+                        {
+                            "w": 680,
+                            "h": 302,
+                            "resize": "fit"
+                        },
+                        "large":
+                        {
+                            "w": 1138,
+                            "h": 505,
+                            "resize": "fit"
+                        },
+                        "thumb":
+                        {
+                            "w": 150,
+                            "h": 150,
+                            "resize": "crop"
+                        }
+                    }
+                }
+            ]
+        },
+        "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+        "in_reply_to_status_id": null,
+        "in_reply_to_status_id_str": null,
+        "in_reply_to_user_id": null,
+        "in_reply_to_user_id_str": null,
+        "in_reply_to_screen_name": null,
+        "user":
+        {
+            "id": 23371841,
+            "id_str": "23371841",
+            "name": "Cory Morningstar",
+            "screen_name": "elleprovocateur",
+            "location": "Canada",
+            "description": "Independent investigative journalist with artistic & intellectual tendencies, who lives and acts with little regard for conventional rules of behaviour.",
+            "url": "http://t.co/BTMfgTdW7X",
+            "entities":
+            {
+                "url":
+                {
+                    "urls":
+                    [
+                        {
+                            "url": "http://t.co/BTMfgTdW7X",
+                            "expanded_url": "http://theartofannihilation.com/",
+                            "display_url": "theartofannihilation.com",
+                            "indices":
+                            [
+                                0,
+                                22
+                            ]
+                        }
+                    ]
+                },
+                "description":
+                {
+                    "urls":
+                    []
+                }
+            },
+            "protected": false,
+            "followers_count": 25919,
+            "friends_count": 1316,
+            "listed_count": 323,
+            "created_at": "Sun Mar 08 23:39:20 +0000 2009",
+            "favourites_count": 18477,
+            "utc_offset": null,
+            "time_zone": null,
+            "geo_enabled": false,
+            "verified": false,
+            "statuses_count": 66717,
+            "lang": null,
+            "contributors_enabled": false,
+            "is_translator": false,
+            "is_translation_enabled": false,
+            "profile_background_color": "1A1B1F",
+            "profile_background_image_url": "http://abs.twimg.com/images/themes/theme9/bg.gif",
+            "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme9/bg.gif",
+            "profile_background_tile": false,
+            "profile_image_url": "http://pbs.twimg.com/profile_images/520082526/wonder_woman_boot_normal.jpg",
+            "profile_image_url_https": "https://pbs.twimg.com/profile_images/520082526/wonder_woman_boot_normal.jpg",
+            "profile_banner_url": "https://pbs.twimg.com/profile_banners/23371841/1398865103",
+            "profile_link_color": "2FC2EF",
+            "profile_sidebar_border_color": "181A1E",
+            "profile_sidebar_fill_color": "252429",
+            "profile_text_color": "666666",
+            "profile_use_background_image": true,
+            "has_extended_profile": false,
+            "default_profile": false,
+            "default_profile_image": false,
+            "following": false,
+            "follow_request_sent": false,
+            "notifications": false,
+            "translator_type": "none",
+            "withheld_in_countries":
+            []
+        },
+        "geo": null,
+        "coordinates": null,
+        "place": null,
+        "contributors": null,
+        "is_quote_status": false,
+        "retweet_count": 245,
+        "favorite_count": 377,
+        "favorited": false,
+        "retweeted": false,
+        "possibly_sensitive": false,
+        "possibly_sensitive_appealable": false,
+        "lang": "en"
+    },
+    "retweet_count": 392,
+    "favorite_count": 577,
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "possibly_sensitive_appealable": false,
+    "lang": "en"
+}

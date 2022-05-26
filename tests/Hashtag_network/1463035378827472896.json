@@ -1,0 +1,205 @@
+{
+    "created_at": "Tue Nov 23 06:43:10 +0000 2021",
+    "id": 1463035378827472896,
+    "id_str": "1463035378827472896",
+    "full_text": "\"We simply cannot take the risk...\"#vaccine #Risk https://t.co/RbBO1nb9jz",
+    "truncated": false,
+    "display_text_range":
+    [
+        0,
+        49
+    ],
+    "entities":
+    {
+        "hashtags":
+        [
+            {
+                "text": "vaccine",
+                "indices":
+                [
+                    35,
+                    43
+                ]
+            },
+            {
+                "text": "Risk",
+                "indices":
+                [
+                    44,
+                    49
+                ]
+            }
+        ],
+        "symbols":
+        [],
+        "user_mentions":
+        [],
+        "urls":
+        [],
+        "media":
+        [
+            {
+                "id": 1463035347496017926,
+                "id_str": "1463035347496017926",
+                "indices":
+                [
+                    50,
+                    73
+                ],
+                "media_url": "http://pbs.twimg.com/media/FE2-5aVXIAY4qTP.jpg",
+                "media_url_https": "https://pbs.twimg.com/media/FE2-5aVXIAY4qTP.jpg",
+                "url": "https://t.co/RbBO1nb9jz",
+                "display_url": "pic.twitter.com/RbBO1nb9jz",
+                "expanded_url": "https://twitter.com/JohnGalt_29/status/1463035378827472896/photo/1",
+                "type": "photo",
+                "sizes":
+                {
+                    "thumb":
+                    {
+                        "w": 150,
+                        "h": 150,
+                        "resize": "crop"
+                    },
+                    "large":
+                    {
+                        "w": 1296,
+                        "h": 648,
+                        "resize": "fit"
+                    },
+                    "small":
+                    {
+                        "w": 680,
+                        "h": 340,
+                        "resize": "fit"
+                    },
+                    "medium":
+                    {
+                        "w": 1200,
+                        "h": 600,
+                        "resize": "fit"
+                    }
+                }
+            }
+        ]
+    },
+    "extended_entities":
+    {
+        "media":
+        [
+            {
+                "id": 1463035347496017926,
+                "id_str": "1463035347496017926",
+                "indices":
+                [
+                    50,
+                    73
+                ],
+                "media_url": "http://pbs.twimg.com/media/FE2-5aVXIAY4qTP.jpg",
+                "media_url_https": "https://pbs.twimg.com/media/FE2-5aVXIAY4qTP.jpg",
+                "url": "https://t.co/RbBO1nb9jz",
+                "display_url": "pic.twitter.com/RbBO1nb9jz",
+                "expanded_url": "https://twitter.com/JohnGalt_29/status/1463035378827472896/photo/1",
+                "type": "photo",
+                "sizes":
+                {
+                    "thumb":
+                    {
+                        "w": 150,
+                        "h": 150,
+                        "resize": "crop"
+                    },
+                    "large":
+                    {
+                        "w": 1296,
+                        "h": 648,
+                        "resize": "fit"
+                    },
+                    "small":
+                    {
+                        "w": 680,
+                        "h": 340,
+                        "resize": "fit"
+                    },
+                    "medium":
+                    {
+                        "w": 1200,
+                        "h": 600,
+                        "resize": "fit"
+                    }
+                }
+            }
+        ]
+    },
+    "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":
+    {
+        "id": 10388412,
+        "id_str": "10388412",
+        "name": "Atlas_shrugged",
+        "screen_name": "JohnGalt_29",
+        "location": "Texas",
+        "description": "courtesy, integrity, perseverance, self-control and indomitable spirit.",
+        "url": null,
+        "entities":
+        {
+            "description":
+            {
+                "urls":
+                []
+            }
+        },
+        "protected": false,
+        "followers_count": 645,
+        "friends_count": 3037,
+        "listed_count": 11,
+        "created_at": "Mon Nov 19 17:49:12 +0000 2007",
+        "favourites_count": 28453,
+        "utc_offset": null,
+        "time_zone": null,
+        "geo_enabled": false,
+        "verified": false,
+        "statuses_count": 10935,
+        "lang": null,
+        "contributors_enabled": false,
+        "is_translator": false,
+        "is_translation_enabled": false,
+        "profile_background_color": "EBEBEB",
+        "profile_background_image_url": "http://abs.twimg.com/images/themes/theme7/bg.gif",
+        "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme7/bg.gif",
+        "profile_background_tile": false,
+        "profile_image_url": "http://pbs.twimg.com/profile_images/378800000203776587/ccbd2501b9c1b294f378a1b884fdcf47_normal.jpeg",
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/378800000203776587/ccbd2501b9c1b294f378a1b884fdcf47_normal.jpeg",
+        "profile_banner_url": "https://pbs.twimg.com/profile_banners/10388412/1636297327",
+        "profile_link_color": "990000",
+        "profile_sidebar_border_color": "DFDFDF",
+        "profile_sidebar_fill_color": "F3F3F3",
+        "profile_text_color": "333333",
+        "profile_use_background_image": true,
+        "has_extended_profile": true,
+        "default_profile": false,
+        "default_profile_image": false,
+        "following": false,
+        "follow_request_sent": false,
+        "notifications": false,
+        "translator_type": "none",
+        "withheld_in_countries":
+        []
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "is_quote_status": false,
+    "retweet_count": 16,
+    "favorite_count": 24,
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "possibly_sensitive_appealable": false,
+    "lang": "en"
+}

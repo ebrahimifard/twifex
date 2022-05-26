@@ -1,0 +1,266 @@
+{
+    "created_at": "Tue Nov 23 16:50:45 +0000 2021",
+    "id": 1463188281168777219,
+    "id_str": "1463188281168777219",
+    "full_text": "👀👇🏽👀 https://t.co/faUBehSYIG",
+    "truncated": false,
+    "display_text_range":
+    [
+        0,
+        4
+    ],
+    "entities":
+    {
+        "hashtags":
+        [],
+        "symbols":
+        [],
+        "user_mentions":
+        [],
+        "urls":
+        [
+            {
+                "url": "https://t.co/faUBehSYIG",
+                "expanded_url": "https://twitter.com/laurie_garrett/status/1463183542213656582",
+                "display_url": "twitter.com/laurie_garrett…",
+                "indices":
+                [
+                    5,
+                    28
+                ]
+            }
+        ]
+    },
+    "source": "<a href=\"http://twitter.com/#!/download/ipad\" rel=\"nofollow\">Twitter for iPad</a>",
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user":
+    {
+        "id": 893797177364930560,
+        "id_str": "893797177364930560",
+        "name": "MT Girl",
+        "screen_name": "MTGirl4Good",
+        "location": "Oregon, USA",
+        "description": "Fight against fascists ain’t over. No one’s gonna save us, def not those in power. Join us. #FightForDemocracy #ElectBetterDems #CFSME, #POTS #Fibro+. No Lists",
+        "url": null,
+        "entities":
+        {
+            "description":
+            {
+                "urls":
+                []
+            }
+        },
+        "protected": false,
+        "followers_count": 2978,
+        "friends_count": 3567,
+        "listed_count": 9,
+        "created_at": "Sat Aug 05 11:33:47 +0000 2017",
+        "favourites_count": 246750,
+        "utc_offset": null,
+        "time_zone": null,
+        "geo_enabled": true,
+        "verified": false,
+        "statuses_count": 97986,
+        "lang": null,
+        "contributors_enabled": false,
+        "is_translator": false,
+        "is_translation_enabled": false,
+        "profile_background_color": "F5F8FA",
+        "profile_background_image_url": null,
+        "profile_background_image_url_https": null,
+        "profile_background_tile": false,
+        "profile_image_url": "http://pbs.twimg.com/profile_images/1434317115557769217/RTML3Am6_normal.jpg",
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/1434317115557769217/RTML3Am6_normal.jpg",
+        "profile_banner_url": "https://pbs.twimg.com/profile_banners/893797177364930560/1630804015",
+        "profile_link_color": "1DA1F2",
+        "profile_sidebar_border_color": "C0DEED",
+        "profile_sidebar_fill_color": "DDEEF6",
+        "profile_text_color": "333333",
+        "profile_use_background_image": true,
+        "has_extended_profile": false,
+        "default_profile": true,
+        "default_profile_image": false,
+        "following": false,
+        "follow_request_sent": false,
+        "notifications": false,
+        "translator_type": "none",
+        "withheld_in_countries":
+        []
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "is_quote_status": true,
+    "quoted_status_id": 1463183542213656582,
+    "quoted_status_id_str": "1463183542213656582",
+    "quoted_status_permalink":
+    {
+        "url": "https://t.co/faUBehSYIG",
+        "expanded": "https://twitter.com/laurie_garrett/status/1463183542213656582",
+        "display": "twitter.com/laurie_garrett…"
+    },
+    "quoted_status":
+    {
+        "created_at": "Tue Nov 23 16:31:55 +0000 2021",
+        "id": 1463183542213656582,
+        "id_str": "1463183542213656582",
+        "full_text": "The very definition of \"success\" -- @pfizer #COVID19 #vaccine proves 100% effective, 4 months after 2nd dose in study of 2,228 kids, aged 12-15 years. No serious side effects.\n\nYeah, you read that - 100%.\n\nhttps://t.co/ftK1oaqu60",
+        "truncated": false,
+        "display_text_range":
+        [
+            0,
+            229
+        ],
+        "entities":
+        {
+            "hashtags":
+            [
+                {
+                    "text": "COVID19",
+                    "indices":
+                    [
+                        44,
+                        52
+                    ]
+                },
+                {
+                    "text": "vaccine",
+                    "indices":
+                    [
+                        53,
+                        61
+                    ]
+                }
+            ],
+            "symbols":
+            [],
+            "user_mentions":
+            [
+                {
+                    "screen_name": "pfizer",
+                    "name": "Pfizer Inc.",
+                    "id": 56488059,
+                    "id_str": "56488059",
+                    "indices":
+                    [
+                        36,
+                        43
+                    ]
+                }
+            ],
+            "urls":
+            [
+                {
+                    "url": "https://t.co/ftK1oaqu60",
+                    "expanded_url": "https://medicalxpress.com/news/2021-11-pfizer-covid-shot-effective-adolescents.html?utm_source=nwletter&utm_medium=email&utm_campaign=daily-nwletter",
+                    "display_url": "medicalxpress.com/news/2021-11-p…",
+                    "indices":
+                    [
+                        206,
+                        229
+                    ]
+                }
+            ]
+        },
+        "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+        "in_reply_to_status_id": null,
+        "in_reply_to_status_id_str": null,
+        "in_reply_to_user_id": null,
+        "in_reply_to_user_id_str": null,
+        "in_reply_to_screen_name": null,
+        "user":
+        {
+            "id": 299273962,
+            "id_str": "299273962",
+            "name": "Laurie Garrett",
+            "screen_name": "Laurie_Garrett",
+            "location": "New York, NY",
+            "description": "Former Sr Fellow @CFR_org. Recipient of Pulitzer Prize, Polk (2Xs) and Peabody Awards. Author: IHeard theSirensScream, TheComingPlague, Ebola & BetrayalofTrust.",
+            "url": "https://t.co/xjamcJGTRU",
+            "entities":
+            {
+                "url":
+                {
+                    "urls":
+                    [
+                        {
+                            "url": "https://t.co/xjamcJGTRU",
+                            "expanded_url": "http://www.cfr.org/experts/global-health-hiv-aids-bioterrorism/laurie-garrett/b1781",
+                            "display_url": "cfr.org/experts/global…",
+                            "indices":
+                            [
+                                0,
+                                23
+                            ]
+                        }
+                    ]
+                },
+                "description":
+                {
+                    "urls":
+                    []
+                }
+            },
+            "protected": false,
+            "followers_count": 251142,
+            "friends_count": 1837,
+            "listed_count": 4772,
+            "created_at": "Sun May 15 20:00:40 +0000 2011",
+            "favourites_count": 11140,
+            "utc_offset": null,
+            "time_zone": null,
+            "geo_enabled": false,
+            "verified": true,
+            "statuses_count": 83030,
+            "lang": null,
+            "contributors_enabled": false,
+            "is_translator": false,
+            "is_translation_enabled": false,
+            "profile_background_color": "C0DEED",
+            "profile_background_image_url": "http://abs.twimg.com/images/themes/theme1/bg.png",
+            "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme1/bg.png",
+            "profile_background_tile": true,
+            "profile_image_url": "http://pbs.twimg.com/profile_images/1284229143744385025/3J1H--yt_normal.jpg",
+            "profile_image_url_https": "https://pbs.twimg.com/profile_images/1284229143744385025/3J1H--yt_normal.jpg",
+            "profile_banner_url": "https://pbs.twimg.com/profile_banners/299273962/1591050781",
+            "profile_link_color": "0084B4",
+            "profile_sidebar_border_color": "C0DEED",
+            "profile_sidebar_fill_color": "DDEEF6",
+            "profile_text_color": "333333",
+            "profile_use_background_image": true,
+            "has_extended_profile": true,
+            "default_profile": false,
+            "default_profile_image": false,
+            "following": false,
+            "follow_request_sent": false,
+            "notifications": false,
+            "translator_type": "none",
+            "withheld_in_countries":
+            []
+        },
+        "geo": null,
+        "coordinates": null,
+        "place": null,
+        "contributors": null,
+        "is_quote_status": false,
+        "retweet_count": 159,
+        "favorite_count": 381,
+        "favorited": false,
+        "retweeted": false,
+        "possibly_sensitive": false,
+        "possibly_sensitive_appealable": false,
+        "lang": "en"
+    },
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "possibly_sensitive_appealable": false,
+    "lang": "und"
+}
