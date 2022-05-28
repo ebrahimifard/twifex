@@ -83,6 +83,9 @@ from itertools import combinations
 #       - replace "stdev" with "stddev"
 #       - Try to use np.nan instead of None thoroughout the code
 #       - VERY IMPORTANT ====> IN network bulidng functions, make sure about double counting!!!! $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#       - In url networks, it should be possible to make the network based on the main website domain not the detailed one
+
+
 
 ############################################# Notes and Comments #############################################
 
@@ -2571,6 +2574,10 @@ class Network:
         self.tweet_level_mention_network = nx.Graph()
         self.tweet_level_url_network = nx.Graph()
 
+        self.tweet_mention_network = nx.DiGraph()
+        self.tweet_hashtag_network = nx.DiGraph()
+        self.tweet_url_network = nx.DiGraph()
+
         ### But here we need to have a multi graph becasue a user can retweet/quote/reply to the other user at the same time
         self.user_level_retweet_network = nx.DiGraph()
         self.user_level_quote_network = nx.DiGraph()
@@ -3213,23 +3220,405 @@ class Network:
         tweets_keys = list(self.tweets.keys())
         for i in range(len(tweets_keys)):
             tweet1 = self.tweets[tweets_keys[i]]
+            tweet1_id = tweet1.get_id()
             tweet1_mentions = tweet1.get_mentions()
-            j = i+1
-            self.tweet_level_mention_network.add_node(tweet1.get_id())
+
+            j = i + 1
+
+            self.tweet_level_mention_network.add_node(tweet1_id)
+
+            tweet1_retweet_condition = tweet1.is_retweeted()
+            tweet1_quote_condition = tweet1.is_quote_available()
+
+            if tweet1_retweet_condition:
+                tweet1_rt = tweet1.get_retweeted()
+                tweet1_rt_id = tweet1_rt.get_id()
+
+                for mt in tweet1_mentions:
+                    if (tweet1_id, tweet1_rt_id) in self.tweet_level_mention_network.edges:
+                        self.tweet_level_mention_network.edges[tweet1_id, tweet1_rt_id]["weight"] += 1
+                        edge_label = "-" + mt
+                        self.tweet_level_mention_network.edges[tweet1_id, tweet1_rt_id]["mentions"] += edge_label
+                    else:
+                        self.tweet_level_mention_network.add_edge(tweet1_id, tweet1_rt_id, weight=1, mentions=mt)
+
+                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                if tweet1_inner_quote_condition:
+                    tweet1_rt_qt = tweet1_rt.get_quote()
+                    tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                    tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+
+                    for mt1 in tweet1_mentions:
+                        for mt2 in tweet1_rt_qt_mentions:
+                            if mt1 == mt2:
+                                if (tweet1_id, tweet1_rt_qt_id) in self.tweet_level_mention_network.edges:
+                                    self.tweet_level_mention_network.edges[tweet1_id, tweet1_rt_qt_id]["weight"] += 1
+                                    edge_label = "-" + mt1
+                                    self.tweet_level_mention_network.edges[tweet1_id, tweet1_rt_qt_id][
+                                        "mentions"] += edge_label
+                                else:
+                                    self.tweet_level_mention_network.add_edge(tweet1_id, tweet1_rt_qt_id, weight=1,
+                                                                              mentions=mt1)
+
+                    for mt1 in tweet1_mentions:
+                        for mt2 in tweet1_rt_qt_mentions:
+                            if mt1 == mt2:
+                                if (tweet1_rt_id, tweet1_rt_qt_id) in self.tweet_level_mention_network.edges:
+                                    self.tweet_level_mention_network.edges[tweet1_rt_id, tweet1_rt_qt_id]["weight"] += 1
+                                    edge_label = "-" + mt1
+                                    self.tweet_level_mention_network.edges[tweet1_rt_id, tweet1_rt_qt_id][
+                                        "mentions"] += edge_label
+                                else:
+                                    self.tweet_level_mention_network.add_edge(tweet1_rt_id, tweet1_rt_qt_id, weight=1,
+                                                                              mentions=mt1)
+
+            if tweet1_quote_condition:
+                tweet1_qt = tweet1.get_quote()
+                tweet1_qt_id = tweet1_qt.get_id()
+                tweet1_qt_mentions = tweet1_qt.get_mentions()
+
+                for mt1 in tweet1_mentions:
+                    for mt2 in tweet1_qt_mentions:
+                        if mt1 == mt2:
+                            if (tweet1_id, tweet1_qt_id) in self.tweet_level_mention_network.edges:
+                                self.tweet_level_mention_network.edges[tweet1_id, tweet1_qt_id]["weight"] += 1
+                                edge_label = "-" + mt1
+                                self.tweet_level_mention_network.edges[tweet1_id, tweet1_qt_id][
+                                    "mentions"] += edge_label
+                            else:
+                                self.tweet_level_mention_network.add_edge(tweet1_id, tweet1_qt_id, weight=1,
+                                                                          mentions=mt1)
 
             while j != len(tweets_keys):
                 tweet2 = self.tweets[tweets_keys[j]]
+                tweet2_id = tweet2.get_id()
                 tweet2_mentions = tweet2.get_mentions()
 
-                for mt1 in tweet1_mentions:
-                    for mt2 in tweet2_mentions:
-                        if mt1 == mt2:
-                            if (tweet1.get_id(), tweet2.get_id()) in self.tweet_level_mention_network.edges:
-                                self.tweet_level_mention_network.edges[tweet1.get_id(), tweet2.get_id()]["weight"] += 1
-                                edge_label = "-"+mt1
-                                self.tweet_level_mention_network.edges[tweet1.get_id(), tweet2.get_id()]["mentions"] += edge_label
-                            else:
-                                self.tweet_level_mention_network.add_edge(tweet1.get_id(), tweet2.get_id(), weight=1, mentions=mt1)
+                tweet2_retweet_condition = tweet2.is_retweeted()
+                tweet2_quote_condition = tweet2.is_quote_available()
+
+                if tweet2_retweet_condition:
+                    tweet2_rt = tweet2.get_retweeted()
+                    tweet2_rt_id = tweet2_rt.get_id()
+
+                    if tweet1_id != tweet2_rt_id:
+                        for mt1 in tweet1_mentions:
+                            for mt2 in tweet2_mentions:
+                                if mt1 == mt2:
+                                    if (tweet1_id, tweet2_rt_id) in self.tweet_level_mention_network.edges:
+                                        self.tweet_level_mention_network.edges[tweet1_id, tweet2_rt_id]["weight"] += 1
+                                        edge_label = "-" + mt1
+                                        self.tweet_level_mention_network.edges[tweet1_id, tweet2_rt_id][
+                                            "mentions"] += edge_label
+                                    else:
+                                        self.tweet_level_mention_network.add_edge(tweet1_id, tweet2_rt_id, weight=1,
+                                                                                  mentions=mt1)
+
+                        tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+                        if tweet2_inner_quote_condition:
+                            tweet2_rt_qt = tweet2_rt.get_quote()
+                            tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+                            tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+
+                            if tweet1_id != tweet2_rt_qt_id:
+                                for mt1 in tweet1_mentions:
+                                    for mt2 in tweet2_rt_qt_mentions:
+                                        if mt1 == mt2:
+                                            if (tweet1_id, tweet2_rt_qt_id) in self.tweet_level_mention_network.edges:
+                                                self.tweet_level_mention_network.edges[tweet1_id, tweet2_rt_qt_id][
+                                                    "weight"] += 1
+                                                edge_label = "-" + mt1
+                                                self.tweet_level_mention_network.edges[tweet1_id, tweet2_rt_qt_id][
+                                                    "mentions"] += edge_label
+                                            else:
+                                                self.tweet_level_mention_network.add_edge(tweet1_id, tweet2_rt_qt_id,
+                                                                                          weight=1,
+                                                                                          mentions=mt1)
+
+                if tweet2_quote_condition:
+                    tweet2_qt = tweet2.get_quote()
+                    tweet2_qt_id = tweet2_qt.get_id()
+                    tweet2_qt_mentions = tweet2_qt.get_mentions()
+
+                    if tweet1_id != tweet2_qt_id:
+                        for mt1 in tweet1_mentions:
+                            for mt2 in tweet2_qt_mentions:
+                                if mt1 == mt2:
+                                    if (tweet1_id, tweet2_qt_id) in self.tweet_level_mention_network.edges:
+                                        self.tweet_level_mention_network.edges[tweet1_id, tweet2_qt_id]["weight"] += 1
+                                        edge_label = "-" + mt1
+                                        self.tweet_level_mention_network.edges[tweet1_id, tweet2_qt_id][
+                                            "mentions"] += edge_label
+                                    else:
+                                        self.tweet_level_mention_network.add_edge(tweet1_id, tweet2_qt_id, weight=1,
+                                                                                  mentions=mt1)
+
+                if tweet1_retweet_condition and tweet2_retweet_condition:
+                    tweet1_rt = tweet1.get_retweeted()
+                    tweet1_rt_id = tweet1_rt.get_id()
+                    tweet1_rt_mentions = tweet1_rt.get_mentions()
+
+                    tweet2_rt = tweet2.get_retweeted()
+                    tweet2_rt_id = tweet2_rt.get_id()
+                    tweet2_rt_mentions = tweet1_rt.get_mentions()
+
+                    if tweet1_rt_id != tweet2_rt_id:
+                        for mt1 in tweet1_rt_mentions:
+                            for mt2 in tweet2_rt_mentions:
+                                if mt1 == mt2:
+                                    if (tweet1_rt_id, tweet2_rt_id) in self.tweet_level_mention_network.edges:
+                                        self.tweet_level_mention_network.edges[tweet1_rt_id, tweet2_rt_id][
+                                            "weight"] += 1
+                                        edge_label = "-" + mt1
+                                        self.tweet_level_mention_network.edges[tweet1_rt_id, tweet2_rt_id][
+                                            "mentions"] += edge_label
+                                    else:
+                                        self.tweet_level_mention_network.add_edge(tweet1_rt_id, tweet2_rt_id, weight=1,
+                                                                                  mentions=mt1)
+
+                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+
+                    if tweet1_inner_quote_condition:
+                        tweet1_rt_qt = tweet1_rt.get_quote()
+                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+
+                        if tweet1_rt_qt_id != tweet2_rt_id:
+                            for mt1 in tweet1_rt_qt_mentions:
+                                for mt2 in tweet2_rt_mentions:
+                                    if mt1 == mt2:
+                                        if (tweet1_rt_qt_id, tweet2_rt_id) in self.tweet_level_mention_network.edges:
+                                            self.tweet_level_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + mt1
+                                            self.tweet_level_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+                                                "mentions"] += edge_label
+                                        else:
+                                            self.tweet_level_mention_network.add_edge(tweet1_rt_qt_id, tweet2_rt_id,
+                                                                                      weight=1, mentions=mt1)
+
+                    if tweet2_inner_quote_condition:
+                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+
+                        if tweet1_rt_id != tweet2_rt_qt_id:
+                            for mt1 in tweet1_rt_mentions:
+                                for mt2 in tweet2_rt_qt_mentions:
+                                    if mt1 == mt2:
+                                        if (tweet1_rt_id, tweet2_rt_qt_id) in self.tweet_level_mention_network.edges:
+                                            self.tweet_level_mention_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + mt1
+                                            self.tweet_level_mention_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+                                                "mentions"] += edge_label
+                                        else:
+                                            self.tweet_level_mention_network.add_edge(tweet1_rt_id, tweet2_rt_qt_id,
+                                                                                      weight=1, mentions=mt1)
+
+                    if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
+                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+
+                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+
+                        if tweet1_rt_qt_id != tweet2_rt_qt_id:
+                            for mt1 in tweet1_rt_qt_mentions:
+                                for mt2 in tweet2_rt_qt_mentions:
+                                    if mt1 == mt2:
+                                        if (tweet1_rt_qt_id, tweet2_rt_qt_id) in self.tweet_level_mention_network.edges:
+                                            self.tweet_level_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + mt1
+                                            self.tweet_level_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+                                                "mentions"] += edge_label
+                                        else:
+                                            self.tweet_level_mention_network.add_edge(tweet1_rt_qt_id, tweet2_rt_qt_id,
+                                                                                      weight=1, mentions=mt1)
+
+                if tweet1_quote_condition and tweet2_quote_condition:
+                    tweet1_qt = tweet1.get_quote()
+                    tweet1_qt_id = tweet1_qt.get_id()
+                    tweet1_qt_mentions = tweet1_qt.get_mentions()
+
+                    tweet2_qt = tweet2.get_quote()
+                    tweet2_qt_id = tweet2_qt.get_id()
+                    tweet2_qt_mentions = tweet2_qt.get_mentions()
+
+                    if tweet1_qt_id != tweet2_qt_id:
+                        for mt1 in tweet1_qt_mentions:
+                            for mt2 in tweet2_qt_mentions:
+                                if mt1 == mt2:
+                                    if (tweet1_qt_id, tweet2_qt_id) in self.tweet_level_mention_network.edges:
+                                        self.tweet_level_mention_network.edges[tweet1_qt_id, tweet2_qt_id][
+                                            "weight"] += 1
+                                        edge_label = "-" + mt1
+                                        self.tweet_level_mention_network.edges[tweet1_qt_id, tweet2_qt_id][
+                                            "mentions"] += edge_label
+                                    else:
+                                        self.tweet_level_mention_network.add_edge(tweet1_qt_id, tweet2_qt_id, weight=1,
+                                                                                  mentions=mt1)
+
+                if tweet1_retweet_condition and tweet2_quote_condition:
+                    tweet1_rt = tweet1.get_retweeted()
+                    tweet1_rt_id = tweet1_rt.get_id()
+                    tweet1_rt_mentions = tweet1_rt.get_mentions()
+
+                    tweet2_qt = tweet2.get_quote()
+                    tweet2_qt_id = tweet2_qt.get_id()
+                    tweet2_qt_mentions = tweet2_qt.get_mentions()
+
+                    if tweet1_rt_id != tweet2_qt_id:
+                        for mt1 in tweet1_rt_mentions:
+                            for mt2 in tweet2_qt_mentions:
+                                if mt1 == mt2:
+                                    if (tweet1_rt_id, tweet2_qt_id) in self.tweet_level_mention_network.edges:
+                                        self.tweet_level_mention_network.edges[tweet1_rt_id, tweet2_qt_id][
+                                            "weight"] += 1
+                                        edge_label = "-" + mt1
+                                        self.tweet_level_mention_network.edges[tweet1_rt_id, tweet2_qt_id][
+                                            "mentions"] += edge_label
+                                    else:
+                                        self.tweet_level_mention_network.add_edge(tweet1_rt_id, tweet2_qt_id, weight=1,
+                                                                                  mentions=mt1)
+
+                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                    if tweet1_inner_quote_condition:
+                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+
+                        if tweet1_rt_qt_id != tweet2_qt_id:
+                            for mt1 in tweet1_rt_qt_mentions:
+                                for mt2 in tweet2_qt_mentions:
+                                    if mt1 == mt2:
+                                        if (tweet1_rt_qt_id, tweet2_qt_id) in self.tweet_level_mention_network.edges:
+                                            self.tweet_level_mention_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + mt1
+                                            self.tweet_level_mention_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+                                                "mentions"] += edge_label
+                                        else:
+                                            self.tweet_level_mention_network.add_edge(tweet1_rt_qt_id, tweet2_qt_id,
+                                                                                      weight=1, mentions=mt1)
+
+                if tweet2_retweet_condition and tweet1_quote_condition:
+                    tweet2_rt = tweet2.get_retweeted()
+                    tweet2_rt_id = tweet2_rt.get_id()
+                    tweet2_rt_mentions = tweet2_rt.get_mentions()
+
+                    tweet1_qt = tweet1.get_quote()
+                    tweet1_qt_id = tweet1_qt.get_id()
+                    tweet1_qt_mentions = tweet1_qt.get_mentions()
+
+                    if tweet1_qt_id != tweet2_rt_id:
+                        for mt1 in tweet1_qt_mentions:
+                            for mt2 in tweet2_rt_mentions:
+                                if mt1 == mt2:
+                                    if (tweet1_qt_id, tweet2_rt_id) in self.tweet_level_mention_network.edges:
+                                        self.tweet_level_mention_network.edges[tweet1_qt_id, tweet2_rt_id][
+                                            "weight"] += 1
+                                        edge_label = "-" + mt1
+                                        self.tweet_level_mention_network.edges[tweet1_qt_id, tweet2_rt_id][
+                                            "mentions"] += edge_label
+                                    else:
+                                        self.tweet_level_mention_network.add_edge(tweet1_qt_id, tweet2_rt_id, weight=1,
+                                                                                  mentions=mt1)
+
+                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+                    if tweet2_inner_quote_condition:
+                        tweet2_rt_qt = tweet2_rt.get_quote()
+                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+
+                        if tweet1_qt_id != tweet2_rt_qt_id:
+                            for mt1 in tweet1_qt_mentions:
+                                for mt2 in tweet2_rt_qt_mentions:
+                                    if mt1 == mt2:
+                                        if (tweet1_qt_id, tweet2_rt_qt_id) in self.tweet_level_mention_network.edges:
+                                            self.tweet_level_mention_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + mt1
+                                            self.tweet_level_mention_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+                                                "mentions"] += edge_label
+                                        else:
+                                            self.tweet_level_mention_network.add_edge(tweet1_qt_id, tweet2_rt_qt_id,
+                                                                                      weight=1,
+                                                                                      mentions=mt1)
+
+                if tweet1_retweet_condition:
+                    tweet1_rt = tweet1.get_retweeted()
+                    tweet1_rt_id = tweet1_rt.get_twitter().get_screen_name()
+                    tweet1_rt_mentions = tweet1_rt.get_mentions()
+
+                    if tweet1_rt_id != tweet2_id:
+                        for mt1 in tweet1_rt_mentions:
+                            for mt2 in tweet2_mentions:
+                                if mt1 == mt2:
+                                    if (tweet1_rt_id, tweet2_id) in self.tweet_level_mention_network.edges:
+                                        self.tweet_level_mention_network.edges[tweet1_rt_id, tweet2_id]["weight"] += 1
+                                        edge_label = "-" + mt1
+                                        self.tweet_level_mention_network.edges[tweet1_rt_id, tweet2_id][
+                                            "mentions"] += edge_label
+                                    else:
+                                        self.tweet_level_mention_network.add_edge(tweet1_rt_id, tweet2_id, weight=1,
+                                                                                  mentions=mt1)
+
+                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                    if tweet1_inner_quote_condition:
+                        tweet1_rt_qt = tweet1_rt.get_quote()
+                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+
+                        if tweet2_id != tweet1_rt_qt_id:
+                            for mt1 in tweet1_rt_qt_mentions:
+                                for mt2 in tweet2_mentions:
+                                    if mt1 == mt2:
+                                        if (tweet1_rt_qt_id, tweet2_id) in self.tweet_level_mention_network.edges:
+                                            self.tweet_level_mention_network.edges[tweet1_rt_qt_id, tweet2_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + mt1
+                                            self.tweet_level_mention_network.edges[tweet1_rt_qt_id, tweet2_id][
+                                                "mentions"] += edge_label
+                                        else:
+                                            self.tweet_level_mention_network.add_edge(tweet1_rt_qt_id, tweet2_id,
+                                                                                      weight=1,
+                                                                                      mentions=mt1)
+
+                if tweet1_quote_condition:
+                    tweet1_qt = tweet1.get_quote()
+                    tweet1_qt_id = tweet1_qt.get_id()
+                    tweet1_qt_mentions = tweet1_qt.get_mentions()
+
+                    if tweet1_qt_id != tweet2_id:
+                        for mt1 in tweet1_qt_mentions:
+                            for mt2 in tweet2_mentions:
+                                if mt1 == mt2:
+                                    if (tweet1_qt_id, tweet2_id) in self.tweet_level_mention_network.edges:
+                                        self.tweet_level_mention_network.edges[tweet1_qt_id, tweet2_id]["weight"] += 1
+                                        edge_label = "-" + mt1
+                                        self.tweet_level_mention_network.edges[tweet1_qt_id, tweet2_id][
+                                            "mentions"] += edge_label
+                                    else:
+                                        self.tweet_level_mention_network.add_edge(tweet1_qt_id, tweet2_id, weight=1,
+                                                                                  mentions=mt1)
+
+                if tweet1_id != tweet2_id:
+                    for mt1 in tweet1_mentions:
+                        for mt2 in tweet2_mentions:
+                            if mt1 == mt2:
+                                if (tweet1_id, tweet2_id) in self.tweet_level_mention_network.edges:
+                                    self.tweet_level_mention_network.edges[tweet1_id, tweet2_id]["weight"] += 1
+                                    edge_label = "-" + mt1
+                                    self.tweet_level_mention_network.edges[tweet1_id, tweet2_id][
+                                        "mentions"] += edge_label
+                                else:
+                                    self.tweet_level_mention_network.add_edge(tweet1_id, tweet2_id, weight=1,
+                                                                              mentions=mt1)
                 j += 1
 
     def tweet_level_url_network_building(self):
@@ -3238,25 +3627,561 @@ class Network:
         tweets_keys = list(self.tweets.keys())
         for i in range(len(tweets_keys)):
             tweet1 = self.tweets[tweets_keys[i]]
+            tweet1_id = tweet1.get_id()
             tweet1_urls = tweet1.get_tweet_urls(return_format="expanded_url")
-            j = i+1
-            self.tweet_level_url_network.add_node(tweet1.get_id())
+
+            j = i + 1
+
+            self.tweet_level_url_network.add_node(tweet1_id)
+
+            tweet1_retweet_condition = tweet1.is_retweeted()
+            tweet1_quote_condition = tweet1.is_quote_available()
+
+            if tweet1_retweet_condition:
+                tweet1_rt = tweet1.get_retweeted()
+                tweet1_rt_id = tweet1_rt.get_id()
+
+                for ut in tweet1_urls:
+                    if (tweet1_id, tweet1_rt_id) in self.tweet_level_url_network.edges:
+                        self.tweet_level_url_network.edges[tweet1_id, tweet1_rt_id]["weight"] += 1
+                        edge_label = "-" + ut
+                        self.tweet_level_url_network.edges[tweet1_id, tweet1_rt_id]["urls"] += edge_label
+                    else:
+                        self.tweet_level_url_network.add_edge(tweet1_id, tweet1_rt_id, weight=1, urls=ut)
+
+                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                if tweet1_inner_quote_condition:
+                    tweet1_rt_qt = tweet1_rt.get_quote()
+                    tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                    tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                    for ut1 in tweet1_urls:
+                        for ut2 in tweet1_rt_qt_urls:
+                            if ut1 == ut2:
+                                if (tweet1_id, tweet1_rt_qt_id) in self.tweet_level_url_network.edges:
+                                    self.tweet_level_url_network.edges[tweet1_id, tweet1_rt_qt_id]["weight"] += 1
+                                    edge_label = "-" + ut1
+                                    self.tweet_level_url_network.edges[tweet1_id, tweet1_rt_qt_id][
+                                        "urls"] += edge_label
+                                else:
+                                    self.tweet_level_url_network.add_edge(tweet1_id, tweet1_rt_qt_id, weight=1,
+                                                                          urls=ut1)
+
+                    for ut1 in tweet1_urls:
+                        for ut2 in tweet1_rt_qt_urls:
+                            if ut1 == ut2:
+                                if (tweet1_rt_id, tweet1_rt_qt_id) in self.tweet_level_url_network.edges:
+                                    self.tweet_level_url_network.edges[tweet1_rt_id, tweet1_rt_qt_id]["weight"] += 1
+                                    edge_label = "-" + ut1
+                                    self.tweet_level_url_network.edges[tweet1_rt_id, tweet1_rt_qt_id][
+                                        "urls"] += edge_label
+                                else:
+                                    self.tweet_level_url_network.add_edge(tweet1_rt_id, tweet1_rt_qt_id, weight=1,
+                                                                          urls=ut1)
+
+            if tweet1_quote_condition:
+                tweet1_qt = tweet1.get_quote()
+                tweet1_qt_id = tweet1_qt.get_id()
+                tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+
+                for ut1 in tweet1_urls:
+                    for ut2 in tweet1_qt_urls:
+                        if ut1 == ut2:
+                            if (tweet1_id, tweet1_qt_id) in self.tweet_level_url_network.edges:
+                                self.tweet_level_url_network.edges[tweet1_id, tweet1_qt_id]["weight"] += 1
+                                edge_label = "-" + ut1
+                                self.tweet_level_url_network.edges[tweet1_id, tweet1_qt_id][
+                                    "urls"] += edge_label
+                            else:
+                                self.tweet_level_url_network.add_edge(tweet1_id, tweet1_qt_id, weight=1,
+                                                                      urls=ut1)
 
             while j != len(tweets_keys):
                 tweet2 = self.tweets[tweets_keys[j]]
+                tweet2_id = tweet2.get_id()
                 tweet2_urls = tweet2.get_tweet_urls(return_format="expanded_url")
 
-                for url1 in tweet1_urls:
-                    for url2 in tweet2_urls:
-                        if url1 == url2:
-                            if (tweet1.get_id(), tweet2.get_id()) in self.tweet_level_url_network.edges:
-                                self.tweet_level_url_network.edges[tweet1.get_id(), tweet2.get_id()]["weight"] += 1
-                                edge_label = "-"+url1
-                                self.tweet_level_url_network.edges[tweet1.get_id(), tweet2.get_id()]["urls"] += edge_label
-                            else:
-                                self.tweet_level_url_network.add_edge(tweet1.get_id(), tweet2.get_id(), weight=1, urls=url1)
+                tweet2_retweet_condition = tweet2.is_retweeted()
+                tweet2_quote_condition = tweet2.is_quote_available()
+
+                if tweet2_retweet_condition:
+                    tweet2_rt = tweet2.get_retweeted()
+                    tweet2_rt_id = tweet2_rt.get_id()
+
+                    if tweet1_id != tweet2_rt_id:
+                        for ut1 in tweet1_urls:
+                            for ut2 in tweet2_urls:
+                                if ut1 == ut2:
+                                    if (tweet1_id, tweet2_rt_id) in self.tweet_level_url_network.edges:
+                                        self.tweet_level_url_network.edges[tweet1_id, tweet2_rt_id]["weight"] += 1
+                                        edge_label = "-" + ut1
+                                        self.tweet_level_url_network.edges[tweet1_id, tweet2_rt_id][
+                                            "urls"] += edge_label
+                                    else:
+                                        self.tweet_level_url_network.add_edge(tweet1_id, tweet2_rt_id, weight=1,
+                                                                              urls=ut1)
+
+                        tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+                        if tweet2_inner_quote_condition:
+                            tweet2_rt_qt = tweet2_rt.get_quote()
+                            tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+                            tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                            if tweet1_id != tweet2_rt_qt_id:
+                                for ut1 in tweet1_urls:
+                                    for ut2 in tweet2_rt_qt_urls:
+                                        if ut1 == ut2:
+                                            if (tweet1_id, tweet2_rt_qt_id) in self.tweet_level_url_network.edges:
+                                                self.tweet_level_url_network.edges[tweet1_id, tweet2_rt_qt_id][
+                                                    "weight"] += 1
+                                                edge_label = "-" + ut1
+                                                self.tweet_level_url_network.edges[tweet1_id, tweet2_rt_qt_id][
+                                                    "urls"] += edge_label
+                                            else:
+                                                self.tweet_level_url_network.add_edge(tweet1_id, tweet2_rt_qt_id,
+                                                                                      weight=1,
+                                                                                      urls=ut1)
+
+                if tweet2_quote_condition:
+                    tweet2_qt = tweet2.get_quote()
+                    tweet2_qt_id = tweet2_qt.get_id()
+                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+
+                    if tweet1_id != tweet2_qt_id:
+                        for ut1 in tweet1_urls:
+                            for ut2 in tweet2_qt_urls:
+                                if ut1 == ut2:
+                                    if (tweet1_id, tweet2_qt_id) in self.tweet_level_url_network.edges:
+                                        self.tweet_level_url_network.edges[tweet1_id, tweet2_qt_id]["weight"] += 1
+                                        edge_label = "-" + ut1
+                                        self.tweet_level_url_network.edges[tweet1_id, tweet2_qt_id][
+                                            "urls"] += edge_label
+                                    else:
+                                        self.tweet_level_url_network.add_edge(tweet1_id, tweet2_qt_id, weight=1,
+                                                                              urls=ut1)
+
+                if tweet1_retweet_condition and tweet2_retweet_condition:
+                    tweet1_rt = tweet1.get_retweeted()
+                    tweet1_rt_id = tweet1_rt.get_id()
+                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+
+                    tweet2_rt = tweet2.get_retweeted()
+                    tweet2_rt_id = tweet2_rt.get_id()
+                    tweet2_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+
+                    if tweet1_rt_id != tweet2_rt_id:
+                        for ut1 in tweet1_rt_urls:
+                            for ut2 in tweet2_rt_urls:
+                                if ut1 == ut2:
+                                    if (tweet1_rt_id, tweet2_rt_id) in self.tweet_level_url_network.edges:
+                                        self.tweet_level_url_network.edges[tweet1_rt_id, tweet2_rt_id][
+                                            "weight"] += 1
+                                        edge_label = "-" + ut1
+                                        self.tweet_level_url_network.edges[tweet1_rt_id, tweet2_rt_id][
+                                            "urls"] += edge_label
+                                    else:
+                                        self.tweet_level_url_network.add_edge(tweet1_rt_id, tweet2_rt_id, weight=1,
+                                                                              urls=ut1)
+
+                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+
+                    if tweet1_inner_quote_condition:
+                        tweet1_rt_qt = tweet1_rt.get_quote()
+                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                        if tweet1_rt_qt_id != tweet2_rt_id:
+                            for ut1 in tweet1_rt_qt_urls:
+                                for ut2 in tweet2_rt_urls:
+                                    if ut1 == ut2:
+                                        if (tweet1_rt_qt_id, tweet2_rt_id) in self.tweet_level_url_network.edges:
+                                            self.tweet_level_url_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + ut1
+                                            self.tweet_level_url_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+                                                "urls"] += edge_label
+                                        else:
+                                            self.tweet_level_url_network.add_edge(tweet1_rt_qt_id, tweet2_rt_id,
+                                                                                  weight=1, urls=ut1)
+
+                    if tweet2_inner_quote_condition:
+                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                        if tweet1_rt_id != tweet2_rt_qt_id:
+                            for ut1 in tweet1_rt_urls:
+                                for ut2 in tweet2_rt_qt_urls:
+                                    if ut1 == ut2:
+                                        if (tweet1_rt_id, tweet2_rt_qt_id) in self.tweet_level_url_network.edges:
+                                            self.tweet_level_url_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + ut1
+                                            self.tweet_level_url_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+                                                "urls"] += edge_label
+                                        else:
+                                            self.tweet_level_url_network.add_edge(tweet1_rt_id, tweet2_rt_qt_id,
+                                                                                  weight=1, urls=ut1)
+
+                    if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
+                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                        if tweet1_rt_qt_id != tweet2_rt_qt_id:
+                            for ut1 in tweet1_rt_qt_urls:
+                                for ut2 in tweet2_rt_qt_urls:
+                                    if ut1 == ut2:
+                                        if (tweet1_rt_qt_id, tweet2_rt_qt_id) in self.tweet_level_url_network.edges:
+                                            self.tweet_level_url_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + ut1
+                                            self.tweet_level_url_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+                                                "urls"] += edge_label
+                                        else:
+                                            self.tweet_level_url_network.add_edge(tweet1_rt_qt_id, tweet2_rt_qt_id,
+                                                                                  weight=1, urls=ut1)
+
+                if tweet1_quote_condition and tweet2_quote_condition:
+                    tweet1_qt = tweet1.get_quote()
+                    tweet1_qt_id = tweet1_qt.get_id()
+                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+
+                    tweet2_qt = tweet2.get_quote()
+                    tweet2_qt_id = tweet2_qt.get_id()
+                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+
+                    if tweet1_qt_id != tweet2_qt_id:
+                        for ut1 in tweet1_qt_urls:
+                            for ut2 in tweet2_qt_urls:
+                                if ut1 == ut2:
+                                    if (tweet1_qt_id, tweet2_qt_id) in self.tweet_level_url_network.edges:
+                                        self.tweet_level_url_network.edges[tweet1_qt_id, tweet2_qt_id][
+                                            "weight"] += 1
+                                        edge_label = "-" + ut1
+                                        self.tweet_level_url_network.edges[tweet1_qt_id, tweet2_qt_id][
+                                            "urls"] += edge_label
+                                    else:
+                                        self.tweet_level_url_network.add_edge(tweet1_qt_id, tweet2_qt_id, weight=1,
+                                                                              urls=ut1)
+
+                if tweet1_retweet_condition and tweet2_quote_condition:
+                    tweet1_rt = tweet1.get_retweeted()
+                    tweet1_rt_id = tweet1_rt.get_id()
+                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+
+                    tweet2_qt = tweet2.get_quote()
+                    tweet2_qt_id = tweet2_qt.get_id()
+                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+
+                    if tweet1_rt_id != tweet2_qt_id:
+                        for ut1 in tweet1_rt_urls:
+                            for ut2 in tweet2_qt_urls:
+                                if ut1 == ut2:
+                                    if (tweet1_rt_id, tweet2_qt_id) in self.tweet_level_url_network.edges:
+                                        self.tweet_level_url_network.edges[tweet1_rt_id, tweet2_qt_id][
+                                            "weight"] += 1
+                                        edge_label = "-" + ut1
+                                        self.tweet_level_url_network.edges[tweet1_rt_id, tweet2_qt_id][
+                                            "urls"] += edge_label
+                                    else:
+                                        self.tweet_level_url_network.add_edge(tweet1_rt_id, tweet2_qt_id, weight=1,
+                                                                              urls=ut1)
+
+                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                    if tweet1_inner_quote_condition:
+                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                        if tweet1_rt_qt_id != tweet2_qt_id:
+                            for ut1 in tweet1_rt_qt_urls:
+                                for ut2 in tweet2_qt_urls:
+                                    if ut1 == ut2:
+                                        if (tweet1_rt_qt_id, tweet2_qt_id) in self.tweet_level_url_network.edges:
+                                            self.tweet_level_url_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + ut1
+                                            self.tweet_level_url_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+                                                "urls"] += edge_label
+                                        else:
+                                            self.tweet_level_url_network.add_edge(tweet1_rt_qt_id, tweet2_qt_id,
+                                                                                  weight=1, urls=ut1)
+
+                if tweet2_retweet_condition and tweet1_quote_condition:
+                    tweet2_rt = tweet2.get_retweeted()
+                    tweet2_rt_id = tweet2_rt.get_id()
+                    tweet2_rt_urls = tweet2_rt.get_tweet_urls(return_format="expanded_url")
+
+                    tweet1_qt = tweet1.get_quote()
+                    tweet1_qt_id = tweet1_qt.get_id()
+                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+
+                    if tweet1_qt_id != tweet2_rt_id:
+                        for ut1 in tweet1_qt_urls:
+                            for ut2 in tweet2_rt_urls:
+                                if ut1 == ut2:
+                                    if (tweet1_qt_id, tweet2_rt_id) in self.tweet_level_url_network.edges:
+                                        self.tweet_level_url_network.edges[tweet1_qt_id, tweet2_rt_id][
+                                            "weight"] += 1
+                                        edge_label = "-" + ut1
+                                        self.tweet_level_url_network.edges[tweet1_qt_id, tweet2_rt_id][
+                                            "urls"] += edge_label
+                                    else:
+                                        self.tweet_level_url_network.add_edge(tweet1_qt_id, tweet2_rt_id, weight=1,
+                                                                              urls=ut1)
+
+                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+                    if tweet2_inner_quote_condition:
+                        tweet2_rt_qt = tweet2_rt.get_quote()
+                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                        if tweet1_qt_id != tweet2_rt_qt_id:
+                            for ut1 in tweet1_qt_urls:
+                                for ut2 in tweet2_rt_qt_urls:
+                                    if ut1 == ut2:
+                                        if (tweet1_qt_id, tweet2_rt_qt_id) in self.tweet_level_url_network.edges:
+                                            self.tweet_level_url_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + ut1
+                                            self.tweet_level_url_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+                                                "urls"] += edge_label
+                                        else:
+                                            self.tweet_level_url_network.add_edge(tweet1_qt_id, tweet2_rt_qt_id,
+                                                                                  weight=1,
+                                                                                  urls=ut1)
+
+                if tweet1_retweet_condition:
+                    tweet1_rt = tweet1.get_retweeted()
+                    tweet1_rt_id = tweet1_rt.get_twitter().get_screen_name()
+                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+
+                    if tweet1_rt_id != tweet2_id:
+                        for ut1 in tweet1_rt_urls:
+                            for ut2 in tweet2_urls:
+                                if ut1 == ut2:
+                                    if (tweet1_rt_id, tweet2_id) in self.tweet_level_url_network.edges:
+                                        self.tweet_level_url_network.edges[tweet1_rt_id, tweet2_id]["weight"] += 1
+                                        edge_label = "-" + ut1
+                                        self.tweet_level_url_network.edges[tweet1_rt_id, tweet2_id][
+                                            "urls"] += edge_label
+                                    else:
+                                        self.tweet_level_url_network.add_edge(tweet1_rt_id, tweet2_id, weight=1,
+                                                                              urls=ut1)
+
+                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+                    if tweet1_inner_quote_condition:
+                        tweet1_rt_qt = tweet1_rt.get_quote()
+                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+
+                        if tweet2_id != tweet1_rt_qt_id:
+                            for ut1 in tweet1_rt_qt_urls:
+                                for ut2 in tweet2_urls:
+                                    if ut1 == ut2:
+                                        if (tweet1_rt_qt_id, tweet2_id) in self.tweet_level_url_network.edges:
+                                            self.tweet_level_url_network.edges[tweet1_rt_qt_id, tweet2_id][
+                                                "weight"] += 1
+                                            edge_label = "-" + ut1
+                                            self.tweet_level_url_network.edges[tweet1_rt_qt_id, tweet2_id][
+                                                "urls"] += edge_label
+                                        else:
+                                            self.tweet_level_url_network.add_edge(tweet1_rt_qt_id, tweet2_id,
+                                                                                  weight=1,
+                                                                                  urls=ut1)
+
+                if tweet1_quote_condition:
+                    tweet1_qt = tweet1.get_quote()
+                    tweet1_qt_id = tweet1_qt.get_id()
+                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+
+                    if tweet1_qt_id != tweet2_id:
+                        for ut1 in tweet1_qt_urls:
+                            for ut2 in tweet2_urls:
+                                if ut1 == ut2:
+                                    if (tweet1_qt_id, tweet2_id) in self.tweet_level_url_network.edges:
+                                        self.tweet_level_url_network.edges[tweet1_qt_id, tweet2_id]["weight"] += 1
+                                        edge_label = "-" + ut1
+                                        self.tweet_level_url_network.edges[tweet1_qt_id, tweet2_id][
+                                            "urls"] += edge_label
+                                    else:
+                                        self.tweet_level_url_network.add_edge(tweet1_qt_id, tweet2_id, weight=1,
+                                                                              urls=ut1)
+
+                if tweet1_id != tweet2_id:
+                    for ut1 in tweet1_urls:
+                        for ut2 in tweet2_urls:
+                            if ut1 == ut2:
+                                if (tweet1_id, tweet2_id) in self.tweet_level_url_network.edges:
+                                    self.tweet_level_url_network.edges[tweet1_id, tweet2_id]["weight"] += 1
+                                    edge_label = "-" + ut1
+                                    self.tweet_level_url_network.edges[tweet1_id, tweet2_id][
+                                        "urls"] += edge_label
+                                else:
+                                    self.tweet_level_url_network.add_edge(tweet1_id, tweet2_id, weight=1,
+                                                                          urls=ut1)
                 j += 1
 
+    # bipartite version of tweet-level hashtag/mention/url networks
+    def tweet_hashtag_bipartite_network_building(self):
+        self.network_repository.append("tweet_hashtag_network")
+        for tweet_id, tweet in self.tweets.items():
+            source = tweet.get_id()
+            hashtag_list = tweet.get_hashtags()
+
+            for hashtag in hashtag_list:
+                if self.tweet_hashtag_network.has_edge(source, hashtag):
+                    self.tweet_hashtag_network.edges[source, hashtag]["weight"] += 1
+                    self.tweet_hashtag_network.edges[source, hashtag][
+                        "shared_author"] += tweet.get_twitter().get_screen_name()
+                else:
+                    self.tweet_hashtag_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+                                                        shared_author=tweet.get_twitter().get_screen_name())
+
+            if tweet.is_retweeted():
+                source = tweet.get_retweeted().get_id()
+                hashtag_list = tweet.get_hashtags()
+                for hashtag in hashtag_list:
+
+                    if self.tweet_hashtag_network.has_edge(source, hashtag):
+                        self.tweet_hashtag_network.edges[source, hashtag]["weight"] += 1
+                        self.tweet_hashtag_network.edges[source, hashtag][
+                            "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
+                    else:
+                        self.tweet_hashtag_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+                                                            shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
+                if tweet.get_retweeted().is_quote_available():
+                    source = tweet.get_retweeted().get_quote().get_id()
+                    hashtag_list = tweet.get_retweeted().get_quote().get_hashtags()
+                    for hashtag in hashtag_list:
+
+                        if self.tweet_hashtag_network.has_edge(source, hashtag):
+                            self.tweet_hashtag_network.edges[source, hashtag]["weight"] += 1
+                            self.tweet_hashtag_network.edges[source, hashtag][
+                                "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+                        else:
+                            self.tweet_hashtag_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+                                                                shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
+            elif tweet.is_quote_available():
+                source = tweet.get_quote().get_id()
+                hashtag_list = tweet.get_quote().get_hashtags()
+                for hashtag in hashtag_list:
+
+                    if self.tweet_hashtag_network.has_edge(source, hashtag):
+                        self.tweet_hashtag_network.edges[source, hashtag]["weight"] += 1
+                        self.tweet_hashtag_network.edges[source, hashtag][
+                            "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
+                    else:
+                        self.tweet_hashtag_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+                                                            shared_author=tweet.get_quote().get_twitter().get_screen_name())
+
+    def tweet_mention_bipartite_network_building(self):
+        self.network_repository.append("tweet_mention_network")
+        for tweet_id, tweet in self.tweets.items():
+            source = tweet.get_id()
+            mention_list = tweet.get_mentions()
+
+            for mention in mention_list:
+                if self.tweet_mention_network.has_edge(source, mention):
+                    self.tweet_mention_network.edges[source, mention]["weight"] += 1
+                    self.tweet_mention_network.edges[source, mention]["shared_author"] += tweet.get_twitter().get_screen_name()
+                else:
+                    self.tweet_mention_network.add_edge(source, mention, kind="mention", weight=1,
+                                                       shared_author=tweet.get_twitter().get_screen_name())
+
+            if tweet.is_retweeted():
+                source = tweet.get_retweeted().get_id()
+                mention_list = tweet.get_mentions()
+                for mention in mention_list:
+
+                    if self.tweet_mention_network.has_edge(source, mention):
+                        self.tweet_mention_network.edges[source, mention]["weight"] += 1
+                        self.tweet_mention_network.edges[source, mention][
+                            "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
+                    else:
+                        self.tweet_mention_network.add_edge(source, mention, kind="mention", weight=1,
+                                                           shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
+                if tweet.get_retweeted().is_quote_available():
+                    source = tweet.get_retweeted().get_quote().get_id()
+                    mention_list = tweet.get_retweeted().get_quote().get_mentions()
+                    for mention in mention_list:
+
+                        if self.tweet_mention_network.has_edge(source, mention):
+                            self.tweet_mention_network.edges[source, mention]["weight"] += 1
+                            self.tweet_mention_network.edges[source, mention][
+                                "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+                        else:
+                            self.tweet_mention_network.add_edge(source, mention, kind="mention", weight=1,
+                                                               shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
+            elif tweet.is_quote_available():
+                source = tweet.get_quote().get_id()
+                mention_list = tweet.get_quote().get_mentions()
+                for mention in mention_list:
+
+                    if self.tweet_mention_network.has_edge(source, mention):
+                        self.tweet_mention_network.edges[source, mention]["weight"] += 1
+                        self.tweet_mention_network.edges[source, mention][
+                            "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
+                    else:
+                        self.tweet_mention_network.add_edge(source, mention, kind="mention", weight=1,
+                                                           shared_author=tweet.get_quote().get_twitter().get_screen_name())
+
+    def tweet_url_bipartite_network_building(self):
+        self.network_repository.append("tweet_url_network")
+        for tweet_id, tweet in self.tweets.items():
+            source = tweet.get_id()
+            url_list = tweet.get_tweet_urls(return_format="expanded_url")
+
+            for url in url_list:
+                if self.tweet_url_network.has_edge(source, url):
+                    self.tweet_url_network.edges[source, url]["weight"] += 1
+                    self.tweet_url_network.edges[source, url]["shared_author"] += tweet.get_twitter().get_screen_name()
+                else:
+                    self.tweet_url_network.add_edge(source, url, kind="url", weight=1,
+                                                    shared_author=tweet.get_twitter().get_screen_name())
+
+            if tweet.is_retweeted():
+                source = tweet.get_retweeted().get_id()
+                url_list = tweet.get_tweet_urls(return_format="expanded_url")
+                for url in url_list:
+
+                    if self.tweet_url_network.has_edge(source, url):
+                        self.tweet_url_network.edges[source, url]["weight"] += 1
+                        self.tweet_url_network.edges[source, url][
+                            "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
+                    else:
+                        self.tweet_url_network.add_edge(source, url, kind="url", weight=1,
+                                                        shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
+                if tweet.get_retweeted().is_quote_available():
+                    source = tweet.get_retweeted().get_quote().get_id()
+                    url_list = tweet.get_retweeted().get_quote().get_tweet_urls(return_format="expanded_url")
+                    for url in url_list:
+
+                        if self.tweet_url_network.has_edge(source, url):
+                            self.tweet_url_network.edges[source, url]["weight"] += 1
+                            self.tweet_url_network.edges[source, url][
+                                "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+                        else:
+                            self.tweet_url_network.add_edge(source, url, kind="url", weight=1,
+                                                            shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
+            elif tweet.is_quote_available():
+                source = tweet.get_quote().get_id()
+                url_list = tweet.get_quote().get_tweet_urls(return_format="expanded_url")
+                for url in url_list:
+
+                    if self.tweet_url_network.has_edge(source, url):
+                        self.tweet_url_network.edges[source, url]["weight"] += 1
+                        self.tweet_url_network.edges[source, url][
+                            "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
+                    else:
+                        self.tweet_url_network.add_edge(source, url, kind="url", weight=1,
+                                                        shared_author=tweet.get_quote().get_twitter().get_screen_name())
     ####################################################################
 
     ### User-level network
@@ -6313,7 +7238,7 @@ class Network:
             del self.user_level_url_network.edges[edge]["tweets"]
 
     # bipartite version of user-level hashtag/mention/url networks
-    def mention_network_building(self):
+    def user_mention_bipartite_network_building(self):
         self.network_repository.append("user_mention_network")
         for tweet_id, tweet in self.tweets.items():
             source = tweet.get_twitter().get_screen_name()
@@ -6362,7 +7287,7 @@ class Network:
                         self.user_mention_network.add_edge(source, mention, kind="mention", weight=1,
                                                            shared_content=tweet.get_quote().get_text())
 
-    def hashtag_network_building(self):
+    def user_hashtag_bipartite_network_building(self):
         self.network_repository.append("user_hashtag_network")
         for tweet_id, tweet in self.tweets.items():
             source = tweet.get_twitter().get_screen_name()
@@ -6413,7 +7338,7 @@ class Network:
                         self.user_hashtag_network.add_edge(source, hashtag, kind="hashtag", weight=1,
                                                            shared_content=tweet.get_quote().get_text())
 
-    def url_network_building(self):
+    def user_url_bipartite_network_building(self):
         self.network_repository.append("user_url_network")
         for tweet_id, tweet in self.tweets.items():
             source = tweet.get_twitter().get_screen_name()
@@ -6493,6 +7418,15 @@ class Network:
                 return self.tweet_level_mention_network
             elif requested_network == "tweet_level_url_network":
                 return self.tweet_level_url_network
+
+            elif requested_network == "tweet_hashtag_network":
+                return self.tweet_hashtag_network
+            elif requested_network == "tweet_mention_network":
+                return self.tweet_mention_network
+            elif requested_network == "tweet_url_network":
+                return self.tweet_url_network
+
+
 
             elif requested_network == "user_level_retweet_network":
                 return self.user_level_retweet_network

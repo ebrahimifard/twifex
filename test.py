@@ -71,10 +71,18 @@ q = twifex.collective_tweets(_tweets).topology_based_features().time_independent
 p.user_level_hashtag_network_building()
 p.user_level_mention_network_building()
 p.user_level_url_network_building()
-p.mention_network_building()
-p.hashtag_network_building()
-p.url_network_building()
+
+p.user_mention_bipartite_network_building()
+p.user_hashtag_bipartite_network_building()
+p.user_url_bipartite_network_building()
+
 p.tweet_level_hashtag_network_building()
+p.tweet_level_mention_network_building()
+p.tweet_level_url_network_building()
+
+p.tweet_hashtag_bipartite_network_building()
+p.tweet_mention_bipartite_network_building()
+p.tweet_url_bipartite_network_building()
 
 print("Hi")
 

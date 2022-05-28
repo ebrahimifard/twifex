@@ -1,0 +1,3897 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2022-05-27">
+    <creator>NetworkX 2.5</creator>
+  </meta>
+  <graph defaultedgetype="directed" mode="static" name="">
+    <attributes mode="static" class="edge">
+      <attribute id="0" title="kind" type="string" />
+      <attribute id="1" title="shared_author" type="string" />
+    </attributes>
+    <nodes>
+      <node id="1430024160047034371" label="1430024160047034371" />
+      <node id="#senateqt" label="#senateqt" />
+      <node id="1430024179034648580" label="1430024179034648580" />
+      <node id="#covidbc" label="#covidbc" />
+      <node id="#bcpoli" label="#bcpoli" />
+      <node id="#covid19bc" label="#covid19bc" />
+      <node id="1430024192108294144" label="1430024192108294144" />
+      <node id="#covid19" label="#covid19" />
+      <node id="#vaccine" label="#vaccine" />
+      <node id="1430024195015016454" label="1430024195015016454" />
+      <node id="#jaipur" label="#jaipur" />
+      <node id="1430024213511868419" label="1430024213511868419" />
+      <node id="#theindiansun" label="#theindiansun" />
+      <node id="1429842329133883396" label="1429842329133883396" />
+      <node id="#demvoice1" label="#demvoice1" />
+      <node id="1430024220931551243" label="1430024220931551243" />
+      <node id="#dohertyreport" label="#dohertyreport" />
+      <node id="#dohertyinstitute" label="#dohertyinstitute" />
+      <node id="1430024226212257795" label="1430024226212257795" />
+      <node id="#厚労省" label="#厚労省" />
+      <node id="#尾身会長" label="#尾身会長" />
+      <node id="1430024239353143316" label="1430024239353143316" />
+      <node id="#srilanka" label="#srilanka" />
+      <node id="#astrazeneca" label="#astrazeneca" />
+      <node id="#sinopharm" label="#sinopharm" />
+      <node id="#pfizer" label="#pfizer" />
+      <node id="#moderna" label="#moderna" />
+      <node id="#covid19lk" label="#covid19lk" />
+      <node id="#vaccination" label="#vaccination" />
+      <node id="1430024243094319114" label="1430024243094319114" />
+      <node id="#joshfrydenfolly" label="#joshfrydenfolly" />
+      <node id="#auspoi" label="#auspoi" />
+      <node id="#profits" label="#profits" />
+      <node id="1430024243371257857" label="1430024243371257857" />
+      <node id="#liberalismisamentaldisorder" label="#liberalismisamentaldisorder" />
+      <node id="1430024294126522371" label="1430024294126522371" />
+      <node id="#covid" label="#covid" />
+      <node id="#deltavariant" label="#deltavariant" />
+      <node id="1430024298216009730" label="1430024298216009730" />
+      <node id="#covid22" label="#covid22" />
+      <node id="1430024300501762052" label="1430024300501762052" />
+      <node id="#contestalert" label="#contestalert" />
+      <node id="#dunzodailykaro" label="#dunzodailykaro" />
+      <node id="#tareekhpetareekhchallenge" label="#tareekhpetareekhchallenge" />
+      <node id="1430024306419924999" label="1430024306419924999" />
+      <node id="#kelantan" label="#kelantan" />
+      <node id="1430024339919933440" label="1430024339919933440" />
+      <node id="#uhuruspeaks" label="#uhuruspeaks" />
+      <node id="1430024371683303427" label="1430024371683303427" />
+      <node id="#jobkeeper" label="#jobkeeper" />
+      <node id="#qt" label="#qt" />
+      <node id="#auspol" label="#auspol" />
+      <node id="1430024404189302786" label="1430024404189302786" />
+      <node id="#globalwithhisa" label="#globalwithhisa" />
+      <node id="1430024430072311808" label="1430024430072311808" />
+      <node id="1430024483989987328" label="1430024483989987328" />
+      <node id="#getvaccinated" label="#getvaccinated" />
+      <node id="#covid19nz" label="#covid19nz" />
+      <node id="1430024497009070080" label="1430024497009070080" />
+      <node id="#stock_market_news" label="#stock_market_news" />
+      <node id="1430024505288658951" label="1430024505288658951" />
+      <node id="1430024528860569602" label="1430024528860569602" />
+      <node id="1430024567817326594" label="1430024567817326594" />
+      <node id="#jaanhaitohjahaanhai" label="#jaanhaitohjahaanhai" />
+      <node id="#जानहैतोजहानहै" label="#जानहैतोजहानहै" />
+      <node id="#united2fightcorona" label="#united2fightcorona" />
+      <node id="#largestvaccinedrive" label="#largestvaccinedrive" />
+      <node id="1430024568358461440" label="1430024568358461440" />
+      <node id="#rotarycancerrun10" label="#rotarycancerrun10" />
+      <node id="#sondemodels" label="#sondemodels" />
+      <node id="1430024574398201856" label="1430024574398201856" />
+      <node id="1430024578814914563" label="1430024578814914563" />
+      <node id="#outbreaks" label="#outbreaks" />
+      <node id="1430024585726992388" label="1430024585726992388" />
+      <node id="#wtsvaccination" label="#wtsvaccination" />
+      <node id="#covid19vaccines" label="#covid19vaccines" />
+      <node id="1430024592710684679" label="1430024592710684679" />
+      <node id="#analytics" label="#analytics" />
+      <node id="#googleads" label="#googleads" />
+      <node id="#facebookads" label="#facebookads" />
+      <node id="1430024598305837058" label="1430024598305837058" />
+      <node id="#thegreatcoronavirusfraudof2020" label="#thegreatcoronavirusfraudof2020" />
+      <node id="#vaccinemadness" label="#vaccinemadness" />
+      <node id="#fdasucks" label="#fdasucks" />
+      <node id="#dumptherepublicrats" label="#dumptherepublicrats" />
+      <node id="#buildaworkersparty" label="#buildaworkersparty" />
+      <node id="1430024635433689090" label="1430024635433689090" />
+      <node id="#publichealth" label="#publichealth" />
+      <node id="#savinglives" label="#savinglives" />
+      <node id="#doitforothers" label="#doitforothers" />
+      <node id="#dontbeselfish" label="#dontbeselfish" />
+      <node id="#didisaypublichealth" label="#didisaypublichealth" />
+      <node id="#hailfauci" label="#hailfauci" />
+      <node id="#stayinghomesaveslives" label="#stayinghomesaveslives" />
+      <node id="#itsallbullshit" label="#itsallbullshit" />
+      <node id="1430024652508778500" label="1430024652508778500" />
+      <node id="#shutdownsa" label="#shutdownsa" />
+      <node id="#podcastandchillwithmacg" label="#podcastandchillwithmacg" />
+      <node id="1430024672255557634" label="1430024672255557634" />
+      <node id="#socialmedia" label="#socialmedia" />
+      <node id="1430024687686324225" label="1430024687686324225" />
+      <node id="#covaxin" label="#covaxin" />
+      <node id="1430024691465342976" label="1430024691465342976" />
+      <node id="#travelpass" label="#travelpass" />
+      <node id="#covishield" label="#covishield" />
+      <node id="1430024695349317632" label="1430024695349317632" />
+      <node id="#fda" label="#fda" />
+      <node id="1430024696431620099" label="1430024696431620099" />
+      <node id="#issues" label="#issues" />
+      <node id="#list" label="#list" />
+      <node id="1430024714269847559" label="1430024714269847559" />
+      <node id="#bidenregime" label="#bidenregime" />
+      <node id="1430024716773826568" label="1430024716773826568" />
+      <node id="#scottyfrommarketing" label="#scottyfrommarketing" />
+      <node id="#sydney" label="#sydney" />
+      <node id="1429962404104859649" label="1429962404104859649" />
+      <node id="1430024758700171269" label="1430024758700171269" />
+      <node id="#antivaxxers" label="#antivaxxers" />
+      <node id="1430024810625650692" label="1430024810625650692" />
+      <node id="#digitalmarketing" label="#digitalmarketing" />
+      <node id="#advertising" label="#advertising" />
+      <node id="1430024830141624321" label="1430024830141624321" />
+      <node id="#vaccineswork" label="#vaccineswork" />
+      <node id="#unite2fightcorona" label="#unite2fightcorona" />
+      <node id="1430024847938052097" label="1430024847938052097" />
+      <node id="#tamilnadu" label="#tamilnadu" />
+      <node id="#colleges" label="#colleges" />
+      <node id="#reopening" label="#reopening" />
+      <node id="#students" label="#students" />
+      <node id="#professors" label="#professors" />
+      <node id="#must" label="#must" />
+      <node id="1430024849968173061" label="1430024849968173061" />
+      <node id="1429991343309299712" label="1429991343309299712" />
+      <node id="1430024901327523840" label="1430024901327523840" />
+      <node id="#slnews" label="#slnews" />
+      <node id="1430024949025153024" label="1430024949025153024" />
+      <node id="#jimmyhayes" label="#jimmyhayes" />
+      <node id="1430024952699256834" label="1430024952699256834" />
+      <node id="#bidenharrisfailure" label="#bidenharrisfailure" />
+      <node id="#factsmatter" label="#factsmatter" />
+      <node id="1430024992951967746" label="1430024992951967746" />
+      <node id="#pfizergang" label="#pfizergang" />
+      <node id="#freebritney" label="#freebritney" />
+      <node id="1429280594094174216" label="1429280594094174216" />
+      <node id="#jessejackson" label="#jessejackson" />
+      <node id="#jessejacksoncovid" label="#jessejacksoncovid" />
+      <node id="1430025051554951169" label="1430025051554951169" />
+      <node id="1429944918953402371" label="1429944918953402371" />
+      <node id="#seeyouthere" label="#seeyouthere" />
+      <node id="1430025107582431233" label="1430025107582431233" />
+      <node id="#covid19vic" label="#covid19vic" />
+      <node id="1430025174452084744" label="1430025174452084744" />
+      <node id="#school" label="#school" />
+      <node id="#teachers" label="#teachers" />
+      <node id="#corona" label="#corona" />
+      <node id="1430025180915568645" label="1430025180915568645" />
+      <node id="1430025193968357379" label="1430025193968357379" />
+      <node id="#macdonald" label="#macdonald" />
+      <node id="#capitolbuilding" label="#capitolbuilding" />
+      <node id="#insurrection" label="#insurrection" />
+      <node id="#pharmacist" label="#pharmacist" />
+      <node id="#maskmandates" label="#maskmandates" />
+      <node id="1430025197340422146" label="1430025197340422146" />
+      <node id="#morrisonfail" label="#morrisonfail" />
+      <node id="#morrisonvaccinecrisis" label="#morrisonvaccinecrisis" />
+      <node id="#greghunt" label="#greghunt" />
+      <node id="1430025197407465474" label="1430025197407465474" />
+      <node id="#qldpol" label="#qldpol" />
+      <node id="1430025246548144134" label="1430025246548144134" />
+      <node id="1430025250268278791" label="1430025250268278791" />
+      <node id="#sensex" label="#sensex" />
+      <node id="#stockmarket" label="#stockmarket" />
+      <node id="#nse" label="#nse" />
+      <node id="#bse" label="#bse" />
+      <node id="#nifty" label="#nifty" />
+      <node id="#investmentguruindia" label="#investmentguruindia" />
+      <node id="1430025258527043585" label="1430025258527043585" />
+      <node id="#bigpharma" label="#bigpharma" />
+      <node id="#fdaapproved" label="#fdaapproved" />
+      <node id="#vaccinate" label="#vaccinate" />
+      <node id="#vaccinemandate" label="#vaccinemandate" />
+      <node id="1430025291032899584" label="1430025291032899584" />
+      <node id="1430025295646498817" label="1430025295646498817" />
+      <node id="#scottyfromdamagecontrol" label="#scottyfromdamagecontrol" />
+      <node id="1430025314525085699" label="1430025314525085699" />
+      <node id="#toronto" label="#toronto" />
+      <node id="#topoli" label="#topoli" />
+      <node id="#onpoli" label="#onpoli" />
+      <node id="1430025398348390400" label="1430025398348390400" />
+      <node id="#vaccines" label="#vaccines" />
+      <node id="#nwo" label="#nwo" />
+      <node id="#702breakfast" label="#702breakfast" />
+      <node id="1430025409702342656" label="1430025409702342656" />
+      <node id="#vaccinepune" label="#vaccinepune" />
+      <node id="#cowin" label="#cowin" />
+      <node id="#pune" label="#pune" />
+      <node id="1430025414181806086" label="1430025414181806086" />
+      <node id="1430025421710675975" label="1430025421710675975" />
+      <node id="#cantfixstupid" label="#cantfixstupid" />
+      <node id="#ivermectin" label="#ivermectin" />
+      <node id="#vaccinessavelives" label="#vaccinessavelives" />
+      <node id="#magamorons" label="#magamorons" />
+      <node id="#qanoncult" label="#qanoncult" />
+      <node id="#magacult" label="#magacult" />
+      <node id="#maskupvaxupgrowup" label="#maskupvaxupgrowup" />
+      <node id="#maskup" label="#maskup" />
+      <node id="1430025495601721352" label="1430025495601721352" />
+      <node id="#getvaxxednow" label="#getvaxxednow" />
+      <node id="1430025500211220481" label="1430025500211220481" />
+      <node id="#lka" label="#lka" />
+      <node id="1430025517957218309" label="1430025517957218309" />
+      <node id="#bedtet2011" label="#bedtet2011" />
+      <node id="1430025539830562816" label="1430025539830562816" />
+      <node id="#rutonowresign" label="#rutonowresign" />
+      <node id="1430025574634778628" label="1430025574634778628" />
+      <node id="#zyduscadila" label="#zyduscadila" />
+      <node id="1430025592221708289" label="1430025592221708289" />
+      <node id="#noeasy" label="#noeasy" />
+      <node id="#straykidscomeback" label="#straykidscomeback" />
+      <node id="#소리꾼" label="#소리꾼" />
+      <node id="#thunderous" label="#thunderous" />
+      <node id="#스트레이키즈" label="#스트레이키즈" />
+      <node id="#straykids" label="#straykids" />
+      <node id="1430025592850698240" label="1430025592850698240" />
+      <node id="#regenerondesantis" label="#regenerondesantis" />
+      <node id="1430017064950018050" label="1430017064950018050" />
+      <node id="#laréunion" label="#laréunion" />
+      <node id="1430025666444070912" label="1430025666444070912" />
+      <node id="#delta" label="#delta" />
+      <node id="1430025668931198980" label="1430025668931198980" />
+      <node id="#smartnews" label="#smartnews" />
+      <node id="1430020552450740267" label="1430020552450740267" />
+      <node id="#dontdamngo" label="#dontdamngo" />
+      <node id="1430025705346142213" label="1430025705346142213" />
+      <node id="#istandwithtruckies" label="#istandwithtruckies" />
+      <node id="1430025770026651648" label="1430025770026651648" />
+      <node id="#covid19kills" label="#covid19kills" />
+      <node id="1430039886611066898" label="1430039886611066898" />
+      <node id="#sdrs" label="#sdrs" />
+      <node id="#globalcitizen" label="#globalcitizen" />
+      <node id="1430039907746164743" label="1430039907746164743" />
+      <node id="#sportsnews" label="#sportsnews" />
+      <node id="#sports" label="#sports" />
+      <node id="1430039919179837446" label="1430039919179837446" />
+      <node id="#txlege" label="#txlege" />
+      <node id="#keeptxkidscovidfree" label="#keeptxkidscovidfree" />
+      <node id="1430039924984750081" label="1430039924984750081" />
+      <node id="#joedirt" label="#joedirt" />
+      <node id="1430039965568745473" label="1430039965568745473" />
+      <node id="1430039990956818435" label="1430039990956818435" />
+      <node id="#gladysresign" label="#gladysresign" />
+      <node id="#scottyfromgaslighting" label="#scottyfromgaslighting" />
+      <node id="1430040001681797131" label="1430040001681797131" />
+      <node id="1430040050839040009" label="1430040050839040009" />
+      <node id="#news" label="#news" />
+      <node id="1430040065556717573" label="1430040065556717573" />
+      <node id="#biontech" label="#biontech" />
+      <node id="1430040077699362819" label="1430040077699362819" />
+      <node id="#macron2022" label="#macron2022" />
+      <node id="1430040082560344068" label="1430040082560344068" />
+      <node id="#whatshappeninginmyanmar" label="#whatshappeninginmyanmar" />
+      <node id="#crimesagainsthumanity" label="#crimesagainsthumanity" />
+      <node id="#aug24coup" label="#aug24coup" />
+      <node id="1430017032259526656" label="1430017032259526656" />
+      <node id="1430040086079361027" label="1430040086079361027" />
+      <node id="#covidvic" label="#covidvic" />
+      <node id="1430040089493741568" label="1430040089493741568" />
+      <node id="#npr" label="#npr" />
+      <node id="#health" label="#health" />
+      <node id="#facebook" label="#facebook" />
+      <node id="1430040091318267924" label="1430040091318267924" />
+      <node id="1430040104064610311" label="1430040104064610311" />
+      <node id="1430040143944200202" label="1430040143944200202" />
+      <node id="#getvaccinatednow" label="#getvaccinatednow" />
+      <node id="1430040166861709321" label="1430040166861709321" />
+      <node id="#lnpfail" label="#lnpfail" />
+      <node id="1429787917782769671" label="1429787917782769671" />
+      <node id="#morningjoe" label="#morningjoe" />
+      <node id="1430040218904694784" label="1430040218904694784" />
+      <node id="#billgates" label="#billgates" />
+      <node id="1430040243063992329" label="1430040243063992329" />
+      <node id="#novaccinepassportsanywhere" label="#novaccinepassportsanywhere" />
+      <node id="#nomandatoryvaccine" label="#nomandatoryvaccine" />
+      <node id="#nomasks" label="#nomasks" />
+      <node id="1430040263716712449" label="1430040263716712449" />
+      <node id="#covidvaccine" label="#covidvaccine" />
+      <node id="#covid19india" label="#covid19india" />
+      <node id="#coronaupdate" label="#coronaupdate" />
+      <node id="1430040266610814976" label="1430040266610814976" />
+      <node id="1430040271039967234" label="1430040271039967234" />
+      <node id="#covidiots" label="#covidiots" />
+      <node id="#dumbasses" label="#dumbasses" />
+      <node id="1430040296822169604" label="1430040296822169604" />
+      <node id="1430040321887412236" label="1430040321887412236" />
+      <node id="#antivaccine" label="#antivaccine" />
+      <node id="#idiots" label="#idiots" />
+      <node id="1430040342829559815" label="1430040342829559815" />
+      <node id="1430040471657754649" label="1430040471657754649" />
+      <node id="#tigray" label="#tigray" />
+      <node id="#eritrea" label="#eritrea" />
+      <node id="#ethiopia" label="#ethiopia" />
+      <node id="#allowaccesstotigray" label="#allowaccesstotigray" />
+      <node id="#endtigraysiege" label="#endtigraysiege" />
+      <node id="#tigrayfamine" label="#tigrayfamine" />
+      <node id="#tigraygenocide" label="#tigraygenocide" />
+      <node id="#tigraycantwait" label="#tigraycantwait" />
+      <node id="1429768713306263560" label="1429768713306263560" />
+      <node id="1430040491291123727" label="1430040491291123727" />
+      <node id="#leavenoonebehind" label="#leavenoonebehind" />
+      <node id="1430040494495739924" label="1430040494495739924" />
+      <node id="#emergency" label="#emergency" />
+      <node id="#pandemic" label="#pandemic" />
+      <node id="1430040512581574656" label="1430040512581574656" />
+      <node id="#weightloss" label="#weightloss" />
+      <node id="#fitness" label="#fitness" />
+      <node id="1430040523910393871" label="1430040523910393871" />
+      <node id="#endthepandemic" label="#endthepandemic" />
+      <node id="1429860061552254982" label="1429860061552254982" />
+      <node id="#dnabacklog" label="#dnabacklog" />
+      <node id="#myvoiceforjustice" label="#myvoiceforjustice" />
+      <node id="1430040611810250754" label="1430040611810250754" />
+      <node id="1430040630189649926" label="1430040630189649926" />
+      <node id="1430040642349064192" label="1430040642349064192" />
+      <node id="#bidenisadisgrace" label="#bidenisadisgrace" />
+      <node id="#bidenisafailure" label="#bidenisafailure" />
+      <node id="#bidendisaster" label="#bidendisaster" />
+      <node id="#msm" label="#msm" />
+      <node id="#cnn" label="#cnn" />
+      <node id="#liberals" label="#liberals" />
+      <node id="#democrats" label="#democrats" />
+      <node id="#msnbc" label="#msnbc" />
+      <node id="#covid19nsw" label="#covid19nsw" />
+      <node id="#scientists" label="#scientists" />
+      <node id="1430040651312160770" label="1430040651312160770" />
+      <node id="#votejoshout" label="#votejoshout" />
+      <node id="1429965891777830914" label="1429965891777830914" />
+      <node id="#formerguy" label="#formerguy" />
+      <node id="#republicansaredestroyingamerica" label="#republicansaredestroyingamerica" />
+      <node id="#voteblue2022" label="#voteblue2022" />
+      <node id="#wearamask" label="#wearamask" />
+      <node id="1430040665963040768" label="1430040665963040768" />
+      <node id="#impfteuchinsknie" label="#impfteuchinsknie" />
+      <node id="1430040675412692996" label="1430040675412692996" />
+      <node id="#cadila" label="#cadila" />
+      <node id="#zycovd" label="#zycovd" />
+      <node id="#stockstowatch" label="#stockstowatch" />
+      <node id="1430040702336086041" label="1430040702336086041" />
+      <node id="#coronavirus" label="#coronavirus" />
+      <node id="1430040820778889220" label="1430040820778889220" />
+      <node id="1430040869403602970" label="1430040869403602970" />
+      <node id="#novaccinepassports" label="#novaccinepassports" />
+      <node id="#career" label="#career" />
+      <node id="1430040918913167369" label="1430040918913167369" />
+      <node id="#covax" label="#covax" />
+      <node id="1430040921580658693" label="1430040921580658693" />
+      <node id="#stayhome" label="#stayhome" />
+      <node id="#washyourhands" label="#washyourhands" />
+      <node id="#roc" label="#roc" />
+      <node id="1430040933970718744" label="1430040933970718744" />
+      <node id="1430040940903755788" label="1430040940903755788" />
+      <node id="#gladyssuperspreader" label="#gladyssuperspreader" />
+      <node id="#biglie" label="#biglie" />
+      <node id="#murdochroyalcommission" label="#murdochroyalcommission" />
+      <node id="1429798366775431171" label="1429798366775431171" />
+      <node id="#4corners" label="#4corners" />
+      <node id="1430040943093116934" label="1430040943093116934" />
+      <node id="#tuberculosis" label="#tuberculosis" />
+      <node id="#eczema" label="#eczema" />
+      <node id="1430040994670600192" label="1430040994670600192" />
+      <node id="#yahoofinancebiden" label="#yahoofinancebiden" />
+      <node id="#businesses" label="#businesses" />
+      <node id="#huffpostfda" label="#huffpostfda" />
+      <node id="#startrollingout" label="#startrollingout" />
+      <node id="1430041031773282308" label="1430041031773282308" />
+      <node id="#vaccinated" label="#vaccinated" />
+      <node id="1430031904686972928" label="1430031904686972928" />
+      <node id="#histoire" label="#histoire" />
+      <node id="1430041055924133899" label="1430041055924133899" />
+      <node id="1429910260131717120" label="1429910260131717120" />
+      <node id="#novaccinepassport" label="#novaccinepassport" />
+      <node id="1430041064996425732" label="1430041064996425732" />
+      <node id="#factchecknepal" label="#factchecknepal" />
+      <node id="1430041072789598211" label="1430041072789598211" />
+      <node id="#antivax" label="#antivax" />
+      <node id="#wine" label="#wine" />
+      <node id="#sayno" label="#sayno" />
+      <node id="1430041077558521870" label="1430041077558521870" />
+      <node id="#breaking" label="#breaking" />
+      <node id="#saudiarabia" label="#saudiarabia" />
+      <node id="1430041083530997762" label="1430041083530997762" />
+      <node id="#vaccinetruth" label="#vaccinetruth" />
+      <node id="1430041098408407045" label="1430041098408407045" />
+      <node id="#wef" label="#wef" />
+      <node id="1430041099553452065" label="1430041099553452065" />
+      <node id="#thesmallthings" label="#thesmallthings" />
+      <node id="1430041112199286784" label="1430041112199286784" />
+      <node id="#seriousillness" label="#seriousillness" />
+      <node id="#inengland" label="#inengland" />
+      <node id="1430041127193821184" label="1430041127193821184" />
+      <node id="#takeyourshot" label="#takeyourshot" />
+      <node id="#zwakala" label="#zwakala" />
+      <node id="#vaccinerolloutsa" label="#vaccinerolloutsa" />
+      <node id="1430041155769487360" label="1430041155769487360" />
+      <node id="#mmu" label="#mmu" />
+      <node id="#permatadunia" label="#permatadunia" />
+      <node id="1430041161708703745" label="1430041161708703745" />
+      <node id="#vaccinepassport" label="#vaccinepassport" />
+      <node id="#australianlaw" label="#australianlaw" />
+      <node id="#legal" label="#legal" />
+      <node id="1430041193748910083" label="1430041193748910083" />
+      <node id="#canada" label="#canada" />
+      <node id="1430041201059663873" label="1430041201059663873" />
+      <node id="#worthreading" label="#worthreading" />
+      <node id="1430041202024349697" label="1430041202024349697" />
+      <node id="#digitalhealth" label="#digitalhealth" />
+      <node id="#industry40" label="#industry40" />
+      <node id="#ai" label="#ai" />
+      <node id="#iot" label="#iot" />
+      <node id="#mhealth" label="#mhealth" />
+      <node id="#healthtech" label="#healthtech" />
+      <node id="1430041209150472196" label="1430041209150472196" />
+      <node id="#highlights" label="#highlights" />
+      <node id="1430041211721576451" label="1430041211721576451" />
+      <node id="1429931462401396737" label="1429931462401396737" />
+      <node id="#rediff" label="#rediff" />
+      <node id="1430041221003550724" label="1430041221003550724" />
+      <node id="1430041233150423067" label="1430041233150423067" />
+      <node id="#staysafe" label="#staysafe" />
+      <node id="1430041236480700418" label="1430041236480700418" />
+      <node id="#infowars" label="#infowars" />
+      <node id="#conspiracy" label="#conspiracy" />
+      <node id="#vaccinesforall" label="#vaccinesforall" />
+      <node id="1430041262309085187" label="1430041262309085187" />
+      <node id="#covod19" label="#covod19" />
+      <node id="1429992215460290580" label="1429992215460290580" />
+      <node id="1430041303023116289" label="1430041303023116289" />
+      <node id="#australia" label="#australia" />
+      <node id="1430041305514749971" label="1430041305514749971" />
+      <node id="#buyanewspaper" label="#buyanewspaper" />
+      <node id="1430041313999671300" label="1430041313999671300" />
+      <node id="#東京都北区" label="#東京都北区" />
+      <node id="#北区" label="#北区" />
+      <node id="#ワクチン" label="#ワクチン" />
+      <node id="#新型コロナウイルス" label="#新型コロナウイルス" />
+      <node id="1430041346295877632" label="1430041346295877632" />
+      <node id="#passsanitaire" label="#passsanitaire" />
+      <node id="#boycott" label="#boycott" />
+      <node id="#restaurateurs" label="#restaurateurs" />
+      <node id="#macron" label="#macron" />
+      <node id="#france" label="#france" />
+      <node id="1430041354105544706" label="1430041354105544706" />
+      <node id="#taiwanisacountry" label="#taiwanisacountry" />
+      <node id="#台湾です" label="#台湾です" />
+      <node id="1429673250334732291" label="1429673250334732291" />
+      <node id="#taiwan" label="#taiwan" />
+      <node id="1430041367963607041" label="1430041367963607041" />
+      <node id="#bidenisnotadisgrace" label="#bidenisnotadisgrace" />
+      <node id="1430041391623811082" label="1430041391623811082" />
+      <node id="#westbengal" label="#westbengal" />
+      <node id="1430041398624104454" label="1430041398624104454" />
+      <node id="#lovewaxedcold" label="#lovewaxedcold" />
+      <node id="1430041415975899136" label="1430041415975899136" />
+      <node id="#cratechallenge" label="#cratechallenge" />
+      <node id="#milkcrate" label="#milkcrate" />
+      <node id="1430041418287001605" label="1430041418287001605" />
+      <node id="#letswakeitup" label="#letswakeitup" />
+      <node id="1430041448146145281" label="1430041448146145281" />
+      <node id="#ramaphosa" label="#ramaphosa" />
+      <node id="1430041448251109382" label="1430041448251109382" />
+      <node id="#medicaltyranny" label="#medicaltyranny" />
+      <node id="1430041497760456708" label="1430041497760456708" />
+      <node id="1430041516706304001" label="1430041516706304001" />
+      <node id="#covid19vaccine" label="#covid19vaccine" />
+      <node id="1430041519583498240" label="1430041519583498240" />
+      <node id="#nzpol" label="#nzpol" />
+      <node id="#natsaresostupidhing" label="#natsaresostupidhing" />
+      <node id="1430041519688355844" label="1430041519688355844" />
+      <node id="1430041521575931935" label="1430041521575931935" />
+      <node id="#vaccinechoice" label="#vaccinechoice" />
+      <node id="1430041544606699522" label="1430041544606699522" />
+      <node id="#saskatchewan" label="#saskatchewan" />
+      <node id="#potential" label="#potential" />
+      <node id="#immigrants" label="#immigrants" />
+      <node id="#canadian" label="#canadian" />
+      <node id="#august" label="#august" />
+      <node id="#goals" label="#goals" />
+      <node id="#share" label="#share" />
+      <node id="#immigration" label="#immigration" />
+      <node id="#lifegoals" label="#lifegoals" />
+      <node id="#jobsearch" label="#jobsearch" />
+      <node id="#tuesdaymotivations" label="#tuesdaymotivations" />
+      <node id="#loveisland" label="#loveisland" />
+      <node id="#money" label="#money" />
+      <node id="#positivity" label="#positivity" />
+      <node id="#weekend" label="#weekend" />
+      <node id="#covidnsw" label="#covidnsw" />
+      <node id="#tuesdayvibe" label="#tuesdayvibe" />
+      <node id="#instagram" label="#instagram" />
+      <node id="#instagood" label="#instagood" />
+      <node id="#freedom" label="#freedom" />
+      <node id="1430041613800148993" label="1430041613800148993" />
+      <node id="#tngovernment" label="#tngovernment" />
+      <node id="#minister" label="#minister" />
+      <node id="#masubramanian" label="#masubramanian" />
+      <node id="1430041618053312524" label="1430041618053312524" />
+      <node id="#sciencematters" label="#sciencematters" />
+      <node id="#knowledgeispower" label="#knowledgeispower" />
+      <node id="#education" label="#education" />
+      <node id="#stem" label="#stem" />
+      <node id="1430041624684417024" label="1430041624684417024" />
+      <node id="#txid" label="#txid" />
+      <node id="#idtwitter" label="#idtwitter" />
+      <node id="#medtwitter" label="#medtwitter" />
+      <node id="1430041625602912256" label="1430041625602912256" />
+      <node id="#morrison" label="#morrison" />
+      <node id="#quarantine" label="#quarantine" />
+      <node id="1430041661850066945" label="1430041661850066945" />
+      <node id="#india" label="#india" />
+      <node id="1430041738111070212" label="1430041738111070212" />
+      <node id="#regeneron" label="#regeneron" />
+      <node id="1430041748428845059" label="1430041748428845059" />
+      <node id="#donotcomply" label="#donotcomply" />
+      <node id="#holdthefuckingline" label="#holdthefuckingline" />
+      <node id="1430041751549485060" label="1430041751549485060" />
+      <node id="#indiafightscorona" label="#indiafightscorona" />
+      <node id="#we4vaccine" label="#we4vaccine" />
+      <node id="#largestvaccinationdrive" label="#largestvaccinationdrive" />
+      <node id="1448993805693239310" label="1448993805693239310" />
+      <node id="1448934891807182861" label="1448934891807182861" />
+      <node id="1448993841986609154" label="1448993841986609154" />
+      <node id="1448945676029775872" label="1448945676029775872" />
+      <node id="1448993865227280385" label="1448993865227280385" />
+      <node id="1448993938715590671" label="1448993938715590671" />
+      <node id="#coronapas" label="#coronapas" />
+      <node id="#sociaalkredietsysteem" label="#sociaalkredietsysteem" />
+      <node id="1448993440830734357" label="1448993440830734357" />
+      <node id="1448994021003587591" label="1448994021003587591" />
+      <node id="#australiahasfallen" label="#australiahasfallen" />
+      <node id="#unvaxxed" label="#unvaxxed" />
+      <node id="#enoughisenough" label="#enoughisenough" />
+      <node id="#injustice" label="#injustice" />
+      <node id="#informedconsent" label="#informedconsent" />
+      <node id="#corruption" label="#corruption" />
+      <node id="#vaccinemandates" label="#vaccinemandates" />
+      <node id="#billofrights" label="#billofrights" />
+      <node id="1448994066352455683" label="1448994066352455683" />
+      <node id="1448994105158156317" label="1448994105158156317" />
+      <node id="1448994142227423236" label="1448994142227423236" />
+      <node id="1448994224939089934" label="1448994224939089934" />
+      <node id="1448994450269736961" label="1448994450269736961" />
+      <node id="#together" label="#together" />
+      <node id="#novaccinemandates" label="#novaccinemandates" />
+      <node id="#togetherdeclaration" label="#togetherdeclaration" />
+      <node id="#openforall" label="#openforall" />
+      <node id="1448661650572144650" label="1448661650572144650" />
+      <node id="1448994572248432643" label="1448994572248432643" />
+      <node id="1448902369840975884" label="1448902369840975884" />
+    </nodes>
+    <edges>
+      <edge source="1430024160047034371" target="#senateqt" id="0" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MurrayWatt" />
+        </attvalues>
+      </edge>
+      <edge source="1430024179034648580" target="#covidbc" id="1" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Balzer_Jess" />
+        </attvalues>
+      </edge>
+      <edge source="1430024179034648580" target="#bcpoli" id="2" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Balzer_Jess" />
+        </attvalues>
+      </edge>
+      <edge source="1430024179034648580" target="#covid19bc" id="3" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Balzer_Jess" />
+        </attvalues>
+      </edge>
+      <edge source="1430024192108294144" target="#covid19" id="4" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="fx16news" />
+        </attvalues>
+      </edge>
+      <edge source="1430024192108294144" target="#vaccine" id="5" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="fx16news" />
+        </attvalues>
+      </edge>
+      <edge source="1430024195015016454" target="#jaipur" id="6" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Nareshfiroda2" />
+        </attvalues>
+      </edge>
+      <edge source="1430024213511868419" target="#theindiansun" id="7" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="The_Indian_Sun" />
+        </attvalues>
+      </edge>
+      <edge source="1429842329133883396" target="#demvoice1" id="8" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JewishResister" />
+        </attvalues>
+      </edge>
+      <edge source="1430024220931551243" target="#dohertyreport" id="9" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lazzamar" />
+        </attvalues>
+      </edge>
+      <edge source="1430024220931551243" target="#dohertyinstitute" id="10" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lazzamar" />
+        </attvalues>
+      </edge>
+      <edge source="1430024226212257795" target="#厚労省" id="11" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="moblancsan" />
+        </attvalues>
+      </edge>
+      <edge source="1430024226212257795" target="#尾身会長" id="12" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="moblancsan" />
+        </attvalues>
+      </edge>
+      <edge source="1430024239353143316" target="#vaccine" id="13" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="arshad_ms18" />
+        </attvalues>
+      </edge>
+      <edge source="1430024239353143316" target="#srilanka" id="14" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="arshad_ms18" />
+        </attvalues>
+      </edge>
+      <edge source="1430024239353143316" target="#astrazeneca" id="15" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="arshad_ms18" />
+        </attvalues>
+      </edge>
+      <edge source="1430024239353143316" target="#sinopharm" id="16" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="arshad_ms18" />
+        </attvalues>
+      </edge>
+      <edge source="1430024239353143316" target="#pfizer" id="17" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="arshad_ms18" />
+        </attvalues>
+      </edge>
+      <edge source="1430024239353143316" target="#moderna" id="18" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="arshad_ms18" />
+        </attvalues>
+      </edge>
+      <edge source="1430024239353143316" target="#covid19lk" id="19" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="arshad_ms18" />
+        </attvalues>
+      </edge>
+      <edge source="1430024239353143316" target="#vaccination" id="20" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="arshad_ms18" />
+        </attvalues>
+      </edge>
+      <edge source="1430024243094319114" target="#joshfrydenfolly" id="21" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="KleinRevd" />
+        </attvalues>
+      </edge>
+      <edge source="1430024243094319114" target="#auspoi" id="22" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="KleinRevd" />
+        </attvalues>
+      </edge>
+      <edge source="1430024243094319114" target="#profits" id="23" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="KleinRevd" />
+        </attvalues>
+      </edge>
+      <edge source="1430024243371257857" target="#liberalismisamentaldisorder" id="24" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ML_Romanowski" />
+        </attvalues>
+      </edge>
+      <edge source="1430024294126522371" target="#covid" id="25" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drsaadkhanz" />
+        </attvalues>
+      </edge>
+      <edge source="1430024294126522371" target="#covid19" id="26" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drsaadkhanz" />
+        </attvalues>
+      </edge>
+      <edge source="1430024294126522371" target="#deltavariant" id="27" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drsaadkhanz" />
+        </attvalues>
+      </edge>
+      <edge source="1430024294126522371" target="#vaccine" id="28" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drsaadkhanz" />
+        </attvalues>
+      </edge>
+      <edge source="1430024298216009730" target="#covid22" id="29" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="LesLoLeursYT" />
+        </attvalues>
+      </edge>
+      <edge source="1430024300501762052" target="#contestalert" id="30" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ChilledSup" />
+        </attvalues>
+      </edge>
+      <edge source="1430024300501762052" target="#dunzodailykaro" id="31" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ChilledSup" />
+        </attvalues>
+      </edge>
+      <edge source="1430024300501762052" target="#tareekhpetareekhchallenge" id="32" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ChilledSup" />
+        </attvalues>
+      </edge>
+      <edge source="1430024306419924999" target="#kelantan" id="33" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TMReserve" />
+        </attvalues>
+      </edge>
+      <edge source="1430024306419924999" target="#covid19" id="34" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TMReserve" />
+        </attvalues>
+      </edge>
+      <edge source="1430024306419924999" target="#vaccine" id="35" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TMReserve" />
+        </attvalues>
+      </edge>
+      <edge source="1430024339919933440" target="#uhuruspeaks" id="36" weight="2">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="vybe_kevybe_ke" />
+        </attvalues>
+      </edge>
+      <edge source="1430024371683303427" target="#jobkeeper" id="37" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Vanished00One" />
+        </attvalues>
+      </edge>
+      <edge source="1430024371683303427" target="#qt" id="38" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Vanished00One" />
+        </attvalues>
+      </edge>
+      <edge source="1430024371683303427" target="#auspol" id="39" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Vanished00One" />
+        </attvalues>
+      </edge>
+      <edge source="1430024404189302786" target="#pfizer" id="40" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HisaApp" />
+        </attvalues>
+      </edge>
+      <edge source="1430024404189302786" target="#moderna" id="41" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HisaApp" />
+        </attvalues>
+      </edge>
+      <edge source="1430024404189302786" target="#globalwithhisa" id="42" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HisaApp" />
+        </attvalues>
+      </edge>
+      <edge source="1430024430072311808" target="#vaccine" id="43" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Lannie4USA" />
+        </attvalues>
+      </edge>
+      <edge source="1430024430072311808" target="#covid19" id="44" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Lannie4USA" />
+        </attvalues>
+      </edge>
+      <edge source="1430024483989987328" target="#getvaccinated" id="45" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JAS_Ten_Resist" />
+        </attvalues>
+      </edge>
+      <edge source="1430024483989987328" target="#covid19nz" id="46" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JAS_Ten_Resist" />
+        </attvalues>
+      </edge>
+      <edge source="1430024497009070080" target="#stock_market_news" id="47" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ETFsStockPicker" />
+        </attvalues>
+      </edge>
+      <edge source="1430024505288658951" target="#stock_market_news" id="48" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ETFsStockPicker" />
+        </attvalues>
+      </edge>
+      <edge source="1430024528860569602" target="#厚労省" id="49" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="moblancsan" />
+        </attvalues>
+      </edge>
+      <edge source="1430024528860569602" target="#尾身会長" id="50" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="moblancsan" />
+        </attvalues>
+      </edge>
+      <edge source="1430024567817326594" target="#jaanhaitohjahaanhai" id="51" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MOMAIndia" />
+        </attvalues>
+      </edge>
+      <edge source="1430024567817326594" target="#जानहैतोजहानहै" id="52" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MOMAIndia" />
+        </attvalues>
+      </edge>
+      <edge source="1430024567817326594" target="#united2fightcorona" id="53" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MOMAIndia" />
+        </attvalues>
+      </edge>
+      <edge source="1430024567817326594" target="#largestvaccinedrive" id="54" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MOMAIndia" />
+        </attvalues>
+      </edge>
+      <edge source="1430024568358461440" target="#rotarycancerrun10" id="55" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SondeRotary" />
+        </attvalues>
+      </edge>
+      <edge source="1430024568358461440" target="#sondemodels" id="56" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SondeRotary" />
+        </attvalues>
+      </edge>
+      <edge source="1430024574398201856" target="#pfizer" id="57" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="pnagovph" />
+        </attvalues>
+      </edge>
+      <edge source="1430024578814914563" target="#covid" id="58" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="healthgovau" />
+        </attvalues>
+      </edge>
+      <edge source="1430024578814914563" target="#outbreaks" id="59" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="healthgovau" />
+        </attvalues>
+      </edge>
+      <edge source="1430024578814914563" target="#vaccine" id="60" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="healthgovau" />
+        </attvalues>
+      </edge>
+      <edge source="1430024585726992388" target="#vaccination" id="61" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="WebSkitters" />
+        </attvalues>
+      </edge>
+      <edge source="1430024585726992388" target="#wtsvaccination" id="62" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="WebSkitters" />
+        </attvalues>
+      </edge>
+      <edge source="1430024585726992388" target="#covid19vaccines" id="63" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="WebSkitters" />
+        </attvalues>
+      </edge>
+      <edge source="1430024592710684679" target="#analytics" id="64" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="datos_digital" />
+        </attvalues>
+      </edge>
+      <edge source="1430024592710684679" target="#googleads" id="65" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="datos_digital" />
+        </attvalues>
+      </edge>
+      <edge source="1430024592710684679" target="#facebookads" id="66" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="datos_digital" />
+        </attvalues>
+      </edge>
+      <edge source="1430024598305837058" target="#thegreatcoronavirusfraudof2020" id="67" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="IWPCHI" />
+        </attvalues>
+      </edge>
+      <edge source="1430024598305837058" target="#vaccinemadness" id="68" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="IWPCHI" />
+        </attvalues>
+      </edge>
+      <edge source="1430024598305837058" target="#fdasucks" id="69" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="IWPCHI" />
+        </attvalues>
+      </edge>
+      <edge source="1430024598305837058" target="#dumptherepublicrats" id="70" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="IWPCHI" />
+        </attvalues>
+      </edge>
+      <edge source="1430024598305837058" target="#buildaworkersparty" id="71" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="IWPCHI" />
+        </attvalues>
+      </edge>
+      <edge source="1430024635433689090" target="#publichealth" id="72" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jold_08" />
+        </attvalues>
+      </edge>
+      <edge source="1430024635433689090" target="#savinglives" id="73" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jold_08" />
+        </attvalues>
+      </edge>
+      <edge source="1430024635433689090" target="#doitforothers" id="74" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jold_08" />
+        </attvalues>
+      </edge>
+      <edge source="1430024635433689090" target="#dontbeselfish" id="75" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jold_08" />
+        </attvalues>
+      </edge>
+      <edge source="1430024635433689090" target="#didisaypublichealth" id="76" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jold_08" />
+        </attvalues>
+      </edge>
+      <edge source="1430024635433689090" target="#hailfauci" id="77" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jold_08" />
+        </attvalues>
+      </edge>
+      <edge source="1430024635433689090" target="#stayinghomesaveslives" id="78" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jold_08" />
+        </attvalues>
+      </edge>
+      <edge source="1430024635433689090" target="#itsallbullshit" id="79" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jold_08" />
+        </attvalues>
+      </edge>
+      <edge source="1430024652508778500" target="#shutdownsa" id="80" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="KatlegoKSemenya" />
+        </attvalues>
+      </edge>
+      <edge source="1430024652508778500" target="#podcastandchillwithmacg" id="81" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="KatlegoKSemenya" />
+        </attvalues>
+      </edge>
+      <edge source="1430024672255557634" target="#socialmedia" id="82" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="do3solutions" />
+        </attvalues>
+      </edge>
+      <edge source="1430024687686324225" target="#covaxin" id="83" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SINDDUJAV" />
+        </attvalues>
+      </edge>
+      <edge source="1430024691465342976" target="#travelpass" id="84" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="CheveningIndia" />
+        </attvalues>
+      </edge>
+      <edge source="1430024691465342976" target="#covaxin" id="85" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="CheveningIndia" />
+        </attvalues>
+      </edge>
+      <edge source="1430024691465342976" target="#covishield" id="86" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="CheveningIndia" />
+        </attvalues>
+      </edge>
+      <edge source="1430024695349317632" target="#fda" id="87" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="IconicTexas" />
+        </attvalues>
+      </edge>
+      <edge source="1430024696431620099" target="#issues" id="88" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JustCanadianGal" />
+        </attvalues>
+      </edge>
+      <edge source="1430024696431620099" target="#list" id="89" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JustCanadianGal" />
+        </attvalues>
+      </edge>
+      <edge source="1430024714269847559" target="#bidenregime" id="90" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="AnastasiaG57" />
+        </attvalues>
+      </edge>
+      <edge source="1430024716773826568" target="#scottyfrommarketing" id="91" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Flemington455" />
+        </attvalues>
+      </edge>
+      <edge source="1430024716773826568" target="#auspol" id="92" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Flemington455" />
+        </attvalues>
+      </edge>
+      <edge source="1430024716773826568" target="#sydney" id="93" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Flemington455" />
+        </attvalues>
+      </edge>
+      <edge source="1430024716773826568" target="#vaccine" id="94" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Flemington455" />
+        </attvalues>
+      </edge>
+      <edge source="1429962404104859649" target="#scottyfrommarketing" id="95" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VentJana" />
+        </attvalues>
+      </edge>
+      <edge source="1429962404104859649" target="#auspol" id="96" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VentJana" />
+        </attvalues>
+      </edge>
+      <edge source="1430024758700171269" target="#antivaxxers" id="97" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Clint_ZA" />
+        </attvalues>
+      </edge>
+      <edge source="1430024810625650692" target="#digitalmarketing" id="98" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TheFitBeaute" />
+        </attvalues>
+      </edge>
+      <edge source="1430024810625650692" target="#advertising" id="99" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TheFitBeaute" />
+        </attvalues>
+      </edge>
+      <edge source="1430024830141624321" target="#vaccineswork" id="100" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="moiradawa" />
+        </attvalues>
+      </edge>
+      <edge source="1430024830141624321" target="#unite2fightcorona" id="101" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="moiradawa" />
+        </attvalues>
+      </edge>
+      <edge source="1430024847938052097" target="#tamilnadu" id="102" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Live_Chennai" />
+        </attvalues>
+      </edge>
+      <edge source="1430024847938052097" target="#colleges" id="103" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Live_Chennai" />
+        </attvalues>
+      </edge>
+      <edge source="1430024847938052097" target="#reopening" id="104" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Live_Chennai" />
+        </attvalues>
+      </edge>
+      <edge source="1430024847938052097" target="#students" id="105" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Live_Chennai" />
+        </attvalues>
+      </edge>
+      <edge source="1430024847938052097" target="#professors" id="106" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Live_Chennai" />
+        </attvalues>
+      </edge>
+      <edge source="1430024847938052097" target="#vaccine" id="107" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Live_Chennai" />
+        </attvalues>
+      </edge>
+      <edge source="1430024847938052097" target="#must" id="108" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Live_Chennai" />
+        </attvalues>
+      </edge>
+      <edge source="1430024849968173061" target="#getvaccinated" id="109" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ByClare" />
+        </attvalues>
+      </edge>
+      <edge source="1429991343309299712" target="#getvaccinated" id="110" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ByClare" />
+        </attvalues>
+      </edge>
+      <edge source="1430024901327523840" target="#slnews" id="111" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Dailymirror_SL" />
+        </attvalues>
+      </edge>
+      <edge source="1430024901327523840" target="#srilanka" id="112" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Dailymirror_SL" />
+        </attvalues>
+      </edge>
+      <edge source="1430024949025153024" target="#jimmyhayes" id="113" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="1Metthe" />
+        </attvalues>
+      </edge>
+      <edge source="1430024952699256834" target="#bidenharrisfailure" id="114" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="willwork4shoez" />
+        </attvalues>
+      </edge>
+      <edge source="1430024952699256834" target="#factsmatter" id="115" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="willwork4shoez" />
+        </attvalues>
+      </edge>
+      <edge source="1430024992951967746" target="#pfizergang" id="116" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="spearsritual" />
+        </attvalues>
+      </edge>
+      <edge source="1430024992951967746" target="#freebritney" id="117" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="spearsritual" />
+        </attvalues>
+      </edge>
+      <edge source="1429280594094174216" target="#jessejackson" id="118" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="AtiFanClub" />
+        </attvalues>
+      </edge>
+      <edge source="1429280594094174216" target="#jessejacksoncovid" id="119" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="AtiFanClub" />
+        </attvalues>
+      </edge>
+      <edge source="1430025051554951169" target="#vaccine" id="120" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="3DViewmaster" />
+        </attvalues>
+      </edge>
+      <edge source="1430025051554951169" target="#getvaccinated" id="121" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="3DViewmaster" />
+        </attvalues>
+      </edge>
+      <edge source="1430025051554951169" target="#covid" id="122" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="3DViewmaster" />
+        </attvalues>
+      </edge>
+      <edge source="1429944918953402371" target="#seeyouthere" id="123" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Clauber1117" />
+        </attvalues>
+      </edge>
+      <edge source="1430025107582431233" target="#covid19vic" id="124" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_RandyTheARTist" />
+        </attvalues>
+      </edge>
+      <edge source="1430025107582431233" target="#vaccine" id="125" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_RandyTheARTist" />
+        </attvalues>
+      </edge>
+      <edge source="1430025174452084744" target="#school" id="126" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="balasubramanikk" />
+        </attvalues>
+      </edge>
+      <edge source="1430025174452084744" target="#teachers" id="127" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="balasubramanikk" />
+        </attvalues>
+      </edge>
+      <edge source="1430025174452084744" target="#vaccine" id="128" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="balasubramanikk" />
+        </attvalues>
+      </edge>
+      <edge source="1430025174452084744" target="#corona" id="129" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="balasubramanikk" />
+        </attvalues>
+      </edge>
+      <edge source="1430025180915568645" target="#uhuruspeaks" id="130" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="vybe_ke" />
+        </attvalues>
+      </edge>
+      <edge source="1430025193968357379" target="#macdonald" id="131" weight="2">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SharonCarbineSharonCarbine" />
+        </attvalues>
+      </edge>
+      <edge source="1430025193968357379" target="#capitolbuilding" id="132" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SharonCarbine" />
+        </attvalues>
+      </edge>
+      <edge source="1430025193968357379" target="#insurrection" id="133" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SharonCarbine" />
+        </attvalues>
+      </edge>
+      <edge source="1430025193968357379" target="#pharmacist" id="134" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SharonCarbine" />
+        </attvalues>
+      </edge>
+      <edge source="1430025193968357379" target="#maskmandates" id="135" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SharonCarbine" />
+        </attvalues>
+      </edge>
+      <edge source="1430025197340422146" target="#morrisonfail" id="136" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="millieally" />
+        </attvalues>
+      </edge>
+      <edge source="1430025197340422146" target="#morrisonvaccinecrisis" id="137" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="millieally" />
+        </attvalues>
+      </edge>
+      <edge source="1430025197340422146" target="#qt" id="138" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="millieally" />
+        </attvalues>
+      </edge>
+      <edge source="1430025197340422146" target="#auspol" id="139" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="millieally" />
+        </attvalues>
+      </edge>
+      <edge source="1430025197340422146" target="#greghunt" id="140" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="millieally" />
+        </attvalues>
+      </edge>
+      <edge source="1430025197407465474" target="#qldpol" id="141" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="monsieur0o" />
+        </attvalues>
+      </edge>
+      <edge source="1430025197407465474" target="#auspol" id="142" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="monsieur0o" />
+        </attvalues>
+      </edge>
+      <edge source="1430025246548144134" target="#pfizer" id="143" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="LiterallyCem" />
+        </attvalues>
+      </edge>
+      <edge source="1430025250268278791" target="#sensex" id="144" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="InvGurInd" />
+        </attvalues>
+      </edge>
+      <edge source="1430025250268278791" target="#stockmarket" id="145" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="InvGurInd" />
+        </attvalues>
+      </edge>
+      <edge source="1430025250268278791" target="#nse" id="146" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="InvGurInd" />
+        </attvalues>
+      </edge>
+      <edge source="1430025250268278791" target="#bse" id="147" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="InvGurInd" />
+        </attvalues>
+      </edge>
+      <edge source="1430025250268278791" target="#nifty" id="148" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="InvGurInd" />
+        </attvalues>
+      </edge>
+      <edge source="1430025250268278791" target="#investmentguruindia" id="149" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="InvGurInd" />
+        </attvalues>
+      </edge>
+      <edge source="1430025258527043585" target="#bigpharma" id="150" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="REDpunk20" />
+        </attvalues>
+      </edge>
+      <edge source="1430025258527043585" target="#fdaapproved" id="151" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="REDpunk20" />
+        </attvalues>
+      </edge>
+      <edge source="1430025258527043585" target="#vaccinate" id="152" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="REDpunk20" />
+        </attvalues>
+      </edge>
+      <edge source="1430025258527043585" target="#vaccinemandate" id="153" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="REDpunk20" />
+        </attvalues>
+      </edge>
+      <edge source="1430025291032899584" target="#uhuruspeaks" id="154" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="vybe_ke" />
+        </attvalues>
+      </edge>
+      <edge source="1430025295646498817" target="#auspoi" id="155" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lt_wenchy" />
+        </attvalues>
+      </edge>
+      <edge source="1430025295646498817" target="#scottyfromdamagecontrol" id="156" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lt_wenchy" />
+        </attvalues>
+      </edge>
+      <edge source="1430025314525085699" target="#toronto" id="157" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DennisKoch10" />
+        </attvalues>
+      </edge>
+      <edge source="1430025314525085699" target="#topoli" id="158" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DennisKoch10" />
+        </attvalues>
+      </edge>
+      <edge source="1430025314525085699" target="#onpoli" id="159" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DennisKoch10" />
+        </attvalues>
+      </edge>
+      <edge source="1430025314525085699" target="#covid19" id="160" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DennisKoch10" />
+        </attvalues>
+      </edge>
+      <edge source="1430025314525085699" target="#deltavariant" id="161" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DennisKoch10" />
+        </attvalues>
+      </edge>
+      <edge source="1430025398348390400" target="#covid19" id="162" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HenkKoekemoer" />
+        </attvalues>
+      </edge>
+      <edge source="1430025398348390400" target="#vaccines" id="163" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HenkKoekemoer" />
+        </attvalues>
+      </edge>
+      <edge source="1430025398348390400" target="#nwo" id="164" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HenkKoekemoer" />
+        </attvalues>
+      </edge>
+      <edge source="1430025398348390400" target="#702breakfast" id="165" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HenkKoekemoer" />
+        </attvalues>
+      </edge>
+      <edge source="1430025409702342656" target="#vaccine" id="166" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PuneUpdater" />
+        </attvalues>
+      </edge>
+      <edge source="1430025409702342656" target="#vaccinepune" id="167" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PuneUpdater" />
+        </attvalues>
+      </edge>
+      <edge source="1430025409702342656" target="#cowin" id="168" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PuneUpdater" />
+        </attvalues>
+      </edge>
+      <edge source="1430025409702342656" target="#covid19" id="169" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PuneUpdater" />
+        </attvalues>
+      </edge>
+      <edge source="1430025409702342656" target="#pune" id="170" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PuneUpdater" />
+        </attvalues>
+      </edge>
+      <edge source="1430025414181806086" target="#uhuruspeaks" id="171" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="vybe_ke" />
+        </attvalues>
+      </edge>
+      <edge source="1430025421710675975" target="#cantfixstupid" id="172" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ValentinePomMom" />
+        </attvalues>
+      </edge>
+      <edge source="1430025421710675975" target="#ivermectin" id="173" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ValentinePomMom" />
+        </attvalues>
+      </edge>
+      <edge source="1430025421710675975" target="#vaccinessavelives" id="174" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ValentinePomMom" />
+        </attvalues>
+      </edge>
+      <edge source="1430025421710675975" target="#magamorons" id="175" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ValentinePomMom" />
+        </attvalues>
+      </edge>
+      <edge source="1430025421710675975" target="#qanoncult" id="176" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ValentinePomMom" />
+        </attvalues>
+      </edge>
+      <edge source="1430025421710675975" target="#magacult" id="177" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ValentinePomMom" />
+        </attvalues>
+      </edge>
+      <edge source="1430025421710675975" target="#maskupvaxupgrowup" id="178" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ValentinePomMom" />
+        </attvalues>
+      </edge>
+      <edge source="1430025421710675975" target="#maskup" id="179" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ValentinePomMom" />
+        </attvalues>
+      </edge>
+      <edge source="1430025495601721352" target="#getvaxxednow" id="180" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Conwolv" />
+        </attvalues>
+      </edge>
+      <edge source="1430025500211220481" target="#sinopharm" id="181" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="priyatharshan1" />
+        </attvalues>
+      </edge>
+      <edge source="1430025500211220481" target="#srilanka" id="182" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="priyatharshan1" />
+        </attvalues>
+      </edge>
+      <edge source="1430025500211220481" target="#lka" id="183" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="priyatharshan1" />
+        </attvalues>
+      </edge>
+      <edge source="1430025500211220481" target="#covid19" id="184" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="priyatharshan1" />
+        </attvalues>
+      </edge>
+      <edge source="1430025500211220481" target="#vaccine" id="185" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="priyatharshan1" />
+        </attvalues>
+      </edge>
+      <edge source="1430025500211220481" target="#covid19lk" id="186" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="priyatharshan1" />
+        </attvalues>
+      </edge>
+      <edge source="1430025517957218309" target="#bedtet2011" id="187" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DharmPrakashsh9" />
+        </attvalues>
+      </edge>
+      <edge source="1430025539830562816" target="#uhuruspeaks" id="188" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="vybe_ke" />
+        </attvalues>
+      </edge>
+      <edge source="1430025539830562816" target="#rutonowresign" id="189" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="vybe_ke" />
+        </attvalues>
+      </edge>
+      <edge source="1430025574634778628" target="#zyduscadila" id="190" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="abplivenews" />
+        </attvalues>
+      </edge>
+      <edge source="1430025592221708289" target="#noeasy" id="191" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="somuchtwitdrama" />
+        </attvalues>
+      </edge>
+      <edge source="1430025592221708289" target="#straykidscomeback" id="192" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="somuchtwitdrama" />
+        </attvalues>
+      </edge>
+      <edge source="1430025592221708289" target="#소리꾼" id="193" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="somuchtwitdrama" />
+        </attvalues>
+      </edge>
+      <edge source="1430025592221708289" target="#thunderous" id="194" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="somuchtwitdrama" />
+        </attvalues>
+      </edge>
+      <edge source="1430025592221708289" target="#스트레이키즈" id="195" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="somuchtwitdrama" />
+        </attvalues>
+      </edge>
+      <edge source="1430025592221708289" target="#straykids" id="196" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="somuchtwitdrama" />
+        </attvalues>
+      </edge>
+      <edge source="1430025592850698240" target="#regenerondesantis" id="197" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JGILL07" />
+        </attvalues>
+      </edge>
+      <edge source="1430017064950018050" target="#covid" id="198" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="zinfoslive" />
+        </attvalues>
+      </edge>
+      <edge source="1430017064950018050" target="#laréunion" id="199" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="zinfoslive" />
+        </attvalues>
+      </edge>
+      <edge source="1430025666444070912" target="#delta" id="200" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="elephunk101" />
+        </attvalues>
+      </edge>
+      <edge source="1430025666444070912" target="#pfizer" id="201" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="elephunk101" />
+        </attvalues>
+      </edge>
+      <edge source="1430025668931198980" target="#smartnews" id="202" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="rezatt0916" />
+        </attvalues>
+      </edge>
+      <edge source="1430020552450740267" target="#dontdamngo" id="203" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="CHSMusings" />
+        </attvalues>
+      </edge>
+      <edge source="1430025705346142213" target="#istandwithtruckies" id="204" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jessied75235626" />
+        </attvalues>
+      </edge>
+      <edge source="1430025770026651648" target="#covid19kills" id="205" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="sheriffali" />
+        </attvalues>
+      </edge>
+      <edge source="1430039886611066898" target="#sdrs" id="206" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="The_Phoenix2192" />
+        </attvalues>
+      </edge>
+      <edge source="1430039886611066898" target="#globalcitizen" id="207" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="The_Phoenix2192" />
+        </attvalues>
+      </edge>
+      <edge source="1430039907746164743" target="#sportsnews" id="208" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="robinsportsnews" />
+        </attvalues>
+      </edge>
+      <edge source="1430039907746164743" target="#sports" id="209" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="robinsportsnews" />
+        </attvalues>
+      </edge>
+      <edge source="1430039919179837446" target="#txlege" id="210" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TXParents4Masks" />
+        </attvalues>
+      </edge>
+      <edge source="1430039919179837446" target="#keeptxkidscovidfree" id="211" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TXParents4Masks" />
+        </attvalues>
+      </edge>
+      <edge source="1430039924984750081" target="#joedirt" id="212" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="villasandvistas" />
+        </attvalues>
+      </edge>
+      <edge source="1430039965568745473" target="#smartnews" id="213" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ramsoto123" />
+        </attvalues>
+      </edge>
+      <edge source="1430039990956818435" target="#gladysresign" id="214" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="hawawright360" />
+        </attvalues>
+      </edge>
+      <edge source="1430039990956818435" target="#scottyfromgaslighting" id="215" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="hawawright360" />
+        </attvalues>
+      </edge>
+      <edge source="1430040001681797131" target="#shutdownsa" id="216" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Normanchauk" />
+        </attvalues>
+      </edge>
+      <edge source="1430040001681797131" target="#podcastandchillwithmacg" id="217" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Normanchauk" />
+        </attvalues>
+      </edge>
+      <edge source="1430040050839040009" target="#covid" id="218" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SpaceWeasel" />
+        </attvalues>
+      </edge>
+      <edge source="1430040050839040009" target="#news" id="219" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SpaceWeasel" />
+        </attvalues>
+      </edge>
+      <edge source="1430040050839040009" target="#vaccine" id="220" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SpaceWeasel" />
+        </attvalues>
+      </edge>
+      <edge source="1430040065556717573" target="#fda" id="221" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="AuEpochTimes" />
+        </attvalues>
+      </edge>
+      <edge source="1430040065556717573" target="#covid19" id="222" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="AuEpochTimes" />
+        </attvalues>
+      </edge>
+      <edge source="1430040065556717573" target="#pfizer" id="223" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="AuEpochTimes" />
+        </attvalues>
+      </edge>
+      <edge source="1430040065556717573" target="#biontech" id="224" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="AuEpochTimes" />
+        </attvalues>
+      </edge>
+      <edge source="1430040077699362819" target="#macron2022" id="225" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Franck83400" />
+        </attvalues>
+      </edge>
+      <edge source="1430040082560344068" target="#whatshappeninginmyanmar" id="226" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ALynnn77" />
+        </attvalues>
+      </edge>
+      <edge source="1430040082560344068" target="#crimesagainsthumanity" id="227" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ALynnn77" />
+        </attvalues>
+      </edge>
+      <edge source="1430040082560344068" target="#aug24coup" id="228" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ALynnn77" />
+        </attvalues>
+      </edge>
+      <edge source="1430017032259526656" target="#covid19" id="229" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NDBurma" />
+        </attvalues>
+      </edge>
+      <edge source="1430040086079361027" target="#covidvic" id="230" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="zhalli1" />
+        </attvalues>
+      </edge>
+      <edge source="1430040089493741568" target="#npr" id="231" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="schestowitz" />
+        </attvalues>
+      </edge>
+      <edge source="1430040089493741568" target="#health" id="232" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="schestowitz" />
+        </attvalues>
+      </edge>
+      <edge source="1430040089493741568" target="#facebook" id="233" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="schestowitz" />
+        </attvalues>
+      </edge>
+      <edge source="1430040091318267924" target="#getvaccinated" id="234" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ldcl35" />
+        </attvalues>
+      </edge>
+      <edge source="1430040104064610311" target="#whatshappeninginmyanmar" id="235" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ALynnn77" />
+        </attvalues>
+      </edge>
+      <edge source="1430040104064610311" target="#crimesagainsthumanity" id="236" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ALynnn77" />
+        </attvalues>
+      </edge>
+      <edge source="1430040104064610311" target="#aug24coup" id="237" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ALynnn77" />
+        </attvalues>
+      </edge>
+      <edge source="1430040143944200202" target="#getvaccinatednow" id="238" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="REALmillerfinch" />
+        </attvalues>
+      </edge>
+      <edge source="1430040143944200202" target="#maskup" id="239" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="REALmillerfinch" />
+        </attvalues>
+      </edge>
+      <edge source="1430040166861709321" target="#lnpfail" id="240" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="plan_IT_Ed" />
+        </attvalues>
+      </edge>
+      <edge source="1429787917782769671" target="#morningjoe" id="241" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="politicususa" />
+        </attvalues>
+      </edge>
+      <edge source="1430040218904694784" target="#billgates" id="242" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="christygh" />
+        </attvalues>
+      </edge>
+      <edge source="1430040243063992329" target="#novaccinepassportsanywhere" id="243" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="tierney_jp" />
+        </attvalues>
+      </edge>
+      <edge source="1430040243063992329" target="#nomandatoryvaccine" id="244" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="tierney_jp" />
+        </attvalues>
+      </edge>
+      <edge source="1430040243063992329" target="#nomasks" id="245" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="tierney_jp" />
+        </attvalues>
+      </edge>
+      <edge source="1430040263716712449" target="#covidvaccine" id="246" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EastMojo" />
+        </attvalues>
+      </edge>
+      <edge source="1430040263716712449" target="#covid19india" id="247" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EastMojo" />
+        </attvalues>
+      </edge>
+      <edge source="1430040263716712449" target="#coronaupdate" id="248" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EastMojo" />
+        </attvalues>
+      </edge>
+      <edge source="1430040266610814976" target="#getvaccinatednow" id="249" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BlackAdam32" />
+        </attvalues>
+      </edge>
+      <edge source="1430040271039967234" target="#covidiots" id="250" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="grimmcore666" />
+        </attvalues>
+      </edge>
+      <edge source="1430040271039967234" target="#dumbasses" id="251" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="grimmcore666" />
+        </attvalues>
+      </edge>
+      <edge source="1430040296822169604" target="#vaccine" id="252" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="saralbharatnews" />
+        </attvalues>
+      </edge>
+      <edge source="1430040321887412236" target="#antivaccine" id="253" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Derkawho" />
+        </attvalues>
+      </edge>
+      <edge source="1430040321887412236" target="#idiots" id="254" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Derkawho" />
+        </attvalues>
+      </edge>
+      <edge source="1430040342829559815" target="#vaccines" id="255" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ebidinger1" />
+        </attvalues>
+      </edge>
+      <edge source="1430040471657754649" target="#tigray" id="256" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cjsul" />
+        </attvalues>
+      </edge>
+      <edge source="1430040471657754649" target="#eritrea" id="257" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cjsul" />
+        </attvalues>
+      </edge>
+      <edge source="1430040471657754649" target="#ethiopia" id="258" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cjsul" />
+        </attvalues>
+      </edge>
+      <edge source="1430040471657754649" target="#allowaccesstotigray" id="259" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cjsul" />
+        </attvalues>
+      </edge>
+      <edge source="1430040471657754649" target="#endtigraysiege" id="260" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cjsul" />
+        </attvalues>
+      </edge>
+      <edge source="1430040471657754649" target="#tigrayfamine" id="261" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cjsul" />
+        </attvalues>
+      </edge>
+      <edge source="1430040471657754649" target="#tigraygenocide" id="262" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cjsul" />
+        </attvalues>
+      </edge>
+      <edge source="1430040471657754649" target="#tigraycantwait" id="263" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cjsul" />
+        </attvalues>
+      </edge>
+      <edge source="1429768713306263560" target="#tigray" id="264" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RationalbeingA" />
+        </attvalues>
+      </edge>
+      <edge source="1429768713306263560" target="#eritrea" id="265" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RationalbeingA" />
+        </attvalues>
+      </edge>
+      <edge source="1429768713306263560" target="#ethiopia" id="266" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RationalbeingA" />
+        </attvalues>
+      </edge>
+      <edge source="1429768713306263560" target="#allowaccesstotigray" id="267" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RationalbeingA" />
+        </attvalues>
+      </edge>
+      <edge source="1429768713306263560" target="#endtigraysiege" id="268" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RationalbeingA" />
+        </attvalues>
+      </edge>
+      <edge source="1429768713306263560" target="#tigrayfamine" id="269" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RationalbeingA" />
+        </attvalues>
+      </edge>
+      <edge source="1429768713306263560" target="#tigraygenocide" id="270" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RationalbeingA" />
+        </attvalues>
+      </edge>
+      <edge source="1429768713306263560" target="#tigraycantwait" id="271" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RationalbeingA" />
+        </attvalues>
+      </edge>
+      <edge source="1430040491291123727" target="#leavenoonebehind" id="272" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NthCoastMedia" />
+        </attvalues>
+      </edge>
+      <edge source="1430040494495739924" target="#vaccine" id="273" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Newsbook_com_mt" />
+        </attvalues>
+      </edge>
+      <edge source="1430040494495739924" target="#emergency" id="274" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Newsbook_com_mt" />
+        </attvalues>
+      </edge>
+      <edge source="1430040494495739924" target="#pandemic" id="275" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Newsbook_com_mt" />
+        </attvalues>
+      </edge>
+      <edge source="1430040512581574656" target="#weightloss" id="276" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Tarr171984" />
+        </attvalues>
+      </edge>
+      <edge source="1430040512581574656" target="#fitness" id="277" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Tarr171984" />
+        </attvalues>
+      </edge>
+      <edge source="1430040523910393871" target="#endthepandemic" id="278" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="The_Phoenix2192" />
+        </attvalues>
+      </edge>
+      <edge source="1429860061552254982" target="#dnabacklog" id="279" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RediTlhabi" />
+        </attvalues>
+      </edge>
+      <edge source="1429860061552254982" target="#myvoiceforjustice" id="280" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RediTlhabi" />
+        </attvalues>
+      </edge>
+      <edge source="1430040611810250754" target="#morrisonvaccinecrisis" id="281" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="RenzaS" />
+        </attvalues>
+      </edge>
+      <edge source="1430040630189649926" target="#covid19" id="282" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="R_Owl_Mirror" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#bidenisadisgrace" id="283" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#bidenisafailure" id="284" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#bidendisaster" id="285" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#msm" id="286" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#cnn" id="287" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#liberalismisamentaldisorder" id="288" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#liberals" id="289" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#democrats" id="290" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#msnbc" id="291" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#covid19nsw" id="292" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#covid19vic" id="293" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#deltavariant" id="294" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#covid19" id="295" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#vaccine" id="296" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040642349064192" target="#scientists" id="297" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NasirShaikhShow" />
+        </attvalues>
+      </edge>
+      <edge source="1430040651312160770" target="#votejoshout" id="298" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BotLnp" />
+        </attvalues>
+      </edge>
+      <edge source="1429965891777830914" target="#formerguy" id="299" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="senseidai" />
+        </attvalues>
+      </edge>
+      <edge source="1429965891777830914" target="#republicansaredestroyingamerica" id="300" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="senseidai" />
+        </attvalues>
+      </edge>
+      <edge source="1429965891777830914" target="#voteblue2022" id="301" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="senseidai" />
+        </attvalues>
+      </edge>
+      <edge source="1429965891777830914" target="#wearamask" id="302" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="senseidai" />
+        </attvalues>
+      </edge>
+      <edge source="1429965891777830914" target="#getvaccinated" id="303" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="senseidai" />
+        </attvalues>
+      </edge>
+      <edge source="1429965891777830914" target="#demvoice1" id="304" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="senseidai" />
+        </attvalues>
+      </edge>
+      <edge source="1430040665963040768" target="#impfteuchinsknie" id="305" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Schille18336614" />
+        </attvalues>
+      </edge>
+      <edge source="1430040675412692996" target="#cadila" id="306" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="nishant_shr" />
+        </attvalues>
+      </edge>
+      <edge source="1430040675412692996" target="#zycovd" id="307" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="nishant_shr" />
+        </attvalues>
+      </edge>
+      <edge source="1430040675412692996" target="#nse" id="308" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="nishant_shr" />
+        </attvalues>
+      </edge>
+      <edge source="1430040675412692996" target="#bse" id="309" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="nishant_shr" />
+        </attvalues>
+      </edge>
+      <edge source="1430040675412692996" target="#stockstowatch" id="310" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="nishant_shr" />
+        </attvalues>
+      </edge>
+      <edge source="1430040702336086041" target="#coronavirus" id="311" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="WegmullerAndre" />
+        </attvalues>
+      </edge>
+      <edge source="1430040820778889220" target="#covid19nsw" id="312" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="advejar" />
+        </attvalues>
+      </edge>
+      <edge source="1430040820778889220" target="#covid19vic" id="313" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="advejar" />
+        </attvalues>
+      </edge>
+      <edge source="1430040869403602970" target="#novaccinepassports" id="314" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="101Hulk" />
+        </attvalues>
+      </edge>
+      <edge source="1430040869403602970" target="#covid19" id="315" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="101Hulk" />
+        </attvalues>
+      </edge>
+      <edge source="1430040869403602970" target="#vaccine" id="316" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="101Hulk" />
+        </attvalues>
+      </edge>
+      <edge source="1430040869403602970" target="#career" id="317" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="101Hulk" />
+        </attvalues>
+      </edge>
+      <edge source="1430040918913167369" target="#covax" id="318" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="pollotapatio" />
+        </attvalues>
+      </edge>
+      <edge source="1430040921580658693" target="#stayhome" id="319" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="LilPenguin222" />
+        </attvalues>
+      </edge>
+      <edge source="1430040921580658693" target="#wearamask" id="320" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="LilPenguin222" />
+        </attvalues>
+      </edge>
+      <edge source="1430040921580658693" target="#washyourhands" id="321" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="LilPenguin222" />
+        </attvalues>
+      </edge>
+      <edge source="1430040921580658693" target="#roc" id="322" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="LilPenguin222" />
+        </attvalues>
+      </edge>
+      <edge source="1430040933970718744" target="#covid19" id="323" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="zockermarlon28" />
+        </attvalues>
+      </edge>
+      <edge source="1430040940903755788" target="#morrisonfail" id="324" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="dabiff007" />
+        </attvalues>
+      </edge>
+      <edge source="1430040940903755788" target="#gladyssuperspreader" id="325" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="dabiff007" />
+        </attvalues>
+      </edge>
+      <edge source="1430040940903755788" target="#biglie" id="326" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="dabiff007" />
+        </attvalues>
+      </edge>
+      <edge source="1430040940903755788" target="#murdochroyalcommission" id="327" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="dabiff007" />
+        </attvalues>
+      </edge>
+      <edge source="1429798366775431171" target="#4corners" id="328" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EndPovertyInOz" />
+        </attvalues>
+      </edge>
+      <edge source="1430040943093116934" target="#tuberculosis" id="329" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MCRI_for_kids" />
+        </attvalues>
+      </edge>
+      <edge source="1430040943093116934" target="#vaccine" id="330" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MCRI_for_kids" />
+        </attvalues>
+      </edge>
+      <edge source="1430040943093116934" target="#eczema" id="331" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MCRI_for_kids" />
+        </attvalues>
+      </edge>
+      <edge source="1430040994670600192" target="#yahoofinancebiden" id="332" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="upstractcom" />
+        </attvalues>
+      </edge>
+      <edge source="1430040994670600192" target="#businesses" id="333" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="upstractcom" />
+        </attvalues>
+      </edge>
+      <edge source="1430040994670600192" target="#huffpostfda" id="334" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="upstractcom" />
+        </attvalues>
+      </edge>
+      <edge source="1430040994670600192" target="#startrollingout" id="335" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="upstractcom" />
+        </attvalues>
+      </edge>
+      <edge source="1430040994670600192" target="#pfizer" id="336" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="upstractcom" />
+        </attvalues>
+      </edge>
+      <edge source="1430040994670600192" target="#fda" id="337" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="upstractcom" />
+        </attvalues>
+      </edge>
+      <edge source="1430041031773282308" target="#vaccinated" id="338" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="tuMIGUELkana" />
+        </attvalues>
+      </edge>
+      <edge source="1430031904686972928" target="#histoire" id="339" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="coherence_e" />
+        </attvalues>
+      </edge>
+      <edge source="1430041055924133899" target="#leavenoonebehind" id="340" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NthCoastMedia" />
+        </attvalues>
+      </edge>
+      <edge source="1429910260131717120" target="#novaccinepassport" id="341" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BernieSpofforth" />
+        </attvalues>
+      </edge>
+      <edge source="1429910260131717120" target="#covid19" id="342" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BernieSpofforth" />
+        </attvalues>
+      </edge>
+      <edge source="1430041064996425732" target="#factchecknepal" id="343" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SouthAsiaCheck" />
+        </attvalues>
+      </edge>
+      <edge source="1430041072789598211" target="#vaccine" id="344" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DevinePremium" />
+        </attvalues>
+      </edge>
+      <edge source="1430041072789598211" target="#antivax" id="345" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DevinePremium" />
+        </attvalues>
+      </edge>
+      <edge source="1430041072789598211" target="#wine" id="346" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DevinePremium" />
+        </attvalues>
+      </edge>
+      <edge source="1430041072789598211" target="#sayno" id="347" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DevinePremium" />
+        </attvalues>
+      </edge>
+      <edge source="1430041077558521870" target="#breaking" id="348" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="News247WP_break" />
+        </attvalues>
+      </edge>
+      <edge source="1430041077558521870" target="#saudiarabia" id="349" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="News247WP_break" />
+        </attvalues>
+      </edge>
+      <edge source="1430041077558521870" target="#covid19" id="350" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="News247WP_break" />
+        </attvalues>
+      </edge>
+      <edge source="1430041083530997762" target="#vaccinetruth" id="351" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Jack4America" />
+        </attvalues>
+      </edge>
+      <edge source="1430041098408407045" target="#novaccinepassports" id="352" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MandiLangan0" />
+        </attvalues>
+      </edge>
+      <edge source="1430041098408407045" target="#novaccinepassport" id="353" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MandiLangan0" />
+        </attvalues>
+      </edge>
+      <edge source="1430041098408407045" target="#wef" id="354" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MandiLangan0" />
+        </attvalues>
+      </edge>
+      <edge source="1430041098408407045" target="#fdaapproved" id="355" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MandiLangan0" />
+        </attvalues>
+      </edge>
+      <edge source="1430041099553452065" target="#thesmallthings" id="356" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Loaa_Zahar" />
+        </attvalues>
+      </edge>
+      <edge source="1430041112199286784" target="#seriousillness" id="357" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TrendingTheNews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041112199286784" target="#inengland" id="358" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="TrendingTheNews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041127193821184" target="#takeyourshot" id="359" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BlaqCinderella_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041127193821184" target="#zwakala" id="360" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BlaqCinderella_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041127193821184" target="#vaccineswork" id="361" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BlaqCinderella_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041127193821184" target="#vaccinerolloutsa" id="362" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BlaqCinderella_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041155769487360" target="#mmu" id="363" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ALUMNIMMU" />
+        </attvalues>
+      </edge>
+      <edge source="1430041155769487360" target="#permatadunia" id="364" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ALUMNIMMU" />
+        </attvalues>
+      </edge>
+      <edge source="1430041161708703745" target="#vaccinepassport" id="365" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ACentralView1" />
+        </attvalues>
+      </edge>
+      <edge source="1430041161708703745" target="#covid19" id="366" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ACentralView1" />
+        </attvalues>
+      </edge>
+      <edge source="1430041161708703745" target="#australianlaw" id="367" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ACentralView1" />
+        </attvalues>
+      </edge>
+      <edge source="1430041161708703745" target="#legal" id="368" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ACentralView1" />
+        </attvalues>
+      </edge>
+      <edge source="1430041193748910083" target="#canada" id="369" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MTI_Canada" />
+        </attvalues>
+      </edge>
+      <edge source="1430041193748910083" target="#vaccinated" id="370" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MTI_Canada" />
+        </attvalues>
+      </edge>
+      <edge source="1430041193748910083" target="#vaccination" id="371" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MTI_Canada" />
+        </attvalues>
+      </edge>
+      <edge source="1430041193748910083" target="#vaccine" id="372" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MTI_Canada" />
+        </attvalues>
+      </edge>
+      <edge source="1430041201059663873" target="#worthreading" id="373" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="majalahsains" />
+        </attvalues>
+      </edge>
+      <edge source="1430041202024349697" target="#digitalhealth" id="374" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041202024349697" target="#socialmedia" id="375" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041202024349697" target="#digitalmarketing" id="376" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041202024349697" target="#industry40" id="377" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041202024349697" target="#ai" id="378" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041202024349697" target="#iot" id="379" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041202024349697" target="#mhealth" id="380" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041202024349697" target="#healthtech" id="381" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041209150472196" target="#highlights" id="382" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="majalahsains" />
+        </attvalues>
+      </edge>
+      <edge source="1430041211721576451" target="#digitalhealth" id="383" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041211721576451" target="#socialmedia" id="384" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041211721576451" target="#digitalmarketing" id="385" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041211721576451" target="#industry40" id="386" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041211721576451" target="#healthtech" id="387" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041211721576451" target="#iot" id="388" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041211721576451" target="#ai" id="389" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041211721576451" target="#mhealth" id="390" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1429931462401396737" target="#rediff" id="391" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Limportant_fr" />
+        </attvalues>
+      </edge>
+      <edge source="1430041221003550724" target="#digitalhealth" id="392" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041221003550724" target="#socialmedia" id="393" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041221003550724" target="#digitalmarketing" id="394" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041221003550724" target="#iot" id="395" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041221003550724" target="#mhealth" id="396" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041221003550724" target="#industry40" id="397" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041221003550724" target="#healthtech" id="398" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041221003550724" target="#ai" id="399" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="_timos_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041233150423067" target="#vaccinerolloutsa" id="400" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DpmeOfficial" />
+        </attvalues>
+      </edge>
+      <edge source="1430041233150423067" target="#vaccine" id="401" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DpmeOfficial" />
+        </attvalues>
+      </edge>
+      <edge source="1430041233150423067" target="#staysafe" id="402" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="DpmeOfficial" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#facebook" id="403" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#infowars" id="404" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#ivermectin" id="405" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#conspiracy" id="406" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#vaccine" id="407" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#vaccinesforall" id="408" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#covid" id="409" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#pfizer" id="410" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041236480700418" target="#moderna" id="411" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="drbob" />
+        </attvalues>
+      </edge>
+      <edge source="1430041262309085187" target="#covod19" id="412" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JmarrMarr" />
+        </attvalues>
+      </edge>
+      <edge source="1429992215460290580" target="#auspol" id="413" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="SwannyQLD" />
+        </attvalues>
+      </edge>
+      <edge source="1430041303023116289" target="#australia" id="414" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="spiritatwork" />
+        </attvalues>
+      </edge>
+      <edge source="1430041305514749971" target="#buyanewspaper" id="415" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EDiamond136" />
+        </attvalues>
+      </edge>
+      <edge source="1430041313999671300" target="#東京都北区" id="416" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="kita_vaccine" />
+        </attvalues>
+      </edge>
+      <edge source="1430041313999671300" target="#北区" id="417" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="kita_vaccine" />
+        </attvalues>
+      </edge>
+      <edge source="1430041313999671300" target="#ワクチン" id="418" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="kita_vaccine" />
+        </attvalues>
+      </edge>
+      <edge source="1430041313999671300" target="#新型コロナウイルス" id="419" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="kita_vaccine" />
+        </attvalues>
+      </edge>
+      <edge source="1430041346295877632" target="#passsanitaire" id="420" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JeanPhi78024285" />
+        </attvalues>
+      </edge>
+      <edge source="1430041346295877632" target="#boycott" id="421" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JeanPhi78024285" />
+        </attvalues>
+      </edge>
+      <edge source="1430041346295877632" target="#restaurateurs" id="422" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JeanPhi78024285" />
+        </attvalues>
+      </edge>
+      <edge source="1430041346295877632" target="#macron" id="423" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JeanPhi78024285" />
+        </attvalues>
+      </edge>
+      <edge source="1430041346295877632" target="#france" id="424" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JeanPhi78024285" />
+        </attvalues>
+      </edge>
+      <edge source="1430041354105544706" target="#taiwanisacountry" id="425" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="FoxLiang1989" />
+        </attvalues>
+      </edge>
+      <edge source="1430041354105544706" target="#台湾です" id="426" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="FoxLiang1989" />
+        </attvalues>
+      </edge>
+      <edge source="1429673250334732291" target="#taiwan" id="427" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="iingwen" />
+        </attvalues>
+      </edge>
+      <edge source="1430041367963607041" target="#bidenisnotadisgrace" id="428" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="JKay3000" />
+        </attvalues>
+      </edge>
+      <edge source="1430041391623811082" target="#westbengal" id="429" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NewsWestBengal" />
+        </attvalues>
+      </edge>
+      <edge source="1430041398624104454" target="#lovewaxedcold" id="430" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="forgot2tellu" />
+        </attvalues>
+      </edge>
+      <edge source="1430041415975899136" target="#shutdownsa" id="431" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="angamjuniorr" />
+        </attvalues>
+      </edge>
+      <edge source="1430041415975899136" target="#cratechallenge" id="432" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="angamjuniorr" />
+        </attvalues>
+      </edge>
+      <edge source="1430041415975899136" target="#milkcrate" id="433" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="angamjuniorr" />
+        </attvalues>
+      </edge>
+      <edge source="1430041418287001605" target="#letswakeitup" id="434" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EATSHITYOU_" />
+        </attvalues>
+      </edge>
+      <edge source="1430041448146145281" target="#ramaphosa" id="435" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="coachSiphenkosi" />
+        </attvalues>
+      </edge>
+      <edge source="1430041448146145281" target="#vaccinerolloutsa" id="436" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="coachSiphenkosi" />
+        </attvalues>
+      </edge>
+      <edge source="1430041448146145281" target="#vaccine" id="437" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="coachSiphenkosi" />
+        </attvalues>
+      </edge>
+      <edge source="1430041448251109382" target="#medicaltyranny" id="438" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="0ctavio_aug" />
+        </attvalues>
+      </edge>
+      <edge source="1430041497760456708" target="#covid19vic" id="439" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="mollyfud" />
+        </attvalues>
+      </edge>
+      <edge source="1430041516706304001" target="#vaccine" id="440" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Zimbiri5" />
+        </attvalues>
+      </edge>
+      <edge source="1430041516706304001" target="#covid19vaccine" id="441" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Zimbiri5" />
+        </attvalues>
+      </edge>
+      <edge source="1430041516706304001" target="#pfizer" id="442" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Zimbiri5" />
+        </attvalues>
+      </edge>
+      <edge source="1430041516706304001" target="#astrazeneca" id="443" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Zimbiri5" />
+        </attvalues>
+      </edge>
+      <edge source="1430041519583498240" target="#nzpol" id="444" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ArrestJK" />
+        </attvalues>
+      </edge>
+      <edge source="1430041519583498240" target="#natsaresostupidhing" id="445" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="ArrestJK" />
+        </attvalues>
+      </edge>
+      <edge source="1430041519688355844" target="#vaccine" id="446" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Kundansingh7860" />
+        </attvalues>
+      </edge>
+      <edge source="1430041521575931935" target="#vaccinechoice" id="447" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MakeMeUpSummer" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#saskatchewan" id="448" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#potential" id="449" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#immigrants" id="450" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#canadian" id="451" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#august" id="452" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#goals" id="453" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#share" id="454" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#immigration" id="455" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#lifegoals" id="456" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#jobsearch" id="457" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#tuesdaymotivations" id="458" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#loveisland" id="459" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#money" id="460" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#vaccines" id="461" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#positivity" id="462" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#weekend" id="463" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#covidnsw" id="464" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#canada" id="465" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#tuesdayvibe" id="466" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#instagram" id="467" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#instagood" id="468" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#freedom" id="469" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041544606699522" target="#coronavirus" id="470" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="VisumOutsourcin" />
+        </attvalues>
+      </edge>
+      <edge source="1430041613800148993" target="#tngovernment" id="471" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="polimernews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041613800148993" target="#covid19" id="472" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="polimernews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041613800148993" target="#vaccine" id="473" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="polimernews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041613800148993" target="#minister" id="474" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="polimernews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041613800148993" target="#masubramanian" id="475" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="polimernews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041618053312524" target="#sciencematters" id="476" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PHL_Dre27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041618053312524" target="#knowledgeispower" id="477" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PHL_Dre27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041618053312524" target="#education" id="478" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PHL_Dre27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041618053312524" target="#stem" id="479" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PHL_Dre27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041618053312524" target="#covid19" id="480" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PHL_Dre27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041618053312524" target="#vaccine" id="481" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PHL_Dre27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041624684417024" target="#txid" id="482" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="thecovidsite" />
+        </attvalues>
+      </edge>
+      <edge source="1430041624684417024" target="#idtwitter" id="483" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="thecovidsite" />
+        </attvalues>
+      </edge>
+      <edge source="1430041624684417024" target="#medtwitter" id="484" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="thecovidsite" />
+        </attvalues>
+      </edge>
+      <edge source="1430041624684417024" target="#covidvaccine" id="485" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="thecovidsite" />
+        </attvalues>
+      </edge>
+      <edge source="1430041624684417024" target="#covid19" id="486" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="thecovidsite" />
+        </attvalues>
+      </edge>
+      <edge source="1430041625602912256" target="#morrison" id="487" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cscviews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041625602912256" target="#quarantine" id="488" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="cscviews" />
+        </attvalues>
+      </edge>
+      <edge source="1430041661850066945" target="#india" id="489" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="NewsLiveGhy" />
+        </attvalues>
+      </edge>
+      <edge source="1430041738111070212" target="#pfizer" id="490" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="outcry27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041738111070212" target="#regeneron" id="491" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="outcry27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041738111070212" target="#covid19" id="492" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="outcry27" />
+        </attvalues>
+      </edge>
+      <edge source="1430041748428845059" target="#donotcomply" id="493" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="LeiselRules" />
+        </attvalues>
+      </edge>
+      <edge source="1430041748428845059" target="#holdthefuckingline" id="494" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="LeiselRules" />
+        </attvalues>
+      </edge>
+      <edge source="1430041751549485060" target="#indiafightscorona" id="495" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="COVIDNewsByMIB" />
+        </attvalues>
+      </edge>
+      <edge source="1430041751549485060" target="#we4vaccine" id="496" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="COVIDNewsByMIB" />
+        </attvalues>
+      </edge>
+      <edge source="1430041751549485060" target="#largestvaccinationdrive" id="497" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="COVIDNewsByMIB" />
+        </attvalues>
+      </edge>
+      <edge source="1430041751549485060" target="#unite2fightcorona" id="498" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="COVIDNewsByMIB" />
+        </attvalues>
+      </edge>
+      <edge source="1448993805693239310" target="#novaccinepassportsanywhere" id="499" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="l_ruigrok" />
+        </attvalues>
+      </edge>
+      <edge source="1448934891807182861" target="#novaccinepassportsanywhere" id="500" weight="2">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MarcVegtMarcVegt" />
+        </attvalues>
+      </edge>
+      <edge source="1448993841986609154" target="#novaccinepassportsanywhere" id="501" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="thedoctorxxx" />
+        </attvalues>
+      </edge>
+      <edge source="1448993841986609154" target="#covid19" id="502" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="thedoctorxxx" />
+        </attvalues>
+      </edge>
+      <edge source="1448945676029775872" target="#novaccinepassportsanywhere" id="503" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BernieSpofforth" />
+        </attvalues>
+      </edge>
+      <edge source="1448945676029775872" target="#covid19" id="504" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="BernieSpofforth" />
+        </attvalues>
+      </edge>
+      <edge source="1448993865227280385" target="#novaccinepassportsanywhere" id="505" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="excellentessie" />
+        </attvalues>
+      </edge>
+      <edge source="1448993938715590671" target="#novaccinepassportsanywhere" id="506" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Blake73116958" />
+        </attvalues>
+      </edge>
+      <edge source="1448993938715590671" target="#coronapas" id="507" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Blake73116958" />
+        </attvalues>
+      </edge>
+      <edge source="1448993938715590671" target="#sociaalkredietsysteem" id="508" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Blake73116958" />
+        </attvalues>
+      </edge>
+      <edge source="1448993440830734357" target="#novaccinepassportsanywhere" id="509" weight="5">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MarcVegtMarcVegtMarcVegtMarcVegtMarcVegt" />
+        </attvalues>
+      </edge>
+      <edge source="1448993440830734357" target="#coronapas" id="510" weight="5">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MarcVegtMarcVegtMarcVegtMarcVegtMarcVegt" />
+        </attvalues>
+      </edge>
+      <edge source="1448993440830734357" target="#sociaalkredietsysteem" id="511" weight="5">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MarcVegtMarcVegtMarcVegtMarcVegtMarcVegt" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#australiahasfallen" id="512" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#australia" id="513" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#covid19" id="514" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#covid" id="515" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#vaccine" id="516" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#vaccinated" id="517" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#unvaxxed" id="518" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#coronavirus" id="519" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#enoughisenough" id="520" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#injustice" id="521" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#informedconsent" id="522" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#corruption" id="523" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#vaccinemandates" id="524" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#novaccinepassports" id="525" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#novaccinepassportsanywhere" id="526" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994021003587591" target="#billofrights" id="527" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="lebowithachip" />
+        </attvalues>
+      </edge>
+      <edge source="1448994066352455683" target="#novaccinepassportsanywhere" id="528" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PhilipRuiter" />
+        </attvalues>
+      </edge>
+      <edge source="1448994066352455683" target="#coronapas" id="529" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PhilipRuiter" />
+        </attvalues>
+      </edge>
+      <edge source="1448994066352455683" target="#sociaalkredietsysteem" id="530" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="PhilipRuiter" />
+        </attvalues>
+      </edge>
+      <edge source="1448994105158156317" target="#novaccinepassportsanywhere" id="531" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HeidewietskaNL" />
+        </attvalues>
+      </edge>
+      <edge source="1448994105158156317" target="#coronapas" id="532" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HeidewietskaNL" />
+        </attvalues>
+      </edge>
+      <edge source="1448994105158156317" target="#sociaalkredietsysteem" id="533" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="HeidewietskaNL" />
+        </attvalues>
+      </edge>
+      <edge source="1448994142227423236" target="#novaccinepassportsanywhere" id="534" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EmmaLente" />
+        </attvalues>
+      </edge>
+      <edge source="1448994142227423236" target="#coronapas" id="535" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EmmaLente" />
+        </attvalues>
+      </edge>
+      <edge source="1448994142227423236" target="#sociaalkredietsysteem" id="536" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="EmmaLente" />
+        </attvalues>
+      </edge>
+      <edge source="1448994224939089934" target="#novaccinepassportsanywhere" id="537" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Adrianaerjo" />
+        </attvalues>
+      </edge>
+      <edge source="1448994224939089934" target="#coronapas" id="538" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Adrianaerjo" />
+        </attvalues>
+      </edge>
+      <edge source="1448994224939089934" target="#sociaalkredietsysteem" id="539" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="Adrianaerjo" />
+        </attvalues>
+      </edge>
+      <edge source="1448994450269736961" target="#together" id="540" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MaryGreenway1" />
+        </attvalues>
+      </edge>
+      <edge source="1448994450269736961" target="#novaccinemandates" id="541" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MaryGreenway1" />
+        </attvalues>
+      </edge>
+      <edge source="1448994450269736961" target="#togetherdeclaration" id="542" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MaryGreenway1" />
+        </attvalues>
+      </edge>
+      <edge source="1448994450269736961" target="#novaccinepassportsanywhere" id="543" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MaryGreenway1" />
+        </attvalues>
+      </edge>
+      <edge source="1448994450269736961" target="#openforall" id="544" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="MaryGreenway1" />
+        </attvalues>
+      </edge>
+      <edge source="1448661650572144650" target="#together" id="545" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="alanvibe" />
+        </attvalues>
+      </edge>
+      <edge source="1448661650572144650" target="#novaccinemandates" id="546" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="alanvibe" />
+        </attvalues>
+      </edge>
+      <edge source="1448661650572144650" target="#togetherdeclaration" id="547" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="alanvibe" />
+        </attvalues>
+      </edge>
+      <edge source="1448661650572144650" target="#novaccinepassportsanywhere" id="548" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="alanvibe" />
+        </attvalues>
+      </edge>
+      <edge source="1448661650572144650" target="#openforall" id="549" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="alanvibe" />
+        </attvalues>
+      </edge>
+      <edge source="1448994572248432643" target="#novaccinepassportsanywhere" id="550" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="squawkying" />
+        </attvalues>
+      </edge>
+      <edge source="1448994572248432643" target="#together" id="551" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="squawkying" />
+        </attvalues>
+      </edge>
+      <edge source="1448902369840975884" target="#novaccinepassportsanywhere" id="552" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="danjgregory" />
+        </attvalues>
+      </edge>
+      <edge source="1448902369840975884" target="#together" id="553" weight="1">
+        <attvalues>
+          <attvalue for="0" value="hashtag" />
+          <attvalue for="1" value="danjgregory" />
+        </attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>
