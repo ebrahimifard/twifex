@@ -1,4 +1,6 @@
-#tests/*
-#resource/*
-outputs/*
-__pycache__/*
+tests/
+resource/
+outputs/
+__pycache__/
+gexfs/
+Archives/

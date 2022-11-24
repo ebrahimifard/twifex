@@ -1,0 +1,23 @@
+# Review existing docstrings and assertions
+# Add docstring and assertions to the method without them
+# Carefully check network building (preferably when you are really fresh and not tired)
+
+
+
+
+########### Spare Functions Repo ############
+
+    # def get_tweet_coordinates(self):
+    #     """
+    #     Represents the geographic location of this Tweet as reported by the user or client application.
+    #     :return: a coordinate object
+    #     """
+    #     return self._coordinates
+    #
+    # def get_tweet_place(self):
+    #     """
+    #     When the place field is present in the tweet, it indicates that the tweet is associated (but not necessarily
+    #     originating from) a Place.
+    #     :return: a place object.
+    #     """
+    #     return self._place

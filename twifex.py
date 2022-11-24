@@ -36,6 +36,10 @@ import wordninja
 from itertools import combinations
 
 
+# import Network
+# import location
+# import TemporalFeatures
+
 ############################################# Packages #############################################
 
 
@@ -86,12 +90,11 @@ from itertools import combinations
 #       - In url networks, it should be possible to make the network based on the main website domain not the detailed one
 #       - Why not all user networks are multigraph??
 #       - When you are making tweet_level networks, add an attribute to the nodes that displays their type (whether they are tweet, retweet, retweeted_quote, or quote)
+#       - Make sure you use the correct variables/dictionaries in every network making method (for instance, in tweet_level_retweet_quote_reply network make sure all the dictionaries are retweet_quote_reply)
 
 
 
 ############################################# Notes and Comments #############################################
-
-
 class TwifexUtility:
     def __init__(self):
         pass
@@ -151,6 +154,37 @@ class TwifexUtility:
         dict_container["count"] = len(num_list)
 
         return dict_container
+
+    @staticmethod
+    def tweets_retweets_retweetedquotes_quotes(tweets_dict):
+        tweets_quotes_retweets = {}
+        for tweet_id, tweet in tweets_dict.items():
+            tweets_quotes_retweets[tweet_id] = {}
+            tweets_quotes_retweets[tweet_id]["type"] = "twt"
+            tweets_quotes_retweets[tweet_id]["object"] = tweet
+            if tweet.is_retweeted():
+                retweeted_tweet = tweet.get_retweeted()
+                tweets_quotes_retweets[retweeted_tweet.get_id()] = {}
+                tweets_quotes_retweets[retweeted_tweet.get_id()]["type"] = "rt"
+                tweets_quotes_retweets[retweeted_tweet.get_id()]["object"] = retweeted_tweet
+
+                if retweeted_tweet.is_quoted():
+                    quoted_tweet = tweet.get_retweeted().get_quote()
+                    tweets_quotes_retweets[quoted_tweet.get_id()] = {}
+                    tweets_quotes_retweets[quoted_tweet.get_id()]["type"] = "rt_qt"
+                    tweets_quotes_retweets[quoted_tweet.get_id()]["object"] = quoted_tweet
+
+            if tweet.is_quote_available():
+                quoted_tweet = tweet.get_quote()
+                tweets_quotes_retweets[quoted_tweet.get_id()] = {}
+                tweets_quotes_retweets[quoted_tweet.get_id()]["type"] = "qt"
+                tweets_quotes_retweets[quoted_tweet.get_id()]["object"] = quoted_tweet
+
+        return tweets_quotes_retweets
+
+    @staticmethod
+    def collective_tweets_to_dictionary(tweets_list):
+        return {tweet.get_id(): tweet for tweet in tweets_list}
 
 
 class Twifex:
@@ -259,9 +293,9 @@ class CollectiveTweets:
         """
         return TopologyBasedFeatures(self.tweets)  # Shouldn't this be topologyBasedFeatures?
 
-    @staticmethod
-    def collective_tweets_to_dictionary(tweets):
-        return {tweet.get_id(): tweet for tweet in tweets}
+
+
+
 
 ############################################# mass features #############################################
 
@@ -393,196 +427,197 @@ class TimeIndependentLocationIndependentMassFeatures:
         """
         return TimeIndependentLocationIndependentUserMassFeatures(self.tweets)
 
+# #TRANSFERRED
+# class TemporalFeatures:
+#     def __init__(self, tweets):
+#         """
+#         :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
+#         """
+#         self.tweets = tweets
+#
+#     def tweets_period(self):
+#         """
+#         :return: a sorted list of tweets creation time
+#         """
+#         tweet_dates = []
+#         for tweet in self.tweets:
+#             tweet_dates.append(self.tweets[tweet].get_creation_time())
+#         return sorted(tweet_dates)
+#
+#     def tweets_in_periods(self, resolution="year", frequency=1):
+#         """
+#         :param resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :return: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
+#         the timestamps and all the tweets that are posted within every timestamp.
+#         """
+#         assert (resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time resolution " \
+#                                                                                              "should be year, month, " \
+#                                                                                              "week, day, hour, minute," \
+#                                                                                              " or second"
+#
+#         sorted_tweet_times = self.tweets_period()
+#         time_frame = sorted_tweet_times[0]
+#         last = sorted_tweet_times[-1]
+#         temporal_tweets = {}
+#
+#         if resolution == "year":
+#             while (time_frame <= last):
+#                 temporal_tweets[time_frame] = []
+#                 time_frame += relativedelta(years=frequency)
+#             for tweet_id, tweet in self.tweets.items():
+#                 tweet_time = tweet.get_creation_time()
+#                 for time_frame in temporal_tweets:
+#                     if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(years=frequency):
+#                         temporal_tweets[time_frame].append(tweet)
+#
+#         elif resolution == "month":
+#             while (time_frame <= last):
+#                 temporal_tweets[time_frame] = []
+#                 time_frame += relativedelta(months=frequency)
+#             for tweet_id, tweet in self.tweets.items():
+#                 tweet_time = tweet.get_creation_time()
+#                 for time_frame in temporal_tweets:
+#                     if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(months=frequency):
+#                         temporal_tweets[time_frame].append(tweet)
+#
+#         elif resolution == "week":
+#             while (time_frame <= last):
+#                 temporal_tweets[time_frame] = []
+#                 time_frame += relativedelta(weeks=frequency)
+#             for tweet_id, tweet in self.tweets.items():
+#                 tweet_time = tweet.get_creation_time()
+#                 for time_frame in temporal_tweets:
+#                     if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(weeks=frequency):
+#                         temporal_tweets[time_frame].append(tweet)
+#
+#         elif resolution == "day":
+#             while (time_frame <= last):
+#                 temporal_tweets[time_frame] = []
+#                 time_frame += relativedelta(days=frequency)
+#             for tweet_id, tweet in self.tweets.items():
+#                 tweet_time = tweet.get_creation_time()
+#                 for time_frame in temporal_tweets:
+#                     if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(days=frequency):
+#                         temporal_tweets[time_frame].append(tweet)
+#
+#         elif resolution == "hour":
+#             while (time_frame <= last):
+#                 temporal_tweets[time_frame] = []
+#                 time_frame += relativedelta(hours=frequency)
+#             for tweet_id, tweet in self.tweets.items():
+#                 tweet_time = tweet.get_creation_time()
+#                 for time_frame in temporal_tweets:
+#                     if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(hours=frequency):
+#                         temporal_tweets[time_frame].append(tweet)
+#
+#         elif resolution == "minute":
+#             while (time_frame <= last):
+#                 temporal_tweets[time_frame] = []
+#                 time_frame += relativedelta(minutes=frequency)
+#             print(len(self.tweets))
+#             for tweet_id, tweet in self.tweets.items():
+#                 tweet_time = tweet.get_creation_time()
+#                 for time_frame in temporal_tweets:
+#                     if time_frame <= tweet_time < time_frame + relativedelta(minutes=frequency):
+#                         temporal_tweets[time_frame].append(tweet)
+#
+#         elif resolution == "second":
+#             while (time_frame <= last):
+#                 temporal_tweets[time_frame] = []
+#                 time_frame += relativedelta(seconds=frequency)
+#             for tweet_id, tweet in self.tweets.items():
+#                 tweet_time = tweet.get_creation_time()
+#                 for time_frame in temporal_tweets:
+#                     if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(seconds=frequency):
+#                         temporal_tweets[time_frame].append(tweet)
+#
+#         return temporal_tweets
 
-class TemporalFeatures:
-    def __init__(self, tweets):
-        """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
-        """
-        self.tweets = tweets
-
-    def tweets_period(self):
-        """
-        :return: a sorted list of tweets creation time
-        """
-        tweet_dates = []
-        for tweet in self.tweets:
-            tweet_dates.append(self.tweets[tweet].get_creation_time())
-        return sorted(tweet_dates)
-
-    def tweets_in_periods(self, resolution="year", frequency=1):
-        """
-        :param resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :return: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
-        the timestamps and all the tweets that are posted within every timestamp.
-        """
-        assert (resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time resolution " \
-                                                                                             "should be year, month, " \
-                                                                                             "week, day, hour, minute," \
-                                                                                             " or second"
-
-        sorted_tweet_times = self.tweets_period()
-        time_frame = sorted_tweet_times[0]
-        last = sorted_tweet_times[-1]
-        temporal_tweets = {}
-
-        if resolution == "year":
-            while (time_frame <= last):
-                temporal_tweets[time_frame] = []
-                time_frame += relativedelta(years=frequency)
-            for tweet_id, tweet in self.tweets.items():
-                tweet_time = tweet.get_creation_time()
-                for time_frame in temporal_tweets:
-                    if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(years=frequency):
-                        temporal_tweets[time_frame].append(tweet)
-
-        elif resolution == "month":
-            while (time_frame <= last):
-                temporal_tweets[time_frame] = []
-                time_frame += relativedelta(months=frequency)
-            for tweet_id, tweet in self.tweets.items():
-                tweet_time = tweet.get_creation_time()
-                for time_frame in temporal_tweets:
-                    if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(months=frequency):
-                        temporal_tweets[time_frame].append(tweet)
-
-        elif resolution == "week":
-            while (time_frame <= last):
-                temporal_tweets[time_frame] = []
-                time_frame += relativedelta(weeks=frequency)
-            for tweet_id, tweet in self.tweets.items():
-                tweet_time = tweet.get_creation_time()
-                for time_frame in temporal_tweets:
-                    if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(weeks=frequency):
-                        temporal_tweets[time_frame].append(tweet)
-
-        elif resolution == "day":
-            while (time_frame <= last):
-                temporal_tweets[time_frame] = []
-                time_frame += relativedelta(days=frequency)
-            for tweet_id, tweet in self.tweets.items():
-                tweet_time = tweet.get_creation_time()
-                for time_frame in temporal_tweets:
-                    if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(days=frequency):
-                        temporal_tweets[time_frame].append(tweet)
-
-        elif resolution == "hour":
-            while (time_frame <= last):
-                temporal_tweets[time_frame] = []
-                time_frame += relativedelta(hours=frequency)
-            for tweet_id, tweet in self.tweets.items():
-                tweet_time = tweet.get_creation_time()
-                for time_frame in temporal_tweets:
-                    if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(hours=frequency):
-                        temporal_tweets[time_frame].append(tweet)
-
-        elif resolution == "minute":
-            while (time_frame <= last):
-                temporal_tweets[time_frame] = []
-                time_frame += relativedelta(minutes=frequency)
-            for tweet_id, tweet in self.tweets.items():
-                tweet_time = tweet.get_creation_time()
-                for time_frame in temporal_tweets:
-                    if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(minutes=frequency):
-                        temporal_tweets[time_frame].append(tweet)
-
-        elif resolution == "second":
-            while (time_frame <= last):
-                temporal_tweets[time_frame] = []
-                time_frame += relativedelta(seconds=frequency)
-            for tweet_id, tweet in self.tweets.items():
-                tweet_time = tweet.get_creation_time()
-                for time_frame in temporal_tweets:
-                    if tweet_time >= time_frame and tweet_time < time_frame + relativedelta(seconds=frequency):
-                        temporal_tweets[time_frame].append(tweet)
-
-        return temporal_tweets
-
-
-class PlaceFeatures:
-    def __init__(self, tweets):
-        """
-        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
-        """
-        self.tweets = tweets
-
-    def geotagged_tweets(self):
-        """
-        This function filters out all tweets without geo location.
-        :return: a dictionary that maps every geotagged tweet_id to its corresponding SingleTweet object
-        """
-        return {p: q for p, q in self.tweets.items() if q.get_place() != None}
-
-    def tweets_distinct_countries(self):
-        """
-        This function finds all countries that the tweets in the dataset are comming from.
-        :return: return a list of distinct countries.
-        """
-        tweetsWithPlaces = self.geotagged_tweets()
-        places = set()
-        for tweet_id, tweet in tweetsWithPlaces.items():
-            place = tweet.get_place()
-            places.add(place["country"])
-        return list(places)
-
-    def tweets_distinct_places(self, coordinates=True):
-        """
-        This function finds all places that the tweets in the dataset are comming from.
-        :return: return a list of distinct places.
-        """
-        tweetsWithPlaces = self.geotagged_tweets()
-        places_coordinates = {}
-        for tweet_id, tweet in tweetsWithPlaces.items():
-            place = tweet.get_place()
-            places_coordinates[place["full_name"]] = places_coordinates.get(place["full_name"], place["bounding_box"])
-        if coordinates:
-            return places_coordinates
-        else:
-            return list(places_coordinates.keys())
-
-    def tweets_with_location(self, spatial_resolution='country'):
-        """
-        This function mapped all the geotagged tweets to their locations based on the spatial resolution specified in the function argument.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that maps every location to the list of all tweets coming from that location.
-        """
-        if spatial_resolution == 'country':
-            res = "country"
-        elif spatial_resolution == 'place':
-            res = "full_name"
-
-        tweetsWithPlaces = self.geotagged_tweets()
-        location_dict = {}
-        for tweet_id, tweet in tweetsWithPlaces.items():
-            location_dict[tweet.get_place()[res]] = location_dict.get(tweet.get_place()[res], []) + [
-                tweet]
-        return location_dict
-
-    # def countries_with_tweets(self):
-    #     """
-    #     This function mapped all the geotagged tweets to their country of origin.
-    #     :return: a dictionary that maps every country to the list of all tweets comming from that country.
-    #     """
-    #     tweetsWithPlaces = self.geotagged_tweets()
-    #     countries_dict = {}
-    #     for tweet_id, tweet in tweetsWithPlaces.items():
-    #         countries_dict[tweet.get_place()["country"]] = countries_dict.get(tweet.get_place()["country"], []) + [
-    #             tweet]
-    #     return countries_dict
-    #
-    # def places_with_tweets(self):
-    #     """
-    #     This function mapped all the geotagged tweets to their origin.
-    #     :return: a dictionary that maps every place to the list of all tweets comming from that country.
-    #     """
-    #     tweetsWithPlaces = self.geotagged_tweets()
-    #     places_dict = {}
-    #     for tweet_id, tweet in tweetsWithPlaces.items():
-    #         places_dict[tweet.get_place()["full_name"]] = places_dict.get(tweet.get_place()["full_name"], []) + [tweet]
-    #     return places_dict
+# #TRANSFERRED
+# class PlaceFeatures:
+#     def __init__(self, tweets):
+#         """
+#         :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
+#         """
+#         self.tweets = tweets
+#
+#     def geotagged_tweets(self):
+#         """
+#         This function filters out all tweets without geo location.
+#         :return: a dictionary that maps every geotagged tweet_id to its corresponding SingleTweet object
+#         """
+#         return {p: q for p, q in self.tweets.items() if q.get_place() != None}
+#
+#     def tweets_distinct_countries(self):
+#         """
+#         This function finds all countries that the tweets in the dataset are comming from.
+#         :return: return a list of distinct countries.
+#         """
+#         tweetsWithPlaces = self.geotagged_tweets()
+#         places = set()
+#         for tweet_id, tweet in tweetsWithPlaces.items():
+#             place = tweet.get_place()
+#             places.add(place["country"])
+#         return list(places)
+#
+#     def tweets_distinct_places(self, coordinates=True):
+#         """
+#         This function finds all places that the tweets in the dataset are comming from.
+#         :return: return a list of distinct places.
+#         """
+#         tweetsWithPlaces = self.geotagged_tweets()
+#         places_coordinates = {}
+#         for tweet_id, tweet in tweetsWithPlaces.items():
+#             place = tweet.get_place()
+#             places_coordinates[place["full_name"]] = places_coordinates.get(place["full_name"], place["bounding_box"])
+#         if coordinates:
+#             return places_coordinates
+#         else:
+#             return list(places_coordinates.keys())
+#
+#     def tweets_with_location(self, spatial_resolution='country'):
+#         """
+#         This function mapped all the geotagged tweets to their locations based on the spatial resolution specified in the function argument.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that maps every location to the list of all tweets coming from that location.
+#         """
+#         if spatial_resolution == 'country':
+#             res = "country"
+#         elif spatial_resolution == 'place':
+#             res = "full_name"
+#
+#         tweetsWithPlaces = self.geotagged_tweets()
+#         location_dict = {}
+#         for tweet_id, tweet in tweetsWithPlaces.items():
+#             location_dict[tweet.get_place()[res]] = location_dict.get(tweet.get_place()[res], []) + [
+#                 tweet]
+#         return location_dict
+#
+#     # def countries_with_tweets(self):
+#     #     """
+#     #     This function mapped all the geotagged tweets to their country of origin.
+#     #     :return: a dictionary that maps every country to the list of all tweets comming from that country.
+#     #     """
+#     #     tweetsWithPlaces = self.geotagged_tweets()
+#     #     countries_dict = {}
+#     #     for tweet_id, tweet in tweetsWithPlaces.items():
+#     #         countries_dict[tweet.get_place()["country"]] = countries_dict.get(tweet.get_place()["country"], []) + [
+#     #             tweet]
+#     #     return countries_dict
+#     #
+#     # def places_with_tweets(self):
+#     #     """
+#     #     This function mapped all the geotagged tweets to their origin.
+#     #     :return: a dictionary that maps every place to the list of all tweets comming from that country.
+#     #     """
+#     #     tweetsWithPlaces = self.geotagged_tweets()
+#     #     places_dict = {}
+#     #     for tweet_id, tweet in tweetsWithPlaces.items():
+#     #         places_dict[tweet.get_place()["full_name"]] = places_dict.get(tweet.get_place()["full_name"], []) + [tweet]
+#     #     return places_dict
 
 
 class TimeDependentLocationIndependentTweetMassFeatures(TemporalFeatures):
@@ -828,11 +863,11 @@ class TimeDependentLocationDependentTweetMassFeatures(TemporalFeatures, PlaceFea
         if order == "spatial-temporal":
             spatial_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
             for location, tweets in spatial_tweets.items():
-                tweet_set[location] = temporalFeatures(CollectiveTweets.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
+                tweet_set[location] = TemporalFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
         elif order == "temporal-spatial":
             temporal_tweets = self.tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
             for timestamp, tweets in temporal_tweets.items():
-                tweet_set[timestamp] = placeFeatures(CollectiveTweets.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
+                tweet_set[timestamp] = PlaceFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
         return tweet_set
 
     def temporal_spatial_tweet_complexity(self, order='spatial-temporal', temporal_resolution='day',
@@ -1390,11 +1425,11 @@ class TimeDependentLocationDependentUserMassFeatures(TemporalFeatures, PlaceFeat
         if order == "spatial-temporal":
             spatial_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
             for location, tweets in spatial_tweets.items():
-                tweet_set[location] = TemporalFeatures(CollectiveTweets.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
+                tweet_set[location] = TemporalFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
         elif order == "temporal-spatial":
             temporal_tweets = self.tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
             for timestamp, tweets in temporal_tweets.items():
-                tweet_set[timestamp] = PlaceFeatures(CollectiveTweets.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
+                tweet_set[timestamp] = PlaceFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
         return tweet_set
 
     def temporal_spatial_user_status_count(self, order='spatial-temporal', temporal_resolution='day',
@@ -2554,4847 +2589,4927 @@ class TimeIndependentLocationIndependentNetworkFeatures:
         return TimeIndependentLocationIndependentUserNetworkFeatures(self.tweets)
 
 
-class Network:
-    def __init__(self, tweets):
-        """
-        This is a constructor of a network class.
-        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
-        """
-        # self.network = nx.DiGraph()
-        self.tweets = tweets
-        # self.network = nx.DiGraph()
 
-        ### The network here should be DiGraph and not MultiGraph becasue it is not possible to have multiple edges for retweet, quote, and reply networks.
-        self.tweet_level_retweet_network = nx.DiGraph()
-        self.tweet_level_quote_network = nx.DiGraph()
-        self.tweet_level_reply_network = nx.DiGraph()
-        self.tweet_level_quote_reply_network = nx.DiGraph()
-        self.tweet_level_retweet_reply_network = nx.DiGraph()
-        self.tweet_level_retweet_quote_network = nx.DiGraph()
-        self.tweet_level_retweet_quote_reply_network = nx.DiGraph()
-
-        self.tweet_level_cooccurrence_hashtag_network = nx.Graph()
-        self.tweet_level_cooccurrence_mention_network = nx.Graph()
-        self.tweet_level_cooccurrence_url_network = nx.Graph()
-
-        self.tweet_hashtag_bipartite_network = nx.DiGraph()
-        self.tweet_mention_bipartite_network = nx.DiGraph()
-        self.tweet_url_bipartite_network = nx.DiGraph()
-
-
-
-        ### But here we need to have a multi graph becasue a user can retweet/quote/reply to the other user at the same time
-        self.user_level_retweet_network = nx.DiGraph()
-        self.user_level_quote_network = nx.DiGraph()
-        self.user_level_reply_network = nx.DiGraph()
-        self.user_level_quote_reply_network = nx.MultiDiGraph()
-        self.user_level_retweet_reply_network = nx.MultiDiGraph()
-        self.user_level_retweet_quote_network = nx.MultiDiGraph()
-        self.user_level_retweet_quote_reply_network = nx.MultiDiGraph()
-
-        self.user_level_cooccurrence_hashtag_network = nx.Graph()
-        self.user_level_cooccurrence_mention_network = nx.Graph()
-        self.user_level_cooccurrence_url_network = nx.Graph()
-
-        self.user_hashtag_bipartite_network = nx.DiGraph()
-        self.user_mention_bipartite_network = nx.DiGraph()
-        self.user_url_bipartite_network = nx.DiGraph()
-
-
-
-        self.network_repository = []
-
-        self.quote_reply_key_keepers = {}
-        self.retweet_reply_key_keepers = {}
-        self.retweet_quote_key_keepers = {}
-        self.retweet_quote_reply_key_keepers = {}
-
-    ### Tweet-level network
-    # retweet/quote/reply networks
-    def tweet_level_retweet_network_building(self):
-        self.network_repository.append("tweet_level_retweet_network")
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-
-            if retweet_condition:
-                self.tweet_level_retweet_network.add_edge(tweet.get_id(),
-                                                          tweet.get_retweeted().get_id(), kind="retweet")
-            else:
-                self.tweet_level_retweet_network.add_node(tweet.get_id())
-
-    def tweet_level_quote_network_building(self):
-        self.network_repository.append("tweet_level_quote_network")
-        for tweet_id, tweet in self.tweets.items():
-            quote_condition = tweet.is_quote_available()
-
-            if quote_condition:
-                self.tweet_level_quote_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_quote_condition:
-                    self.tweet_level_quote_network.add_edge(tweet.get_quote().get_id(),
-                                                            tweet.get_quote().get_quote_status_id(), kind="quote")
-            else:
-                self.tweet_level_quote_network.add_node(tweet.get_id())
-
-    def tweet_level_reply_network_building(self):
-        self.network_repository.append("tweet_level_reply_network")
-        for tweet_id, tweet in self.tweets.items():
-            reply_condition = tweet.is_this_a_reply()
-
-            if reply_condition:
-                self.tweet_level_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-            else:
-                self.tweet_level_reply_network.add_node(tweet.get_id())
-
-    # quote-reply/retweet-reply/retweet-quote networks
-    def tweet_level_quote_reply_network_building(self):
-        self.network_repository.append("tweet_level_quote_reply_network")
-        for tweet_id, tweet in self.tweets.items():
-            quote_condition = tweet.is_quote_available()
-            reply_condition = tweet.is_this_a_reply()
-
-            if quote_condition is True and reply_condition is True:
-                self.tweet_level_quote_reply_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                self.tweet_level_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="quote")
-                inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
-                inner_quote_condition_level_one = tweet.get_quote().is_quoted()
-                if inner_reply_condition_level_one:
-                    self.tweet_level_quote_reply_network.add_edge(tweet.get_quote().get_id(),
-                                                                  tweet.get_quote().get_reply_to_id(), kind="reply")
-                if inner_quote_condition_level_one:
-                    self.tweet_level_quote_reply_network.add_edge(tweet.get_quote().get_id(),
-                                                                  tweet.get_quote().get_quote_status_id(), kind="quote")
-
-            elif quote_condition is True and reply_condition is False:
-                self.tweet_level_quote_reply_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                inner_reply_condition = tweet.get_quote().is_this_a_reply()
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_reply_condition:
-                    self.tweet_level_quote_reply_network.add_edge(tweet.get_quote().get_id(),
-                                                                  tweet.get_quote().get_reply_to_id(), kind="reply")
-                if inner_quote_condition:
-                    self.tweet_level_quote_reply_network.add_edge(tweet.get_quote().get_id(),
-                                                                  tweet.get_quote().get_quote_status_id(), kind="quote")
-            elif quote_condition is False and reply_condition is True:
-                self.tweet_level_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-            elif quote_condition is False and reply_condition is False:
-                self.tweet_level_quote_reply_network.add_node(tweet.get_id())
-
-    def tweet_level_retweet_reply_network_building(self):
-        self.network_repository.append("tweet_level_retweet_reply_network")
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-            reply_condition = tweet.is_this_a_reply()
-
-            if retweet_condition is True and reply_condition is True:  #######This condition seems impossible to happen
-                self.tweet_level_retweet_reply_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                self.tweet_level_retweet_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
-                if inner_reply_condition:
-                    self.tweet_level_retweet_reply_network.add_edge(tweet.get_retweeted().get_id(),
-                                                                    tweet.get_retweeted().get_reply_to_id(), kind="reply")
-            elif retweet_condition is True and reply_condition is False:
-                self.tweet_level_retweet_reply_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
-                if inner_reply_condition:
-                    self.tweet_level_retweet_reply_network.add_edge(tweet.get_retweeted().get_id(),
-                                                                    tweet.get_retweeted().get_reply_to_id(), kind="reply")
-            elif retweet_condition is False and reply_condition is True:
-                self.tweet_level_retweet_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-            elif retweet_condition is False and reply_condition is False:
-                self.tweet_level_retweet_reply_network.add_node(tweet.get_id())
-
-    def tweet_level_retweet_quote_network_building(self):
-        self.network_repository.append("tweet_level_retweet_quote_network")
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-            quote_condition = tweet.is_quote_available()
-
-            ####### if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
-            if retweet_condition is True and quote_condition is False:
-                self.tweet_level_retweet_quote_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-                if inner_quote_condition_level_one:
-                    self.tweet_level_retweet_quote_network.add_edge(tweet.get_retweeted().get_id(),
-                                                                    tweet.get_retweeted().get_quote().get_id(), kind="quote")
-                    inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                    if inner_quote_condition_level_two:
-                        self.tweet_level_retweet_quote_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                         tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
-            elif retweet_condition is False and quote_condition is True:
-                self.tweet_level_retweet_quote_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_quote_condition:
-                    self.tweet_level_retweet_quote_network.add_edge(tweet.get_quote().get_id(),
-                                                                    tweet.get_quote().get_quote_status_id(), kind="quote")
-            elif retweet_condition is False and quote_condition is False:
-                self.tweet_level_retweet_quote_network.add_node(tweet.get_id())
-
-    # retweet-quote-reply network
-    def tweet_level_retweet_quote_reply_network_building(self):
-        self.network_repository.append("tweet_level_retweet_quote_reply_network")
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-            quote_condition = tweet.is_quote_available()
-            reply_condition = tweet.is_this_a_reply()
-
-
-            # The first two conditions never occur
-            # if retweet_condition is True and quote_condition is True and reply_condition is True:
-            # elif retweet_condition is True and quote_condition is True and reply_condition is False:
-            if retweet_condition is True and quote_condition is False and reply_condition is True:  #######This condition seems impossible to happen
-                self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
-                inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-                if inner_reply_condition_level_one:
-                    self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
-                                     kind="reply")
-                if inner_quote_condition_level_one:
-                    self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
-                                     kind="quote")
-                    inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                    inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
-                    if inner_quote_condition_level_two:
-                        self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                         tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
-                    if inner_reply_condition_level_two:
-                        self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                         tweet.get_retweeted().get_quote().get_reply_to_id(), kind="reply")
-
-            elif retweet_condition is True and quote_condition is False and reply_condition is False:
-                self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
-                inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
-                inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-                if inner_reply_condition_level_one:
-                    self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(), kind="reply")
-                if inner_quote_condition_level_one:
-                    self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind="quote")
-                    inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                    inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
-                    if inner_quote_condition_level_two:
-                        self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                         tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
-                    if inner_reply_condition_level_two:
-                        self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
-                                         tweet.get_retweeted().get_quote().get_reply_to_id(), kind="reply")
-
-            elif retweet_condition is False and quote_condition is True and reply_condition is True:
-                self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-                inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
-                inner_quote_condition_level_one = tweet.get_quote().is_quoted()
-                if inner_reply_condition_level_one:
-                    self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
-                if inner_quote_condition_level_one:
-                    self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
-
-            elif retweet_condition is False and quote_condition is True and reply_condition is False:
-                self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
-                inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
-                inner_quote_condition_level_one = tweet.get_quote().is_quoted()
-                if inner_reply_condition_level_one:
-                    self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
-                if inner_quote_condition_level_one:
-                    self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
-
-            elif retweet_condition is False and quote_condition is False and reply_condition is True:
-                self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
-            elif retweet_condition is False and quote_condition is False and reply_condition is False:
-                self.tweet_level_retweet_quote_reply_network.add_node(tweet.get_id())
-
-            # # if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
-            # if retweet_condition is True and quote_condition is False:
-            #     network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
-            #     inner_quote_condition = tweet.get_retweeted().is_quoted()
-            #     if inner_quote_condition:
-            #         network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind=network_type)
-            # elif retweet_condition is False and quote_condition is True:
-            #     network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
-            # elif retweet_condition is False and quote_condition is False:
-            #     network.add_node(tweet.get_id())
-
-    # hashtag/mention/url networks
-    def tweet_level_cooccurrence_hashtag_network_building(self):
-        self.network_repository.append("tweet_level_cooccurrence_hashtag_network")
-
-        tweets_keys = list(self.tweets.keys())
-        for i in range(len(tweets_keys)):
-            tweet1 = self.tweets[tweets_keys[i]]
-            tweet1_id = tweet1.get_id()
-            tweet1_hashtags = tweet1.get_hashtags()
-
-            j = i + 1
-
-            self.tweet_level_cooccurrence_hashtag_network.add_node(tweet1_id)
-
-            tweet1_retweet_condition = tweet1.is_retweeted()
-            tweet1_quote_condition = tweet1.is_quote_available()
-
-            if tweet1_retweet_condition:
-                tweet1_rt = tweet1.get_retweeted()
-                tweet1_rt_id = tweet1_rt.get_id()
-
-                for ht in tweet1_hashtags:
-                    if (tweet1_id, tweet1_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_rt_id]["weight"] += 1
-                        edge_label = "-" + ht
-                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_rt_id]["hashtags"] += edge_label
-                    else:
-                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet1_rt_id, weight=1, hashtags=ht)
-
-                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                if tweet1_inner_quote_condition:
-                    tweet1_rt_qt = tweet1_rt.get_quote()
-                    tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                    tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                    for ht1 in tweet1_hashtags:
-                        for ht2 in tweet1_rt_qt_hashtags:
-                            if ht1 == ht2:
-                                if (tweet1_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                    self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_rt_qt_id]["weight"] += 1
-                                    edge_label = "-" + ht1
-                                    self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_rt_qt_id][
-                                        "hashtags"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet1_rt_qt_id, weight=1,
-                                                                              hashtags=ht1)
-
-                    for ht1 in tweet1_hashtags:
-                        for ht2 in tweet1_rt_qt_hashtags:
-                            if ht1 == ht2:
-                                if (tweet1_rt_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                    self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet1_rt_qt_id]["weight"] += 1
-                                    edge_label = "-" + ht1
-                                    self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet1_rt_qt_id][
-                                        "hashtags"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet1_rt_qt_id, weight=1,
-                                                                              hashtags=ht1)
-
-            if tweet1_quote_condition:
-                tweet1_qt = tweet1.get_quote()
-                tweet1_qt_id = tweet1_qt.get_id()
-                tweet1_qt_hashtags = tweet1_qt.get_hashtags()
-
-                for ht1 in tweet1_hashtags:
-                    for ht2 in tweet1_qt_hashtags:
-                        if ht1 == ht2:
-                            if (tweet1_id, tweet1_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_qt_id]["weight"] += 1
-                                edge_label = "-" + ht1
-                                self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_qt_id][
-                                    "hashtags"] += edge_label
-                            else:
-                                self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet1_qt_id, weight=1,
-                                                                          hashtags=ht1)
-
-            while j != len(tweets_keys):
-                tweet2 = self.tweets[tweets_keys[j]]
-                tweet2_id = tweet2.get_id()
-                tweet2_hashtags = tweet2.get_hashtags()
-
-                tweet2_retweet_condition = tweet2.is_retweeted()
-                tweet2_quote_condition = tweet2.is_quote_available()
-
-                if tweet2_retweet_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-
-                    if tweet1_id != tweet2_rt_id:
-                        for ht1 in tweet1_hashtags:
-                            for ht2 in tweet2_hashtags:
-                                if ht1 == ht2:
-                                    if (tweet1_id, tweet2_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_rt_id]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_rt_id][
-                                            "hashtags"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet2_rt_id, weight=1,
-                                                                                  hashtags=ht1)
-
-                        tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                        if tweet2_inner_quote_condition:
-                            tweet2_rt_qt = tweet2_rt.get_quote()
-                            tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                            tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
-
-                            if tweet1_id != tweet2_rt_qt_id:
-                                for ht1 in tweet1_hashtags:
-                                    for ht2 in tweet2_rt_qt_hashtags:
-                                        if ht1 == ht2:
-                                            if (tweet1_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                                self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_rt_qt_id][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_rt_qt_id][
-                                                    "hashtags"] += edge_label
-                                            else:
-                                                self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet2_rt_qt_id,
-                                                                                          weight=1,
-                                                                                          hashtags=ht1)
-
-                if tweet2_quote_condition:
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_hashtags = tweet2_qt.get_hashtags()
-
-                    if tweet1_id != tweet2_qt_id:
-                        for ht1 in tweet1_hashtags:
-                            for ht2 in tweet2_qt_hashtags:
-                                if ht1 == ht2:
-                                    if (tweet1_id, tweet2_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_qt_id]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_qt_id][
-                                            "hashtags"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet2_qt_id, weight=1,
-                                                                                  hashtags=ht1)
-
-                if tweet1_retweet_condition and tweet2_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_id()
-                    tweet1_rt_hashtags = tweet1_rt.get_hashtags()
-
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-                    tweet2_rt_hashtags = tweet1_rt.get_hashtags()
-
-                    if tweet1_rt_id != tweet2_rt_id:
-                        for ht1 in tweet1_rt_hashtags:
-                            for ht2 in tweet2_rt_hashtags:
-                                if ht1 == ht2:
-                                    if (tweet1_rt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_rt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_rt_id][
-                                            "hashtags"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet2_rt_id, weight=1,
-                                                                                  hashtags=ht1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                        if tweet1_rt_qt_id != tweet2_rt_id:
-                            for ht1 in tweet1_rt_qt_hashtags:
-                                for ht2 in tweet2_rt_hashtags:
-                                    if ht1 == ht2:
-                                        if (tweet1_rt_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
-                                                "hashtags"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_qt_id, tweet2_rt_id,
-                                                                                      weight=1, hashtags=ht1)
-
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
-
-                        if tweet1_rt_id != tweet2_rt_qt_id:
-                            for ht1 in tweet1_rt_hashtags:
-                                for ht2 in tweet2_rt_qt_hashtags:
-                                    if ht1 == ht2:
-                                        if (tweet1_rt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
-                                                "hashtags"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet2_rt_qt_id,
-                                                                                      weight=1, hashtags=ht1)
-
-                    if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
-
-                        if tweet1_rt_qt_id != tweet2_rt_qt_id:
-                            for ht1 in tweet1_rt_qt_hashtags:
-                                for ht2 in tweet2_rt_qt_hashtags:
-                                    if ht1 == ht2:
-                                        if (tweet1_rt_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
-                                                "hashtags"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_qt_id, tweet2_rt_qt_id,
-                                                                                      weight=1, hashtags=ht1)
-
-                if tweet1_quote_condition and tweet2_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_hashtags = tweet1_qt.get_hashtags()
-
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_hashtags = tweet2_qt.get_hashtags()
-
-                    if tweet1_qt_id != tweet2_qt_id:
-                        for ht1 in tweet1_qt_hashtags:
-                            for ht2 in tweet2_qt_hashtags:
-                                if ht1 == ht2:
-                                    if (tweet1_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_qt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_qt_id][
-                                            "hashtags"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_qt_id, tweet2_qt_id, weight=1,
-                                                                                  hashtags=ht1)
-
-                if tweet1_retweet_condition and tweet2_quote_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_id()
-                    tweet1_rt_hashtags = tweet1_rt.get_hashtags()
-
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_hashtags = tweet2_qt.get_hashtags()
-
-                    if tweet1_rt_id != tweet2_qt_id:
-                        for ht1 in tweet1_rt_hashtags:
-                            for ht2 in tweet2_qt_hashtags:
-                                if ht1 == ht2:
-                                    if (tweet1_rt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_qt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_qt_id][
-                                            "hashtags"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet2_qt_id, weight=1,
-                                                                                  hashtags=ht1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                        if tweet1_rt_qt_id != tweet2_qt_id:
-                            for ht1 in tweet1_rt_qt_hashtags:
-                                for ht2 in tweet2_qt_hashtags:
-                                    if ht1 == ht2:
-                                        if (tweet1_rt_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
-                                                "hashtags"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_qt_id, tweet2_qt_id,
-                                                                                      weight=1, hashtags=ht1)
-
-                if tweet2_retweet_condition and tweet1_quote_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-                    tweet2_rt_hashtags = tweet2_rt.get_hashtags()
-
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_hashtags = tweet1_qt.get_hashtags()
-
-                    if tweet1_qt_id != tweet2_rt_id:
-                        for ht1 in tweet1_qt_hashtags:
-                            for ht2 in tweet2_rt_hashtags:
-                                if ht1 == ht2:
-                                    if (tweet1_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_rt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_rt_id][
-                                            "hashtags"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_qt_id, tweet2_rt_id, weight=1,
-                                                                                  hashtags=ht1)
-
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2_rt.get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
-
-                        if tweet1_qt_id != tweet2_rt_qt_id:
-                            for ht1 in tweet1_qt_hashtags:
-                                for ht2 in tweet2_rt_qt_hashtags:
-                                    if ht1 == ht2:
-                                        if (tweet1_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
-                                                "hashtags"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_qt_id, tweet2_rt_qt_id,
-                                                                                      weight=1,
-                                                                                      hashtags=ht1)
-
-                if tweet1_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_hashtags = tweet1_rt.get_hashtags()
-
-                    if tweet1_rt_id != tweet2_id:
-                        for ht1 in tweet1_rt_hashtags:
-                            for ht2 in tweet2_hashtags:
-                                if ht1 == ht2:
-                                    if (tweet1_rt_id, tweet2_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_id]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_id][
-                                            "hashtags"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet2_id, weight=1,
-                                                                                  hashtags=ht1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                        if tweet2_id != tweet1_rt_qt_id:
-                            for ht1 in tweet1_rt_qt_hashtags:
-                                for ht2 in tweet2_hashtags:
-                                    if ht1 == ht2:
-                                        if (tweet1_rt_qt_id, tweet2_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_id][
-                                                "hashtags"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_qt_id, tweet2_id,
-                                                                                      weight=1,
-                                                                                      hashtags=ht1)
-
-                if tweet1_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_hashtags = tweet1_qt.get_hashtags()
-
-                    if tweet1_qt_id != tweet2_id:
-                        for ht1 in tweet1_qt_hashtags:
-                            for ht2 in tweet2_hashtags:
-                                if ht1 == ht2:
-                                    if (tweet1_qt_id, tweet2_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_id]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_id][
-                                            "hashtags"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_qt_id, tweet2_id, weight=1,
-                                                                                  hashtags=ht1)
-
-                if tweet1_id != tweet2_id:
-                    for ht1 in tweet1_hashtags:
-                        for ht2 in tweet2_hashtags:
-                            if ht1 == ht2:
-                                if (tweet1_id, tweet2_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
-                                    self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_id]["weight"] += 1
-                                    edge_label = "-" + ht1
-                                    self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_id][
-                                        "hashtags"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet2_id, weight=1,
-                                                                              hashtags=ht1)
-                j += 1
-
-    def tweet_level_cooccurrence_mention_network_building(self):
-        self.network_repository.append("tweet_level_cooccurrence_mention_network")
-
-        tweets_keys = list(self.tweets.keys())
-        for i in range(len(tweets_keys)):
-            tweet1 = self.tweets[tweets_keys[i]]
-            tweet1_id = tweet1.get_id()
-            tweet1_mentions = tweet1.get_mentions()
-
-            j = i + 1
-
-            self.tweet_level_cooccurrence_mention_network.add_node(tweet1_id)
-
-            tweet1_retweet_condition = tweet1.is_retweeted()
-            tweet1_quote_condition = tweet1.is_quote_available()
-
-            if tweet1_retweet_condition:
-                tweet1_rt = tweet1.get_retweeted()
-                tweet1_rt_id = tweet1_rt.get_id()
-
-                for mt in tweet1_mentions:
-                    if (tweet1_id, tweet1_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_rt_id]["weight"] += 1
-                        edge_label = "-" + mt
-                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_rt_id]["mentions"] += edge_label
-                    else:
-                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet1_rt_id, weight=1, mentions=mt)
-
-                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                if tweet1_inner_quote_condition:
-                    tweet1_rt_qt = tweet1_rt.get_quote()
-                    tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                    tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                    for mt1 in tweet1_mentions:
-                        for mt2 in tweet1_rt_qt_mentions:
-                            if mt1 == mt2:
-                                if (tweet1_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                    self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_rt_qt_id]["weight"] += 1
-                                    edge_label = "-" + mt1
-                                    self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_rt_qt_id][
-                                        "mentions"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet1_rt_qt_id, weight=1,
-                                                                              mentions=mt1)
-
-                    for mt1 in tweet1_mentions:
-                        for mt2 in tweet1_rt_qt_mentions:
-                            if mt1 == mt2:
-                                if (tweet1_rt_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                    self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet1_rt_qt_id]["weight"] += 1
-                                    edge_label = "-" + mt1
-                                    self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet1_rt_qt_id][
-                                        "mentions"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet1_rt_qt_id, weight=1,
-                                                                              mentions=mt1)
-
-            if tweet1_quote_condition:
-                tweet1_qt = tweet1.get_quote()
-                tweet1_qt_id = tweet1_qt.get_id()
-                tweet1_qt_mentions = tweet1_qt.get_mentions()
-
-                for mt1 in tweet1_mentions:
-                    for mt2 in tweet1_qt_mentions:
-                        if mt1 == mt2:
-                            if (tweet1_id, tweet1_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_qt_id]["weight"] += 1
-                                edge_label = "-" + mt1
-                                self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_qt_id][
-                                    "mentions"] += edge_label
-                            else:
-                                self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet1_qt_id, weight=1,
-                                                                          mentions=mt1)
-
-            while j != len(tweets_keys):
-                tweet2 = self.tweets[tweets_keys[j]]
-                tweet2_id = tweet2.get_id()
-                tweet2_mentions = tweet2.get_mentions()
-
-                tweet2_retweet_condition = tweet2.is_retweeted()
-                tweet2_quote_condition = tweet2.is_quote_available()
-
-                if tweet2_retweet_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-
-                    if tweet1_id != tweet2_rt_id:
-                        for mt1 in tweet1_mentions:
-                            for mt2 in tweet2_mentions:
-                                if mt1 == mt2:
-                                    if (tweet1_id, tweet2_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_rt_id]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_rt_id][
-                                            "mentions"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet2_rt_id, weight=1,
-                                                                                  mentions=mt1)
-
-                        tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                        if tweet2_inner_quote_condition:
-                            tweet2_rt_qt = tweet2_rt.get_quote()
-                            tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                            tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
-
-                            if tweet1_id != tweet2_rt_qt_id:
-                                for mt1 in tweet1_mentions:
-                                    for mt2 in tweet2_rt_qt_mentions:
-                                        if mt1 == mt2:
-                                            if (tweet1_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                                self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_rt_qt_id][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_rt_qt_id][
-                                                    "mentions"] += edge_label
-                                            else:
-                                                self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet2_rt_qt_id,
-                                                                                          weight=1,
-                                                                                          mentions=mt1)
-
-                if tweet2_quote_condition:
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_mentions = tweet2_qt.get_mentions()
-
-                    if tweet1_id != tweet2_qt_id:
-                        for mt1 in tweet1_mentions:
-                            for mt2 in tweet2_qt_mentions:
-                                if mt1 == mt2:
-                                    if (tweet1_id, tweet2_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_qt_id]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_qt_id][
-                                            "mentions"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet2_qt_id, weight=1,
-                                                                                  mentions=mt1)
-
-                if tweet1_retweet_condition and tweet2_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_id()
-                    tweet1_rt_mentions = tweet1_rt.get_mentions()
-
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-                    tweet2_rt_mentions = tweet1_rt.get_mentions()
-
-                    if tweet1_rt_id != tweet2_rt_id:
-                        for mt1 in tweet1_rt_mentions:
-                            for mt2 in tweet2_rt_mentions:
-                                if mt1 == mt2:
-                                    if (tweet1_rt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_rt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_rt_id][
-                                            "mentions"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet2_rt_id, weight=1,
-                                                                                  mentions=mt1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                        if tweet1_rt_qt_id != tweet2_rt_id:
-                            for mt1 in tweet1_rt_qt_mentions:
-                                for mt2 in tweet2_rt_mentions:
-                                    if mt1 == mt2:
-                                        if (tweet1_rt_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
-                                                "mentions"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_qt_id, tweet2_rt_id,
-                                                                                      weight=1, mentions=mt1)
-
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
-
-                        if tweet1_rt_id != tweet2_rt_qt_id:
-                            for mt1 in tweet1_rt_mentions:
-                                for mt2 in tweet2_rt_qt_mentions:
-                                    if mt1 == mt2:
-                                        if (tweet1_rt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
-                                                "mentions"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet2_rt_qt_id,
-                                                                                      weight=1, mentions=mt1)
-
-                    if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
-
-                        if tweet1_rt_qt_id != tweet2_rt_qt_id:
-                            for mt1 in tweet1_rt_qt_mentions:
-                                for mt2 in tweet2_rt_qt_mentions:
-                                    if mt1 == mt2:
-                                        if (tweet1_rt_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
-                                                "mentions"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_qt_id, tweet2_rt_qt_id,
-                                                                                      weight=1, mentions=mt1)
-
-                if tweet1_quote_condition and tweet2_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_mentions = tweet1_qt.get_mentions()
-
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_mentions = tweet2_qt.get_mentions()
-
-                    if tweet1_qt_id != tweet2_qt_id:
-                        for mt1 in tweet1_qt_mentions:
-                            for mt2 in tweet2_qt_mentions:
-                                if mt1 == mt2:
-                                    if (tweet1_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_qt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_qt_id][
-                                            "mentions"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_qt_id, tweet2_qt_id, weight=1,
-                                                                                  mentions=mt1)
-
-                if tweet1_retweet_condition and tweet2_quote_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_id()
-                    tweet1_rt_mentions = tweet1_rt.get_mentions()
-
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_mentions = tweet2_qt.get_mentions()
-
-                    if tweet1_rt_id != tweet2_qt_id:
-                        for mt1 in tweet1_rt_mentions:
-                            for mt2 in tweet2_qt_mentions:
-                                if mt1 == mt2:
-                                    if (tweet1_rt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_qt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_qt_id][
-                                            "mentions"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet2_qt_id, weight=1,
-                                                                                  mentions=mt1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                        if tweet1_rt_qt_id != tweet2_qt_id:
-                            for mt1 in tweet1_rt_qt_mentions:
-                                for mt2 in tweet2_qt_mentions:
-                                    if mt1 == mt2:
-                                        if (tweet1_rt_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
-                                                "mentions"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_qt_id, tweet2_qt_id,
-                                                                                      weight=1, mentions=mt1)
-
-                if tweet2_retweet_condition and tweet1_quote_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-                    tweet2_rt_mentions = tweet2_rt.get_mentions()
-
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_mentions = tweet1_qt.get_mentions()
-
-                    if tweet1_qt_id != tweet2_rt_id:
-                        for mt1 in tweet1_qt_mentions:
-                            for mt2 in tweet2_rt_mentions:
-                                if mt1 == mt2:
-                                    if (tweet1_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_rt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_rt_id][
-                                            "mentions"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_qt_id, tweet2_rt_id, weight=1,
-                                                                                  mentions=mt1)
-
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2_rt.get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
-
-                        if tweet1_qt_id != tweet2_rt_qt_id:
-                            for mt1 in tweet1_qt_mentions:
-                                for mt2 in tweet2_rt_qt_mentions:
-                                    if mt1 == mt2:
-                                        if (tweet1_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
-                                                "mentions"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_qt_id, tweet2_rt_qt_id,
-                                                                                      weight=1,
-                                                                                      mentions=mt1)
-
-                if tweet1_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_mentions = tweet1_rt.get_mentions()
-
-                    if tweet1_rt_id != tweet2_id:
-                        for mt1 in tweet1_rt_mentions:
-                            for mt2 in tweet2_mentions:
-                                if mt1 == mt2:
-                                    if (tweet1_rt_id, tweet2_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_id]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_id][
-                                            "mentions"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet2_id, weight=1,
-                                                                                  mentions=mt1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                        if tweet2_id != tweet1_rt_qt_id:
-                            for mt1 in tweet1_rt_qt_mentions:
-                                for mt2 in tweet2_mentions:
-                                    if mt1 == mt2:
-                                        if (tweet1_rt_qt_id, tweet2_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_id][
-                                                "mentions"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_qt_id, tweet2_id,
-                                                                                      weight=1,
-                                                                                      mentions=mt1)
-
-                if tweet1_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_mentions = tweet1_qt.get_mentions()
-
-                    if tweet1_qt_id != tweet2_id:
-                        for mt1 in tweet1_qt_mentions:
-                            for mt2 in tweet2_mentions:
-                                if mt1 == mt2:
-                                    if (tweet1_qt_id, tweet2_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_id]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_id][
-                                            "mentions"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_qt_id, tweet2_id, weight=1,
-                                                                                  mentions=mt1)
-
-                if tweet1_id != tweet2_id:
-                    for mt1 in tweet1_mentions:
-                        for mt2 in tweet2_mentions:
-                            if mt1 == mt2:
-                                if (tweet1_id, tweet2_id) in self.tweet_level_cooccurrence_mention_network.edges:
-                                    self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_id]["weight"] += 1
-                                    edge_label = "-" + mt1
-                                    self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_id][
-                                        "mentions"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet2_id, weight=1,
-                                                                              mentions=mt1)
-                j += 1
-
-    def tweet_level_cooccurrence_url_network_building(self):
-        self.network_repository.append("tweet_level_cooccurrence_url_network")
-
-        tweets_keys = list(self.tweets.keys())
-        for i in range(len(tweets_keys)):
-            tweet1 = self.tweets[tweets_keys[i]]
-            tweet1_id = tweet1.get_id()
-            tweet1_urls = tweet1.get_tweet_urls(return_format="expanded_url")
-
-            j = i + 1
-
-            self.tweet_level_cooccurrence_url_network.add_node(tweet1_id)
-
-            tweet1_retweet_condition = tweet1.is_retweeted()
-            tweet1_quote_condition = tweet1.is_quote_available()
-
-            if tweet1_retweet_condition:
-                tweet1_rt = tweet1.get_retweeted()
-                tweet1_rt_id = tweet1_rt.get_id()
-
-                for ut in tweet1_urls:
-                    if (tweet1_id, tweet1_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                        self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_rt_id]["weight"] += 1
-                        edge_label = "-" + ut
-                        self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_rt_id]["urls"] += edge_label
-                    else:
-                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet1_rt_id, weight=1, urls=ut)
-
-                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                if tweet1_inner_quote_condition:
-                    tweet1_rt_qt = tweet1_rt.get_quote()
-                    tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                    tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                    for ut1 in tweet1_urls:
-                        for ut2 in tweet1_rt_qt_urls:
-                            if ut1 == ut2:
-                                if (tweet1_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                    self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_rt_qt_id]["weight"] += 1
-                                    edge_label = "-" + ut1
-                                    self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_rt_qt_id][
-                                        "urls"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet1_rt_qt_id, weight=1,
-                                                                          urls=ut1)
-
-                    for ut1 in tweet1_urls:
-                        for ut2 in tweet1_rt_qt_urls:
-                            if ut1 == ut2:
-                                if (tweet1_rt_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                    self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet1_rt_qt_id]["weight"] += 1
-                                    edge_label = "-" + ut1
-                                    self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet1_rt_qt_id][
-                                        "urls"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet1_rt_qt_id, weight=1,
-                                                                          urls=ut1)
-
-            if tweet1_quote_condition:
-                tweet1_qt = tweet1.get_quote()
-                tweet1_qt_id = tweet1_qt.get_id()
-                tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
-
-                for ut1 in tweet1_urls:
-                    for ut2 in tweet1_qt_urls:
-                        if ut1 == ut2:
-                            if (tweet1_id, tweet1_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_qt_id]["weight"] += 1
-                                edge_label = "-" + ut1
-                                self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_qt_id][
-                                    "urls"] += edge_label
-                            else:
-                                self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet1_qt_id, weight=1,
-                                                                      urls=ut1)
-
-            while j != len(tweets_keys):
-                tweet2 = self.tweets[tweets_keys[j]]
-                tweet2_id = tweet2.get_id()
-                tweet2_urls = tweet2.get_tweet_urls(return_format="expanded_url")
-
-                tweet2_retweet_condition = tweet2.is_retweeted()
-                tweet2_quote_condition = tweet2.is_quote_available()
-
-                if tweet2_retweet_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-
-                    if tweet1_id != tweet2_rt_id:
-                        for ut1 in tweet1_urls:
-                            for ut2 in tweet2_urls:
-                                if ut1 == ut2:
-                                    if (tweet1_id, tweet2_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_rt_id]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_rt_id][
-                                            "urls"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet2_rt_id, weight=1,
-                                                                              urls=ut1)
-
-                        tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                        if tweet2_inner_quote_condition:
-                            tweet2_rt_qt = tweet2_rt.get_quote()
-                            tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                            tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                            if tweet1_id != tweet2_rt_qt_id:
-                                for ut1 in tweet1_urls:
-                                    for ut2 in tweet2_rt_qt_urls:
-                                        if ut1 == ut2:
-                                            if (tweet1_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                                self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_rt_qt_id][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_rt_qt_id][
-                                                    "urls"] += edge_label
-                                            else:
-                                                self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet2_rt_qt_id,
-                                                                                      weight=1,
-                                                                                      urls=ut1)
-
-                if tweet2_quote_condition:
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_id != tweet2_qt_id:
-                        for ut1 in tweet1_urls:
-                            for ut2 in tweet2_qt_urls:
-                                if ut1 == ut2:
-                                    if (tweet1_id, tweet2_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_qt_id]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_qt_id][
-                                            "urls"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet2_qt_id, weight=1,
-                                                                              urls=ut1)
-
-                if tweet1_retweet_condition and tweet2_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_id()
-                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
-
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-                    tweet2_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_rt_id != tweet2_rt_id:
-                        for ut1 in tweet1_rt_urls:
-                            for ut2 in tweet2_rt_urls:
-                                if ut1 == ut2:
-                                    if (tweet1_rt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_rt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_rt_id][
-                                            "urls"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet2_rt_id, weight=1,
-                                                                              urls=ut1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt_qt_id != tweet2_rt_id:
-                            for ut1 in tweet1_rt_qt_urls:
-                                for ut2 in tweet2_rt_urls:
-                                    if ut1 == ut2:
-                                        if (tweet1_rt_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
-                                                "urls"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_qt_id, tweet2_rt_id,
-                                                                                  weight=1, urls=ut1)
-
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt_id != tweet2_rt_qt_id:
-                            for ut1 in tweet1_rt_urls:
-                                for ut2 in tweet2_rt_qt_urls:
-                                    if ut1 == ut2:
-                                        if (tweet1_rt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
-                                                "urls"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet2_rt_qt_id,
-                                                                                  weight=1, urls=ut1)
-
-                    if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt_qt_id != tweet2_rt_qt_id:
-                            for ut1 in tweet1_rt_qt_urls:
-                                for ut2 in tweet2_rt_qt_urls:
-                                    if ut1 == ut2:
-                                        if (tweet1_rt_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
-                                                "urls"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_qt_id, tweet2_rt_qt_id,
-                                                                                  weight=1, urls=ut1)
-
-                if tweet1_quote_condition and tweet2_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
-
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_qt_id != tweet2_qt_id:
-                        for ut1 in tweet1_qt_urls:
-                            for ut2 in tweet2_qt_urls:
-                                if ut1 == ut2:
-                                    if (tweet1_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_qt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_qt_id][
-                                            "urls"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_qt_id, tweet2_qt_id, weight=1,
-                                                                              urls=ut1)
-
-                if tweet1_retweet_condition and tweet2_quote_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_id()
-                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
-
-                    tweet2_qt = tweet2.get_quote()
-                    tweet2_qt_id = tweet2_qt.get_id()
-                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_rt_id != tweet2_qt_id:
-                        for ut1 in tweet1_rt_urls:
-                            for ut2 in tweet2_qt_urls:
-                                if ut1 == ut2:
-                                    if (tweet1_rt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_qt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_qt_id][
-                                            "urls"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet2_qt_id, weight=1,
-                                                                              urls=ut1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt_qt_id != tweet2_qt_id:
-                            for ut1 in tweet1_rt_qt_urls:
-                                for ut2 in tweet2_qt_urls:
-                                    if ut1 == ut2:
-                                        if (tweet1_rt_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
-                                                "urls"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_qt_id, tweet2_qt_id,
-                                                                                  weight=1, urls=ut1)
-
-                if tweet2_retweet_condition and tweet1_quote_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    tweet2_rt_id = tweet2_rt.get_id()
-                    tweet2_rt_urls = tweet2_rt.get_tweet_urls(return_format="expanded_url")
-
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_qt_id != tweet2_rt_id:
-                        for ut1 in tweet1_qt_urls:
-                            for ut2 in tweet2_rt_urls:
-                                if ut1 == ut2:
-                                    if (tweet1_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_rt_id][
-                                            "weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_rt_id][
-                                            "urls"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_qt_id, tweet2_rt_id, weight=1,
-                                                                              urls=ut1)
-
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2_rt.get_quote()
-                        tweet2_rt_qt_id = tweet2_rt_qt.get_id()
-                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_qt_id != tweet2_rt_qt_id:
-                            for ut1 in tweet1_qt_urls:
-                                for ut2 in tweet2_rt_qt_urls:
-                                    if ut1 == ut2:
-                                        if (tweet1_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
-                                                "urls"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_url_network.add_edge(tweet1_qt_id, tweet2_rt_qt_id,
-                                                                                  weight=1,
-                                                                                  urls=ut1)
-
-                if tweet1_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    tweet1_rt_id = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_rt_id != tweet2_id:
-                        for ut1 in tweet1_rt_urls:
-                            for ut2 in tweet2_urls:
-                                if ut1 == ut2:
-                                    if (tweet1_rt_id, tweet2_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_id]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_id][
-                                            "urls"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet2_id, weight=1,
-                                                                              urls=ut1)
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        tweet1_rt_qt_id = tweet1_rt_qt.get_id()
-                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet2_id != tweet1_rt_qt_id:
-                            for ut1 in tweet1_rt_qt_urls:
-                                for ut2 in tweet2_urls:
-                                    if ut1 == ut2:
-                                        if (tweet1_rt_qt_id, tweet2_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_id][
-                                                "weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_id][
-                                                "urls"] += edge_label
-                                        else:
-                                            self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_qt_id, tweet2_id,
-                                                                                  weight=1,
-                                                                                  urls=ut1)
-
-                if tweet1_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    tweet1_qt_id = tweet1_qt.get_id()
-                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_qt_id != tweet2_id:
-                        for ut1 in tweet1_qt_urls:
-                            for ut2 in tweet2_urls:
-                                if ut1 == ut2:
-                                    if (tweet1_qt_id, tweet2_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_id]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_id][
-                                            "urls"] += edge_label
-                                    else:
-                                        self.tweet_level_cooccurrence_url_network.add_edge(tweet1_qt_id, tweet2_id, weight=1,
-                                                                              urls=ut1)
-
-                if tweet1_id != tweet2_id:
-                    for ut1 in tweet1_urls:
-                        for ut2 in tweet2_urls:
-                            if ut1 == ut2:
-                                if (tweet1_id, tweet2_id) in self.tweet_level_cooccurrence_url_network.edges:
-                                    self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_id]["weight"] += 1
-                                    edge_label = "-" + ut1
-                                    self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_id][
-                                        "urls"] += edge_label
-                                else:
-                                    self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet2_id, weight=1,
-                                                                          urls=ut1)
-                j += 1
-
-    # bipartite version of tweet-level hashtag/mention/url networks
-    def tweet_hashtag_bipartite_network_building(self):
-        self.network_repository.append("tweet_hashtag_bipartite_network")
-        for tweet_id, tweet in self.tweets.items():
-            source = tweet.get_id()
-            hashtag_list = tweet.get_hashtags()
-
-            for hashtag in hashtag_list:
-                if self.tweet_hashtag_bipartite_network.has_edge(source, hashtag):
-                    self.tweet_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
-                    self.tweet_hashtag_bipartite_network.edges[source, hashtag][
-                        "shared_author"] += tweet.get_twitter().get_screen_name()
-                else:
-                    self.tweet_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
-                                                        shared_author=tweet.get_twitter().get_screen_name())
-
-            if tweet.is_retweeted():
-                source = tweet.get_retweeted().get_id()
-                hashtag_list = tweet.get_hashtags()
-                for hashtag in hashtag_list:
-
-                    if self.tweet_hashtag_bipartite_network.has_edge(source, hashtag):
-                        self.tweet_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
-                        self.tweet_hashtag_bipartite_network.edges[source, hashtag][
-                            "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
-                    else:
-                        self.tweet_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
-                                                            shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
-                if tweet.get_retweeted().is_quote_available():
-                    source = tweet.get_retweeted().get_quote().get_id()
-                    hashtag_list = tweet.get_retweeted().get_quote().get_hashtags()
-                    for hashtag in hashtag_list:
-
-                        if self.tweet_hashtag_bipartite_network.has_edge(source, hashtag):
-                            self.tweet_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
-                            self.tweet_hashtag_bipartite_network.edges[source, hashtag][
-                                "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                        else:
-                            self.tweet_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
-                                                                shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
-            elif tweet.is_quote_available():
-                source = tweet.get_quote().get_id()
-                hashtag_list = tweet.get_quote().get_hashtags()
-                for hashtag in hashtag_list:
-
-                    if self.tweet_hashtag_bipartite_network.has_edge(source, hashtag):
-                        self.tweet_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
-                        self.tweet_hashtag_bipartite_network.edges[source, hashtag][
-                            "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
-                    else:
-                        self.tweet_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
-                                                            shared_author=tweet.get_quote().get_twitter().get_screen_name())
-
-    def tweet_mention_bipartite_network_building(self):
-        self.network_repository.append("tweet_mention_bipartite_network")
-        for tweet_id, tweet in self.tweets.items():
-            source = tweet.get_id()
-            mention_list = tweet.get_mentions()
-
-            for mention in mention_list:
-                if self.tweet_mention_bipartite_network.has_edge(source, mention):
-                    self.tweet_mention_bipartite_network.edges[source, mention]["weight"] += 1
-                    self.tweet_mention_bipartite_network.edges[source, mention]["shared_author"] += tweet.get_twitter().get_screen_name()
-                else:
-                    self.tweet_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
-                                                       shared_author=tweet.get_twitter().get_screen_name())
-
-            if tweet.is_retweeted():
-                source = tweet.get_retweeted().get_id()
-                mention_list = tweet.get_mentions()
-                for mention in mention_list:
-
-                    if self.tweet_mention_bipartite_network.has_edge(source, mention):
-                        self.tweet_mention_bipartite_network.edges[source, mention]["weight"] += 1
-                        self.tweet_mention_bipartite_network.edges[source, mention][
-                            "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
-                    else:
-                        self.tweet_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
-                                                           shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
-                if tweet.get_retweeted().is_quote_available():
-                    source = tweet.get_retweeted().get_quote().get_id()
-                    mention_list = tweet.get_retweeted().get_quote().get_mentions()
-                    for mention in mention_list:
-
-                        if self.tweet_mention_bipartite_network.has_edge(source, mention):
-                            self.tweet_mention_bipartite_network.edges[source, mention]["weight"] += 1
-                            self.tweet_mention_bipartite_network.edges[source, mention][
-                                "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                        else:
-                            self.tweet_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
-                                                               shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
-            elif tweet.is_quote_available():
-                source = tweet.get_quote().get_id()
-                mention_list = tweet.get_quote().get_mentions()
-                for mention in mention_list:
-
-                    if self.tweet_mention_bipartite_network.has_edge(source, mention):
-                        self.tweet_mention_bipartite_network.edges[source, mention]["weight"] += 1
-                        self.tweet_mention_bipartite_network.edges[source, mention][
-                            "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
-                    else:
-                        self.tweet_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
-                                                           shared_author=tweet.get_quote().get_twitter().get_screen_name())
-
-    def tweet_url_bipartite_network_building(self):
-        self.network_repository.append("tweet_url_bipartite_network")
-        for tweet_id, tweet in self.tweets.items():
-            source = tweet.get_id()
-            url_list = tweet.get_tweet_urls(return_format="expanded_url")
-
-            for url in url_list:
-                if self.tweet_url_bipartite_network.has_edge(source, url):
-                    self.tweet_url_bipartite_network.edges[source, url]["weight"] += 1
-                    self.tweet_url_bipartite_network.edges[source, url]["shared_author"] += tweet.get_twitter().get_screen_name()
-                else:
-                    self.tweet_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
-                                                    shared_author=tweet.get_twitter().get_screen_name())
-
-            if tweet.is_retweeted():
-                source = tweet.get_retweeted().get_id()
-                url_list = tweet.get_tweet_urls(return_format="expanded_url")
-                for url in url_list:
-
-                    if self.tweet_url_bipartite_network.has_edge(source, url):
-                        self.tweet_url_bipartite_network.edges[source, url]["weight"] += 1
-                        self.tweet_url_bipartite_network.edges[source, url][
-                            "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
-                    else:
-                        self.tweet_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
-                                                        shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
-                if tweet.get_retweeted().is_quote_available():
-                    source = tweet.get_retweeted().get_quote().get_id()
-                    url_list = tweet.get_retweeted().get_quote().get_tweet_urls(return_format="expanded_url")
-                    for url in url_list:
-
-                        if self.tweet_url_bipartite_network.has_edge(source, url):
-                            self.tweet_url_bipartite_network.edges[source, url]["weight"] += 1
-                            self.tweet_url_bipartite_network.edges[source, url][
-                                "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                        else:
-                            self.tweet_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
-                                                            shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
-            elif tweet.is_quote_available():
-                source = tweet.get_quote().get_id()
-                url_list = tweet.get_quote().get_tweet_urls(return_format="expanded_url")
-                for url in url_list:
-
-                    if self.tweet_url_bipartite_network.has_edge(source, url):
-                        self.tweet_url_bipartite_network.edges[source, url]["weight"] += 1
-                        self.tweet_url_bipartite_network.edges[source, url][
-                            "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
-                    else:
-                        self.tweet_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
-                                                        shared_author=tweet.get_quote().get_twitter().get_screen_name())
-    ####################################################################
-
-    ### User-level network
-    # retweet/quote/reply networks
-    def user_level_retweet_network_building(self):
-        self.network_repository.append("user_level_retweet_network")
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-            source = tweet.get_twitter().get_screen_name()
-            if retweet_condition:
-                destination = tweet.get_retweeted().get_twitter().get_screen_name()
-                if self.user_level_retweet_network.has_edge(source, destination):
-                    self.user_level_retweet_network.edges[source, destination]["weight"] += 1
-                else:
-                    self.user_level_retweet_network.add_edge(source, destination, kind="retweet", weight=1)
-            else:
-                self.user_level_retweet_network.add_node(source)
-
-    def user_level_quote_network_building(self):
-        self.network_repository.append("user_level_quote_network")
-        for tweet_id, tweet in self.tweets.items():
-            quote_condition = tweet.is_quote_available()
-
-            source = tweet.get_twitter().get_screen_name()
-            if quote_condition:
-                destination = tweet.get_quote().get_twitter().get_screen_name()
-                if self.user_level_quote_network.has_edge(source, destination):
-                    self.user_level_quote_network.edges[source, destination]["weight"] += 1
-                else:
-                    self.user_level_quote_network.add_edge(source, destination, kind="quote", weight=1)
-
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_quote_condition:
-                    inner_source = tweet.get_quote().get_twitter().get_screen_name()
-                    inner_destination = tweet.get_quote().get_inner_quote_screen_name()
-                    if self.user_level_quote_network.has_edge(inner_source, inner_destination):
-                        self.user_level_quote_network.edges[inner_source, inner_destination]["weight"] += 1
-                    else:
-                        self.user_level_quote_network.add_edge(inner_source, inner_destination, kind="quote", weight=1)
-            else:
-                self.user_level_quote_network.add_node(source)
-
-    def user_level_reply_network_building(self):
-        self.network_repository.append("user_level_reply_network")
-        for tweet_id, tweet in self.tweets.items():
-            reply_condition = tweet.is_this_a_reply()
-
-            source = tweet.get_twitter().get_screen_name()
-            if reply_condition:
-                destination = tweet.get_in_reply_to_screen_name()
-                if self.user_level_reply_network.has_edge(source, destination):
-                    self.user_level_reply_network.edges[source, destination]["weight"] += 1
-                else:
-                    self.user_level_reply_network.add_edge(source, destination, kind="reply", weight=1)
-            else:
-                self.user_level_reply_network.add_node(source)
-
-    # quote-reply/retweet-reply/retweet-quote networks
-    def user_level_quote_reply_network_building(self):
-        self.network_repository.append("user_level_quote_reply_network")
-        for tweet_id, tweet in self.tweets.items():
-            quote_condition = tweet.is_quote_available()
-            reply_condition = tweet.is_this_a_reply()
-
-            key_code = 0
-            source = tweet.get_twitter().get_screen_name()
-
-            if quote_condition is True and reply_condition is True:
-                # source = tweet.get_twitter().get_screen_name()
-                quote_destination = tweet.get_quote().get_twitter().get_screen_name()
-
-                # key_code = 0
-                if (source, quote_destination, "quote") in self.quote_reply_key_keepers.keys():
-                    self.user_level_quote_reply_network.edges[source, quote_destination, self.quote_reply_key_keepers[
-                        (source, quote_destination, "quote")]]["weight"] += 1
-                else:
-                    self.quote_reply_key_keepers[(source, quote_destination, "quote")] = key_code
-                    key_code += 1
-                    self.user_level_quote_reply_network.add_edge(source, quote_destination, key=self.quote_reply_key_keepers[
-                        (source, quote_destination, "quote")], kind="quote", weight=1)
-
-                reply_destination = tweet.get_in_reply_to_screen_name()
-                if (source, reply_destination, "reply") in self.quote_reply_key_keepers.keys():
-                    self.user_level_quote_reply_network.edges[
-                        source, reply_destination, self.quote_reply_key_keepers[
-                            (source, reply_destination, "reply")]][
-                        "weight"] += 1
-                else:
-                    self.quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
-                    key_code += 1
-                    self.user_level_quote_reply_network.add_edge(source, reply_destination, key=self.quote_reply_key_keepers[
-                        (source, reply_destination, "reply")], kind="reply", weight=1)
-
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_quote_condition:
-                    inner_source = tweet.get_quote().get_twitter().get_screen_name()
-                    inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
-                    if (
-                            inner_source, inner_quote_destination, "quote") in self.quote_reply_key_keepers.keys():
-                        self.user_level_quote_reply_network.edges[
-                            inner_source, inner_quote_destination, self.quote_reply_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")]][
-                            "weight"] += 1
-                    else:
-                        self.quote_reply_key_keepers[(inner_source, inner_quote_destination, "quote")] = key_code
-                        key_code += 1
-                        self.user_level_quote_reply_network.add_edge(inner_source, inner_quote_destination,
-                                               key=self.quote_reply_key_keepers[
-                                                   (inner_source, inner_quote_destination, "quote")],
-                                               kind="quote", weight=1)
-                    inner_reply_condition = tweet.get_quote().is_this_a_reply()
-                    if inner_reply_condition:
-                        inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
-                        if (
-                                inner_source, inner_reply_destination,
-                                "reply") in self.quote_reply_key_keepers.keys():
-                            self.user_level_quote_reply_network.edges[
-                                inner_source, inner_reply_destination, self.quote_reply_key_keepers[
-                                    (inner_source, inner_reply_destination, network_type)]][
-                                "weight"] += 1
-                        else:
-                            self.quote_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")] = key_code
-                            key_code += 1
-                            self.user_level_quote_reply_network.add_edge(inner_source, inner_reply_destination,
-                                                   key=self.quote_reply_key_keepers[
-                                                       (inner_source, inner_reply_destination, "reply")],
-                                                   kind="reply", weight=1)
-
-            elif quote_condition is True and reply_condition is False:
-                # source = tweet.get_twitter().get_screen_name()
-                quote_destination = tweet.get_quote().get_twitter().get_screen_name()
-
-                # key_code = 0
-                if (source, quote_destination, "quote") in self.quote_reply_key_keepers.keys():
-                    self.user_level_quote_reply_network.edges[source, quote_destination, self.quote_reply_key_keepers[
-                        (source, quote_destination, "quote")]]["weight"] += 1
-                else:
-                    self.quote_reply_key_keepers[(source, quote_destination, "quote")] = key_code
-                    key_code += 1
-                    self.user_level_quote_reply_network.add_edge(source, quote_destination, key=self.quote_reply_key_keepers[
-                        (source, quote_destination, "quote")], kind="quote", weight=1)
-
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_quote_condition:
-                    inner_source = tweet.get_quote().get_twitter().get_screen_name()
-                    inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
-                    if (inner_source, inner_quote_destination, "quote") in self.quote_reply_key_keepers.keys():
-                        self.user_level_quote_reply_network.edges[
-                            inner_source, inner_quote_destination, self.quote_reply_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")]][
-                            "weight"] += 1
-                    else:
-                        self.quote_reply_key_keepers[(inner_source, inner_quote_destination, "quote")] = key_code
-                        key_code += 1
-                        self.user_level_quote_reply_network.add_edge(inner_source, inner_quote_destination,
-                                               key=self.quote_reply_key_keepers[
-                                                   (inner_source, inner_quote_destination, "quote")],
-                                               kind="quote", weight=1)
-                    inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
-                    if inner_reply_destination:
-                        if (
-                                inner_source, inner_reply_destination,
-                                "reply") in self.quote_reply_key_keepers.keys():
-                            self.user_level_quote_reply_network.edges[
-                                inner_source, inner_reply_destination, self.quote_reply_key_keepers[
-                                    (inner_source, inner_reply_destination, "reply")]][
-                                "weight"] += 1
-                        else:
-                            self.quote_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")] = key_code
-                            key_code += 1
-                            self.user_level_quote_reply_network.add_edge(inner_source, inner_reply_destination,
-                                                   key=self.quote_reply_key_keepers[
-                                                       (inner_source, inner_reply_destination, "reply")],
-                                                   kind="reply", weight=1)
-
-            elif quote_condition is False and reply_condition is True:
-                # source = tweet.get_twitter().get_screen_name()
-                reply_destination = tweet.get_in_reply_to_screen_name()
-                if (source, reply_destination, "reply") in self.quote_reply_key_keepers.keys():
-                    self.user_level_quote_reply_network.edges[
-                        source, reply_destination, self.quote_reply_key_keepers[
-                            (source, reply_destination, "reply")]][
-                        "weight"] += 1
-                else:
-                    self.quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
-                    key_code += 1
-                    self.user_level_quote_reply_network.add_edge(source, reply_destination, key=self.quote_reply_key_keepers[
-                        (source, reply_destination, "reply")], kind="reply", weight=1)
-
-            elif quote_condition is False and reply_condition is False:
-                self.user_level_quote_reply_network.add_node(source)
-
-    def user_level_retweet_reply_network_building(self):
-        self.network_repository.append("user_level_retweet_reply_network")
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-            reply_condition = tweet.is_this_a_reply()
-
-            key_code = 0
-            source = tweet.get_twitter().get_screen_name()
-
-            if retweet_condition is True and reply_condition is True:
-                # source = tweet.get_twitter().get_screen_name()
-                retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
-
-                if (source, retweet_destination, "retweet") in self.retweet_reply_key_keepers.keys():
-                    self.user_level_retweet_reply_network.edges[source, retweet_destination, self.retweet_reply_key_keepers[
-                        (source, retweet_destination, "retweet")]]["weight"] += 1
-                else:
-                    self.retweet_reply_key_keepers[(source, retweet_destination, "retweet")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_reply_network.add_edge(source, retweet_destination, key=self.retweet_reply_key_keepers[
-                        (source, retweet_destination, "retweet")], kind="retweet", weight=1)
-
-                reply_destination = tweet.get_in_reply_to_screen_name()
-                if (source, reply_destination, "reply") in self.retweet_reply_key_keepers.keys():
-                    self.user_level_retweet_reply_network.edges[
-                        source, reply_destination, self.retweet_reply_key_keepers[
-                            (source, reply_destination, "reply")]][
-                        "weight"] += 1
-                else:
-                    self.retweet_reply_key_keepers[(source, reply_destination, "reply")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_reply_network.add_edge(source, reply_destination, key=self.retweet_reply_key_keepers[
-                        (source, reply_destination, "reply")], kind="reply", weight=1)
-
-                inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
-                if inner_reply_condition:
-                    inner_source = retweet_destination
-                    inner_reply_destination = tweet.get_retweeted().get_in_reply_to_screen_name()
-
-                    if (
-                            inner_source, inner_reply_destination,
-                            "reply") in self.retweet_reply_key_keepers.keys():
-                        self.user_level_retweet_reply_network.edges[
-                            inner_source, inner_reply_destination, self.retweet_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_reply_key_keepers[
-                            (inner_source, inner_reply_destination, "reply")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_reply_network.add_edge(inner_source, inner_reply_destination,
-                                               key=self.retweet_reply_key_keepers[
-                                                   (inner_source, inner_reply_destination, "reply")],
-                                               kind="reply", weight=1)
-
-            elif retweet_condition is True and reply_condition is False:
-                # source = tweet.get_twitter().get_screen_name()
-                retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
-
-                if (source, retweet_destination, "retweet") in self.retweet_reply_key_keepers.keys():
-                    self.user_level_retweet_reply_network.edges[source, retweet_destination, self.retweet_reply_key_keepers[
-                        (source, retweet_destination, "retweet")]]["weight"] += 1
-                else:
-                    self.retweet_reply_key_keepers[(source, retweet_destination, "retweet")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_reply_network.add_edge(source, retweet_destination, key=self.retweet_reply_key_keepers[
-                        (source, retweet_destination, "retweet")], kind="retweet", weight=1)
-
-                inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
-                if inner_reply_condition:
-                    inner_source = retweet_destination
-                    inner_reply_destination = tweet.get_retweeted().get_in_reply_to_screen_name()
-
-                    if (
-                            inner_source, inner_reply_destination,
-                            "reply") in self.retweet_reply_key_keepers.keys():
-                        self.user_level_retweet_reply_network.edges[
-                            inner_source, inner_reply_destination, self.retweet_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_reply_key_keepers[
-                            (inner_source, inner_reply_destination, "reply")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_reply_network.add_edge(inner_source, inner_reply_destination,
-                                               key=self.retweet_reply_key_keepers[
-                                                   (inner_source, inner_reply_destination, "reply")],
-                                               kind="reply", weight=1)
-
-            elif retweet_condition is False and reply_condition is True:
-                # source = tweet.get_twitter().get_screen_name()
-                reply_destination = tweet.get_in_reply_to_screen_name()
-                if (source, reply_destination, "reply") in self.retweet_reply_key_keepers.keys():
-                    self.user_level_retweet_reply_network.edges[
-                        source, reply_destination, self.retweet_reply_key_keepers[
-                            (source, reply_destination, "reply")]][
-                        "weight"] += 1
-                else:
-                    self.retweet_reply_key_keepers[(source, reply_destination, "reply")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_reply_network.add_edge(source, reply_destination, key=self.retweet_reply_key_keepers[
-                        (source, reply_destination, "reply")], kind="reply", weight=1)
-
-            elif retweet_condition is False and reply_condition is False:
-                self.user_level_retweet_reply_network.add_node(source)
-
-    def user_level_retweet_quote_network_building(self):
-        self.network_repository.append("user_level_retweet_quote_network")
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-            quote_condition = tweet.is_quote_available()
-
-            key_code = 0
-            source = tweet.get_twitter().get_screen_name()
-            # if retweet_condition is True and quote_condition is True: #Not possible
-            if retweet_condition is True and quote_condition is False:
-                # source = tweet.get_twitter().get_screen_name()
-                retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
-
-                if (source, retweet_destination, "retweet") in self.retweet_quote_key_keepers.keys():
-                    self.user_level_retweet_quote_network.edges[source, retweet_destination, self.retweet_quote_key_keepers[
-                        (source, retweet_destination, "retweet")]]["weight"] += 1
-                else:
-                    self.retweet_quote_key_keepers[(source, retweet_destination, "retweet")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_network.add_edge(source, retweet_destination, key=self.retweet_quote_key_keepers[
-                        (source, retweet_destination, "retweet")], kind="retweet", weight=1)
-
-                inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-                if inner_quote_condition_level_one:
-                    inner_source = retweet_destination
-                    inner_quote_destination = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                    # inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
-                    if (inner_source, inner_quote_destination, "quote") in self.retweet_quote_key_keepers.keys():
-                        self.user_level_retweet_quote_network.edges[
-                            inner_source, inner_quote_destination, self.retweet_quote_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_quote_key_keepers[(inner_source, inner_quote_destination, "quote")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_quote_network.add_edge(inner_source, inner_quote_destination,
-                                               key=self.retweet_quote_key_keepers[
-                                                   (inner_source, inner_quote_destination, "quote")],
-                                               kind="quote", weight=1)
-
-                    inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                    if inner_quote_condition_level_two:
-                        inner_source_level_two = inner_quote_destination
-                        inner_quote_destination_level_two = tweet.get_quote().get_inner_quote_screen_name()
-                        if (inner_source_level_two, inner_quote_destination_level_two,
-                            "quote") in self.retweet_quote_key_keepers.keys():
-                            self.user_level_retweet_quote_network.edges[
-                                inner_source_level_two, inner_quote_destination_level_two,
-                                self.retweet_quote_key_keepers[
-                                    (inner_source_level_two, inner_quote_destination_level_two, "quote")]][
-                                "weight"] += 1
-                        else:
-                            self.retweet_quote_key_keepers[
-                                (inner_source_level_two, inner_quote_destination_level_two, "quote")] = key_code
-                            key_code += 1
-                            self.user_level_retweet_quote_network.add_edge(inner_source_level_two, inner_quote_destination_level_two,
-                                                   key=self.retweet_quote_key_keepers[
-                                                       (inner_source_level_two, inner_quote_destination_level_two,
-                                                        "quote")],
-                                                   kind="quote", weight=1)
-
-            elif retweet_condition is False and quote_condition is True:
-                # source = tweet.get_twitter().get_screen_name()
-                quote_destination = tweet.get_quote().get_twitter().get_screen_name()
-
-                # key_code = 0
-                if (source, quote_destination, "quote") in self.retweet_quote_key_keepers.keys():
-                    self.user_level_retweet_quote_network.edges[source, quote_destination, self.retweet_quote_key_keepers[
-                        (source, quote_destination, "quote")]]["weight"] += 1
-                else:
-                    self.retweet_quote_key_keepers[(source, quote_destination, "quote")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_network.add_edge(source, quote_destination, key=self.retweet_quote_key_keepers[
-                        (source, quote_destination, "quote")], kind="quote", weight=1)
-
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_quote_condition:
-                    inner_source = quote_destination
-                    inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
-                    if (inner_source, inner_quote_destination, "quote") in self.retweet_quote_key_keepers.keys():
-                        self.user_level_retweet_quote_network.edges[
-                            inner_source, inner_quote_destination, self.retweet_quote_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_quote_key_keepers[(inner_source, inner_quote_destination, "quote")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_quote_network.add_edge(inner_source, inner_quote_destination,
-                                               key=self.retweet_quote_key_keepers[
-                                                   (inner_source, inner_quote_destination, "quote")],
-                                               kind="quote", weight=1)
-
-            elif retweet_condition is False and quote_condition is False:
-                self.user_level_retweet_quote_network.add_node(source)
-
-    # retweet-quote-reply network
-    def user_level_retweet_quote_reply_network_building(self):
-        self.network_repository.append("user_level_retweet_quote_reply_network")
-        for tweet_id, tweet in self.tweets.items():
-            retweet_condition = tweet.is_retweeted()
-            quote_condition = tweet.is_quote_available()
-            reply_condition = tweet.is_this_a_reply()
-
-            key_code = 0
-            source = tweet.get_twitter().get_screen_name()
-
-            if retweet_condition is True and quote_condition is False and reply_condition is True:
-                # source = tweet.get_twitter().get_screen_name()
-                retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
-
-                if (source, retweet_destination, "retweet") in self.retweet_quote_reply_key_keepers.keys():
-                    self.user_level_retweet_quote_reply_network.edges[source, retweet_destination, self.retweet_quote_reply_key_keepers[
-                        (source, retweet_destination, "retweet")]]["weight"] += 1
-                else:
-                    self.retweet_quote_reply_key_keepers[(source, retweet_destination, "retweet")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_reply_network.add_edge(source, retweet_destination, key=self.retweet_quote_reply_key_keepers[
-                        (source, retweet_destination, "retweet")], kind="retweet", weight=1)
-
-                reply_destination = tweet.get_in_reply_to_screen_name()
-                if (source, reply_destination, "reply") in self.retweet_quote_reply_key_keepers.keys():
-                    self.user_level_retweet_quote_reply_network.edges[
-                        source, reply_destination, self.retweet_quote_reply_key_keepers[
-                            (source, reply_destination, "reply")]][
-                        "weight"] += 1
-                else:
-                    self.retweet_quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_reply_network.add_edge(source, reply_destination, key=self.retweet_quote_reply_key_keepers[
-                        (source, reply_destination, "reply")], kind="reply", weight=1)
-
-                inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
-                inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-
-                if inner_reply_condition_level_one:
-                    inner_source = retweet_destination
-                    inner_reply_destination = tweet.get_retweeted().get_in_reply_to_screen_name()
-
-                    if (
-                            inner_source, inner_reply_destination,
-                            "reply") in self.retweet_quote_reply_key_keepers.keys():
-                        self.user_level_retweet_quote_reply_network.edges[
-                            inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_quote_reply_key_keepers[
-                            (inner_source, inner_reply_destination, "reply")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
-                                               key=self.retweet_quote_reply_key_keepers[
-                                                   (inner_source, inner_reply_destination, "reply")],
-                                               kind="reply", weight=1)
-                if inner_quote_condition_level_one:
-                    inner_source = retweet_destination
-                    inner_quote_destination = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                    if (
-                            inner_source, inner_quote_destination,
-                            "quote") in self.retweet_quote_reply_key_keepers.keys():
-                        self.user_level_retweet_quote_reply_network.edges[
-                            inner_source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_quote_reply_key_keepers[
-                            (inner_source, inner_quote_destination, "quote")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
-                                               key=self.retweet_quote_reply_key_keepers[
-                                                   (inner_source, inner_quote_destination, "quote")],
-                                               kind="quote", weight=1)
-
-                    inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                    inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
-
-                    if inner_reply_condition_level_two:
-                        inner_source = inner_quote_destination
-                        inner_reply_destination = tweet.get_retweeted().get_quote().get_in_reply_to_screen_name()
-
-                        if (
-                                inner_source, inner_reply_destination,
-                                "reply") in self.retweet_quote_reply_key_keepers.keys():
-                            self.user_level_retweet_quote_reply_network.edges[
-                                inner_source, inner_reply_destination, self.quote_reply_key_keepers[
-                                    (inner_source, inner_reply_destination, "reply")]][
-                                "weight"] += 1
-                        else:
-                            self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")] = key_code
-                            key_code += 1
-                            self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
-                                                   key=self.retweet_quote_reply_key_keepers[
-                                                       (inner_source, inner_reply_destination, "reply")],
-                                                   kind="reply", weight=1)
-                    if inner_quote_condition_level_two:
-                        inner_source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                        inner_quote_destination = inner_quote_destination
-                        if (
-                                inner_source, inner_quote_destination,
-                                "quote") in self.retweet_quote_reply_key_keepers.keys():
-                            self.user_level_retweet_quote_reply_network.edges[
-                                source, inner_quote_destination, self.quote_reply_key_keepers[
-                                    (source, inner_quote_destination, "quote")]][
-                                "weight"] += 1
-                        else:
-                            self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")] = key_code
-                            key_code += 1
-                            self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
-                                                   key=self.retweet_quote_reply_key_keepers[
-                                                       (inner_source, inner_quote_destination, "quote")],
-                                                   kind="quote", weight=1)
-            elif retweet_condition is True and quote_condition is False and reply_condition is False:
-                # source = tweet.get_twitter().get_screen_name()
-                retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
-
-                if (source, retweet_destination, "retweet") in self.retweet_quote_reply_key_keepers.keys():
-                    self.user_level_retweet_quote_reply_network.edges[source, retweet_destination, self.retweet_quote_reply_key_keepers[
-                        (source, retweet_destination, "retweet")]]["weight"] += 1
-                else:
-                    self.retweet_quote_reply_key_keepers[(source, retweet_destination, "retweet")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_reply_network.add_edge(source, retweet_destination,
-                                           key=self.retweet_quote_reply_key_keepers[
-                                               (source, retweet_destination, "retweet")], kind="retweet",
-                                           weight=1)
-
-                inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
-                inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
-
-                if inner_reply_condition_level_one:
-                    inner_source = retweet_destination
-                    inner_reply_destination = tweet.get_retweeted().get_in_reply_to_screen_name()
-
-                    if (
-                            inner_source, inner_reply_destination,
-                            "reply") in self.retweet_quote_reply_key_keepers.keys():
-                        self.user_level_retweet_quote_reply_network.edges[
-                            inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_quote_reply_key_keepers[
-                            (inner_source, inner_reply_destination, "reply")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
-                                               key=self.retweet_quote_reply_key_keepers[
-                                                   (inner_source, inner_reply_destination, "reply")],
-                                               kind="reply", weight=1)
-                if inner_quote_condition_level_one:
-                    inner_source = retweet_destination
-                    inner_quote_destination = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                    if (
-                            inner_source, inner_quote_destination,
-                            "quote") in self.retweet_quote_reply_key_keepers.keys():
-                        self.user_level_retweet_quote_reply_network.edges[
-                            inner_source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_quote_reply_key_keepers[
-                            (inner_source, inner_quote_destination, "quote")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
-                                               key=self.retweet_quote_reply_key_keepers[
-                                                   (inner_source, inner_quote_destination, "quote")],
-                                               kind="quote", weight=1)
-
-                    inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
-                    inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
-
-                    if inner_reply_condition_level_two:
-                        inner_source = inner_quote_destination
-                        inner_reply_destination = tweet.get_retweeted().get_quote().get_in_reply_to_screen_name()
-
-                        if (
-                                inner_source, inner_reply_destination,
-                                "reply") in self.retweet_quote_reply_key_keepers.keys():
-                            self.user_level_retweet_quote_reply_network.edges[
-                                inner_source, inner_reply_destination, self.quote_reply_key_keepers[
-                                    (inner_source, inner_reply_destination, "reply")]][
-                                "weight"] += 1
-                        else:
-                            self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")] = key_code
-                            key_code += 1
-                            self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
-                                                   key=self.retweet_quote_reply_key_keepers[
-                                                       (inner_source, inner_reply_destination, "reply")],
-                                                   kind="reply", weight=1)
-                    if inner_quote_condition_level_two:
-                        inner_source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                        inner_quote_destination = inner_quote_destination
-                        if (
-                                inner_source, inner_quote_destination,
-                                "quote") in self.retweet_quote_reply_key_keepers.keys():
-                            self.user_level_retweet_quote_reply_network.edges[
-                                source, inner_quote_destination, self.quote_reply_key_keepers[
-                                    (source, inner_quote_destination, "quote")]][
-                                "weight"] += 1
-                        else:
-                            self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")] = key_code
-                            key_code += 1
-                            self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
-                                                   key=self.retweet_quote_reply_key_keepers[
-                                                       (inner_source, inner_quote_destination, "quote")],
-                                                   kind="quote", weight=1)
-            elif retweet_condition is False and quote_condition is True and reply_condition is True:
-                # source = tweet.get_twitter().get_screen_name()
-                quote_destination = tweet.get_quote().get_twitter().get_screen_name()
-
-                # key_code = 0
-                if (source, quote_destination, "quote") in self.retweet_quote_reply_key_keepers.keys():
-                    self.user_level_retweet_quote_reply_network.edges[source, quote_destination, self.retweet_quote_reply_key_keepers[
-                        (source, quote_destination, "quote")]]["weight"] += 1
-                else:
-                    self.retweet_quote_reply_key_keepers[(source, quote_destination, "quote")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_reply_network.add_edge(source, quote_destination, key=self.retweet_quote_reply_key_keepers[
-                        (source, quote_destination, "quote")], kind="quote", weight=1)
-
-                reply_destination = tweet.get_in_reply_to_screen_name()
-                if (source, reply_destination, "reply") in self.retweet_quote_reply_key_keepers.keys():
-                    self.user_level_retweet_quote_reply_network.edges[
-                        source, reply_destination, self.retweet_quote_reply_key_keepers[
-                            (source, reply_destination, "reply")]][
-                        "weight"] += 1
-                else:
-                    self.retweet_quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_reply_network.add_edge(source, reply_destination, key=self.retweet_quote_reply_key_keepers[
-                        (source, reply_destination, "reply")], kind="reply", weight=1)
-
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_quote_condition:
-                    inner_source = quote_destination
-                    inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
-                    if (
-                            inner_source, inner_quote_destination,
-                            "quote") in self.retweet_quote_reply_key_keepers.keys():
-                        self.user_level_retweet_quote_reply_network.edges[
-                            inner_source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_quote_reply_key_keepers[
-                            (inner_source, inner_quote_destination, "quote")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
-                                               key=self.retweet_quote_reply_key_keepers[
-                                                   (inner_source, inner_quote_destination, "quote")],
-                                               kind="quote", weight=1)
-                    inner_reply_condition = tweet.get_quote().is_this_a_reply()
-                    if inner_reply_condition:
-                        inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
-                        if (
-                                inner_source, inner_reply_destination,
-                                "reply") in self.retweet_quote_reply_key_keepers.keys():
-                            self.user_level_retweet_quote_reply_network.edges[
-                                inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
-                                    (inner_source, inner_reply_destination, "reply")]][
-                                "weight"] += 1
-                        else:
-                            self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")] = key_code
-                            key_code += 1
-                            self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
-                                                   key=self.retweet_quote_reply_key_keepers[
-                                                       (inner_source, inner_reply_destination, "reply")],
-                                                   kind="reply", weight=1)
-            elif retweet_condition is False and quote_condition is True and reply_condition is False:
-                # source = tweet.get_twitter().get_screen_name()
-                quote_destination = tweet.get_quote().get_twitter().get_screen_name()
-
-                # key_code = 0
-                if (source, quote_destination, "quote") in self.retweet_quote_reply_key_keepers.keys():
-                    self.user_level_retweet_quote_reply_network.edges[source, quote_destination, self.retweet_quote_reply_key_keepers[
-                        (source, quote_destination, "quote")]]["weight"] += 1
-                else:
-                    self.retweet_quote_reply_key_keepers[(source, quote_destination, "quote")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_reply_network.add_edge(source, quote_destination, key=self.retweet_quote_reply_key_keepers[
-                        (source, quote_destination, "quote")], kind="quote", weight=1)
-
-                inner_quote_condition = tweet.get_quote().is_quoted()
-                if inner_quote_condition:
-                    inner_source = quote_destination
-                    inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
-                    if (
-                            inner_source, inner_quote_destination,
-                            "quote") in self.retweet_quote_reply_key_keepers.keys():
-                        self.user_level_retweet_quote_reply_network.edges[
-                            inner_source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_quote_destination, "quote")]][
-                            "weight"] += 1
-                    else:
-                        self.retweet_quote_reply_key_keepers[
-                            (inner_source, inner_quote_destination, "quote")] = key_code
-                        key_code += 1
-                        self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
-                                               key=self.retweet_quote_reply_key_keepers[
-                                                   (inner_source, inner_quote_destination, "quote")],
-                                               kind="quote", weight=1)
-                    inner_reply_condition = tweet.get_quote().is_this_a_reply()
-                    if inner_reply_condition:
-                        inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
-                        if (
-                                inner_source, inner_reply_destination,
-                                "reply") in self.retweet_quote_reply_key_keepers.keys():
-                            self.user_level_retweet_quote_reply_network.edges[
-                                inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
-                                    (inner_source, inner_reply_destination, "reply")]][
-                                "weight"] += 1
-                        else:
-                            self.retweet_quote_reply_key_keepers[
-                                (inner_source, inner_reply_destination, "reply")] = key_code
-                            key_code += 1
-                            self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
-                                                   key=self.retweet_quote_reply_key_keepers[
-                                                       (inner_source, inner_reply_destination, "reply")],
-                                                   kind="reply", weight=1)
-            elif retweet_condition is False and quote_condition is False and reply_condition is True:
-                # source = tweet.get_twitter().get_screen_name()
-                reply_destination = tweet.get_in_reply_to_screen_name()
-                if (source, reply_destination, "reply") in self.retweet_quote_reply_key_keepers.keys():
-                    self.user_level_retweet_quote_reply_network.edges[
-                        source, reply_destination, self.quote_reply_key_keepers[
-                            (source, reply_destination, "reply")]][
-                        "weight"] += 1
-                else:
-                    self.retweet_quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
-                    key_code += 1
-                    self.user_level_retweet_quote_reply_network.add_edge(source, reply_destination, key=self.retweet_quote_reply_key_keepers[
-                        (source, reply_destination, "reply")], kind="reply", weight=1)
-            elif retweet_condition is False and quote_condition is False and reply_condition is False:
-                self.user_level_retweet_quote_reply_network.add_node(source)
-
-    # user-level co-occurence hashtag/mention/url networks
-    def user_level_cooccurrence_hashtag_network_building(self):  # Thinking of pruning hashtags      #also adding tweet_ids as a feature instead of deleting them (convert them to a a string)
-        self.network_repository.append("user_level_cooccurrence_hashtag_network")
-
-        tweets_keys = list(self.tweets.keys())
-        for i in range(len(tweets_keys)):
-            tweet1 = self.tweets[tweets_keys[i]]
-            user1 = tweet1.get_twitter().get_screen_name()
-            tweet1_hashtags = tweet1.get_hashtags()
-
-            j = i + 1
-
-            self.user_level_cooccurrence_hashtag_network.add_node(user1)
-
-            tweet1_retweet_condition = tweet1.is_retweeted()
-            tweet1_quote_condition = tweet1.is_quote_available()
-
-            if tweet1_retweet_condition:
-                tweet1_rt = tweet1.get_retweeted()
-                user1_rt = tweet1_rt.get_twitter().get_screen_name()
-
-                if (user1, user1_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                    if (tweet1.get_id(), tweet1_rt.get_id()) not in \
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt][
-                                "tweets"] and (tweet1_rt.get_id(), tweet1.get_id()) not in \
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["tweets"]:
-                        for ht in tweet1_hashtags:
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["weight"] += 1
-                            edge_label = "-" + ht
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["hashtags"] += edge_label
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["tweets"] += [
-                                (tweet1.get_id(), tweet1_rt.get_id())]
-                else:
-                    for ht in tweet1_hashtags:
-                        if (user1, user1_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["weight"] += 1
-                            edge_label = "-" + ht
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["hashtags"] += edge_label
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["tweets"] += [
-                                (tweet1.get_id(), tweet1_rt.get_id())]
-                        else:
-                            self.user_level_cooccurrence_hashtag_network.add_edge(user1, user1_rt, weight=1, hashtags=ht,
-                                                                     tweets=[(tweet1.get_id(), tweet1_rt.get_id())])
-
-                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                if tweet1_inner_quote_condition:
-                    tweet1_rt_qt = tweet1_rt.get_quote()
-                    user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                    tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                    if (user1, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                        if (tweet1.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["tweets"] and (
-                                tweet1_rt_qt.get_id(), tweet1.get_id()) not in \
-                                self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["tweets"]:
-                            for ht1 in tweet1_hashtags:
-                                for ht2 in tweet1_rt_qt_hashtags:
-                                    if ht1 == ht2:
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt][
-                                            "hashtags"] += edge_label
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["tweets"] += [
-                                            (tweet1.get_id(), tweet1_rt_qt.get_id())]
-                    else:
-                        for ht1 in tweet1_hashtags:
-                            for ht2 in tweet1_rt_qt_hashtags:
-                                if ht1 == ht2:
-                                    if (user1, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt][
-                                            "hashtags"] += edge_label
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["tweets"] += [
-                                            (tweet1.get_id(), tweet1_rt_qt.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_hashtag_network.add_edge(user1, user1_rt_qt, weight=1,
-                                                                                 hashtags=ht1,
-                                                                                 tweets=[(tweet1.get_id(),
-                                                                                          tweet1_rt_qt.get_id())])
-
-                    if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                        if (tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"] and (
-                                tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"]:
-                            for ht1 in tweet1_hashtags:
-                                for ht2 in tweet1_rt_qt_hashtags:
-                                    if ht1 == ht2:
-                                        # if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt][
-                                            "hashtags"] += edge_label
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
-                                            (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
-                    else:
-                        for ht1 in tweet1_hashtags:
-                            for ht2 in tweet1_rt_qt_hashtags:
-                                if ht1 == ht2:
-                                    if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt][
-                                            "hashtags"] += edge_label
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
-                                            (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user1_rt_qt, weight=1,
-                                                                                 hashtags=ht1, tweets=[
-                                                (tweet1_rt.get_id(), tweet1_rt_qt.get_id())])
-
-            if tweet1_quote_condition:
-                tweet1_qt = tweet1.get_quote()
-                user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                tweet1_qt_hashtags = tweet1_qt.get_hashtags()
-
-                if (user1, user1_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                    if (tweet1.get_id(), tweet1_qt.get_id()) not in \
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt][
-                                "tweets"] and (tweet1_qt.get_id(), tweet1.get_id()) not in \
-                            self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["tweets"]:
-                        for ht1 in tweet1_hashtags:
-                            for ht2 in tweet1_qt_hashtags:
-                                if ht1 == ht2:
-                                    # if (user1, user1_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["weight"] += 1
-                                    edge_label = "-" + ht1
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["hashtags"] += edge_label
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["tweets"] += [
-                                        (tweet1.get_id(), tweet1_qt.get_id())]
-                else:
-                    for ht1 in tweet1_hashtags:
-                        for ht2 in tweet1_qt_hashtags:
-                            if ht1 == ht2:
-                                if (user1, user1_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["weight"] += 1
-                                    edge_label = "-" + ht1
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["hashtags"] += edge_label
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["tweets"] += [
-                                        (tweet1.get_id(), tweet1_qt.get_id())]
-                                else:
-                                    self.user_level_cooccurrence_hashtag_network.add_edge(user1, user1_qt, weight=1, hashtags=ht1,
-                                                                             tweets=[
-                                                                                 (tweet1.get_id(), tweet1_qt.get_id())])
-
-            while j != len(tweets_keys):
-                tweet2 = self.tweets[tweets_keys[j]]
-                user2 = tweet2.get_twitter().get_screen_name()
-                tweet2_hashtags = tweet2.get_hashtags()
-
-                tweet2_retweet_condition = tweet2.is_retweeted()
-                tweet2_quote_condition = tweet2.is_quote_available()
-
-                if tweet2_retweet_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-
-                    if tweet1.get_id() != tweet2_rt.get_id():
-                        if (user1, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                            if (tweet1.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["tweets"]:
-                                for ht1 in tweet1_hashtags:
-                                    for ht2 in tweet2_hashtags:
-                                        if ht1 == ht2:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for ht1 in tweet1_hashtags:
-                                for ht2 in tweet2_hashtags:
-                                    if ht1 == ht2:
-                                        if (user1, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_hashtag_network.add_edge(user1, user2_rt, weight=1,
-                                                                                     hashtags=ht1, tweets=[
-                                                    (tweet1.get_id(), tweet2_rt.get_id())])
-
-                        tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                        if tweet2_inner_quote_condition:
-                            tweet2_rt_qt = tweet2_rt.get_quote()
-                            user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                            tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
-
-                            if tweet1.get_id() != tweet2_rt_qt.get_id():
-                                if (user1, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                    if (tweet1.get_id(), tweet2_rt_qt.get_id()) not in \
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt]["tweets"] and (
-                                            tweet2_rt_qt.get_id(), tweet1.get_id()) not in \
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt]["tweets"]:
-                                        for ht1 in tweet1_hashtags:
-                                            for ht2 in tweet2_rt_qt_hashtags:
-                                                if ht1 == ht2:
-                                                    # if (user1, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
-                                                        "weight"] += 1
-                                                    edge_label = "-" + ht1
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
-                                                        "hashtags"] += edge_label
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
-                                                        "tweets"] += [(tweet1.get_id(), tweet2_rt_qt.get_id())]
-                                else:
-                                    for ht1 in tweet1_hashtags:
-                                        for ht2 in tweet2_rt_qt_hashtags:
-                                            if ht1 == ht2:
-                                                if (user1, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
-                                                        "weight"] += 1
-                                                    edge_label = "-" + ht1
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
-                                                        "hashtags"] += edge_label
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
-                                                        "tweets"] += [
-                                                        (tweet1.get_id(), tweet2_rt_qt.get_id())]
-                                                else:
-                                                    self.user_level_cooccurrence_hashtag_network.add_edge(user1, user2_rt_qt,
-                                                                                             weight=1,
-                                                                                             hashtags=ht1, tweets=[
-                                                            (tweet1.get_id(), tweet2_rt_qt.get_id())])
-
-                if tweet2_quote_condition:
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_hashtags = tweet2_qt.get_hashtags()
-
-                    if tweet1.get_id() != tweet2_qt.get_id():
-                        if (user1, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                            if (tweet1.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["tweets"]:
-                                for ht1 in tweet1_hashtags:
-                                    for ht2 in tweet2_qt_hashtags:
-                                        if ht1 == ht2:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for ht1 in tweet1_hashtags:
-                                for ht2 in tweet2_qt_hashtags:
-                                    if ht1 == ht2:
-                                        if (user1, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_hashtag_network.add_edge(user1, user2_qt, weight=1,
-                                                                                     hashtags=ht1, tweets=[
-                                                    (tweet1.get_id(), tweet2_qt.get_id())])
-
-                if tweet1_retweet_condition and tweet2_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_hashtags = tweet1_rt.get_hashtags()
-
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-                    tweet2_rt_hashtags = tweet1_rt.get_hashtags()
-
-                    if tweet1_rt.get_id() != tweet2_rt.get_id():
-                        if (user1_rt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                            if (tweet1_rt.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["tweets"]:
-                                for ht1 in tweet1_rt_hashtags:
-                                    for ht2 in tweet2_rt_hashtags:
-                                        if ht1 == ht2:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for ht1 in tweet1_rt_hashtags:
-                                for ht2 in tweet2_rt_hashtags:
-                                    if ht1 == ht2:
-                                        if (user1_rt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user2_rt, weight=1,
-                                                                                     hashtags=ht1, tweets=[
-                                                    (tweet1_rt.get_id(), tweet2_rt.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                        if tweet1_rt_qt.get_id() != tweet2_rt.get_id():
-                            if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_rt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt]["tweets"] and (
-                                        tweet2_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt]["tweets"]:
-                                    for ht1 in tweet1_rt_qt_hashtags:
-                                        for ht2 in tweet2_rt_hashtags:
-                                            if ht1 == ht2:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
-                            else:
-                                for ht1 in tweet1_rt_qt_hashtags:
-                                    for ht2 in tweet2_rt_hashtags:
-                                        if ht1 == ht2:
-                                            if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt_qt, user2_rt,
-                                                                                         weight=1,
-                                                                                         hashtags=ht1, tweets=[
-                                                        (tweet1_rt_qt.get_id(), tweet2_rt.get_id())])
-
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
-
-                        if tweet1_rt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                if (tweet1_rt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_rt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt]["tweets"]:
-                                    for ht1 in tweet1_rt_hashtags:
-                                        for ht2 in tweet2_rt_qt_hashtags:
-                                            if ht1 == ht2:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                for ht1 in tweet1_rt_hashtags:
-                                    for ht2 in tweet2_rt_qt_hashtags:
-                                        if ht1 == ht2:
-                                            if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user2_rt_qt,
-                                                                                         weight=1,
-                                                                                         hashtags=ht1, tweets=[
-                                                        (tweet1_rt.get_id(), tweet2_rt_qt.get_id())])
-
-                    if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
-
-                        if tweet1_rt_qt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt]["tweets"]:
-                                    for ht1 in tweet1_rt_qt_hashtags:
-                                        for ht2 in tweet2_rt_qt_hashtags:
-                                            if ht1 == ht2:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt][
-                                                    "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                    for ht1 in tweet1_rt_qt_hashtags:
-                                        for ht2 in tweet2_rt_qt_hashtags:
-                                            if ht1 == ht2:
-                                                if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
-                                                        "weight"] += 1
-                                                    edge_label = "-" + ht1
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt][
-                                                        "hashtags"] += edge_label
-                                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt][
-                                                        "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
-                                                else:
-                                                    self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt_qt, user2_rt_qt,
-                                                                                             weight=1, hashtags=ht1,
-                                                                                             tweets=[
-                                                                                                 (tweet1_rt_qt.get_id(),
-                                                                                                  tweet2_rt_qt.get_id())])
-
-                if tweet1_quote_condition and tweet2_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_hashtags = tweet1_qt.get_hashtags()
-
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_hashtags = tweet2_qt.get_hashtags()
-
-                    if tweet1_qt.get_id() != tweet2_qt.get_id():
-                        if (user1_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                            if (tweet1_qt.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["tweets"]:
-                                for ht1 in tweet1_qt_hashtags:
-                                    for ht2 in tweet2_qt_hashtags:
-                                        if ht1 == ht2:
-                                            # if (user1_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for ht1 in tweet1_qt_hashtags:
-                                for ht2 in tweet2_qt_hashtags:
-                                    if ht1 == ht2:
-                                        if (user1_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2_qt, weight=1,
-                                                                                     hashtags=ht1, tweets=[
-                                                    (tweet1_qt.get_id(), tweet2_qt.get_id())])
-                                    # else:
-                                    #     self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2_qt, weight=1, hashtags=ht1, tweets=[(tweet1_qt.get_id(), tweet2_qt.get_id())])
-
-                if tweet1_retweet_condition and tweet2_quote_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_hashtags = tweet1_rt.get_hashtags()
-
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_hashtags = tweet2_qt.get_hashtags()
-
-                    if tweet1_rt.get_id() != tweet2_qt.get_id():
-                        if (user1_rt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                            if (tweet1_rt.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["tweets"]:
-                                for ht1 in tweet1_rt_hashtags:
-                                    for ht2 in tweet2_qt_hashtags:
-                                        if ht1 == ht2:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for ht1 in tweet1_rt_hashtags:
-                                for ht2 in tweet2_qt_hashtags:
-                                    if ht1 == ht2:
-                                        if (user1_rt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user2_qt, weight=1,
-                                                                                     hashtags=ht1, tweets=[
-                                                    (tweet1_rt.get_id(), tweet2_qt.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                        if tweet1_rt_qt.get_id() != tweet2_qt.get_id():
-                            if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt]["tweets"] and (
-                                        tweet2_qt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt]["tweets"]:
-                                    for ht1 in tweet1_rt_qt_hashtags:
-                                        for ht2 in tweet2_qt_hashtags:
-                                            if ht1 == ht2:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
-                            else:
-                                for ht1 in tweet1_rt_qt_hashtags:
-                                    for ht2 in tweet2_qt_hashtags:
-                                        if ht1 == ht2:
-                                            if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt_qt, user2_qt,
-                                                                                         weight=1,
-                                                                                         hashtags=ht1, tweets=[
-                                                        (tweet1_rt_qt.get_id(), tweet2_qt.get_id())])
-
-                if tweet2_retweet_condition and tweet1_quote_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-                    tweet2_rt_hashtags = tweet2_rt.get_hashtags()
-
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_hashtags = tweet1_qt.get_hashtags()
-
-                    if tweet1_qt.get_id() != tweet2_rt.get_id():
-                        if (user1_qt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                            if (tweet1_qt.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["tweets"]:
-                                for ht1 in tweet1_qt_hashtags:
-                                    for ht2 in tweet2_rt_hashtags:
-                                        if ht1 == ht2:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for ht1 in tweet1_qt_hashtags:
-                                for ht2 in tweet2_rt_hashtags:
-                                    if ht1 == ht2:
-                                        if (user1_qt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2_rt, weight=1,
-                                                                                     hashtags=ht1, tweets=[
-                                                    (tweet1_qt.get_id(), tweet2_rt.get_id())])
-
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2_rt.get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
-
-                        if tweet1_qt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                if (tweet1_qt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt]["tweets"]:
-                                    for ht1 in tweet1_qt_hashtags:
-                                        for ht2 in tweet2_rt_qt_hashtags:
-                                            if ht1 == ht2:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                for ht1 in tweet1_qt_hashtags:
-                                    for ht2 in tweet2_rt_qt_hashtags:
-                                        if ht1 == ht2:
-                                            if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2_rt_qt,
-                                                                                         weight=1,
-                                                                                         hashtags=ht1, tweets=[
-                                                        (tweet1_qt.get_id(), tweet2_rt_qt.get_id())])
-
-                if tweet1_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_hashtags = tweet1_rt.get_hashtags()
-
-                    if tweet1_rt.get_id() != tweet2.get_id():
-                        if (user1_rt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
-                            if (tweet1_rt.get_id(), tweet2.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["tweets"] and (
-                                    tweet2.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["tweets"]:
-                                for ht1 in tweet1_rt_hashtags:
-                                    for ht2 in tweet2_hashtags:
-                                        if ht1 == ht2:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2.get_id())]
-                        else:
-                            for ht1 in tweet1_rt_hashtags:
-                                for ht2 in tweet2_hashtags:
-                                    if ht1 == ht2:
-                                        if (user1_rt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user2, weight=1,
-                                                                                     hashtags=ht1, tweets=[
-                                                    (tweet1_rt.get_id(), tweet2.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
-
-                        if tweet1_rt_qt.get_id() != tweet2.get_id():
-                            if (user1_rt_qt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["tweets"] and (
-                                        tweet2.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["tweets"]:
-                                    for ht1 in tweet1_rt_qt_hashtags:
-                                        for ht2 in tweet2_hashtags:
-                                            if ht1 == ht2:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2.get_id())]
-                            else:
-                                for ht1 in tweet1_rt_qt_hashtags:
-                                    for ht2 in tweet2_hashtags:
-                                        if ht1 == ht2:
-                                            if (user1_rt_qt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["weight"] += 1
-                                                edge_label = "-" + ht1
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2][
-                                                    "hashtags"] += edge_label
-                                                self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt_qt, user2, weight=1,
-                                                                                         hashtags=ht1, tweets=[
-                                                        (tweet1_rt_qt.get_id(), tweet2.get_id())])
-
-                if tweet1_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_hashtags = tweet1_qt.get_hashtags()
-
-                    if tweet1_qt.get_id() != tweet2.get_id():
-                        if (user1_qt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
-                            if (tweet1_qt.get_id(), tweet2.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["tweets"] and (
-                                    tweet2.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["tweets"]:
-                                for ht1 in tweet1_qt_hashtags:
-                                    for ht2 in tweet2_hashtags:
-                                        if ht1 == ht2:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2.get_id())]
-                        else:
-                            for ht1 in tweet1_qt_hashtags:
-                                for ht2 in tweet2_hashtags:
-                                    if ht1 == ht2:
-                                        if (user1_qt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["weight"] += 1
-                                            edge_label = "-" + ht1
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2][
-                                                "hashtags"] += edge_label
-                                            self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2, weight=1,
-                                                                                     hashtags=ht1, tweets=[
-                                                    (tweet1_qt.get_id(), tweet2.get_id())])
-
-                if tweet1.get_id() != tweet2.get_id():
-                    if (user1, user2) in self.user_level_cooccurrence_hashtag_network.edges:
-                        if (tweet1.get_id(), tweet2.get_id()) not in \
-                                self.user_level_cooccurrence_hashtag_network.edges[user1, user2][
-                                    "tweets"] and (tweet2.get_id(), tweet1.get_id()) not in \
-                                self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["tweets"]:
-                            for ht1 in tweet1_hashtags:
-                                for ht2 in tweet2_hashtags:
-                                    if ht1 == ht2:
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["hashtags"] += edge_label
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["tweets"] += [
-                                            (tweet1.get_id(), tweet2.get_id())]
-                    else:
-                        for ht1 in tweet1_hashtags:
-                            for ht2 in tweet2_hashtags:
-                                if ht1 == ht2:
-                                    if (user1, user2) in self.user_level_cooccurrence_hashtag_network.edges:
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["weight"] += 1
-                                        edge_label = "-" + ht1
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["hashtags"] += edge_label
-                                        self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["tweets"] += [
-                                            (tweet1.get_id(), tweet2.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_hashtag_network.add_edge(user1, user2, weight=1, hashtags=ht1,
-                                                                                 tweets=[
-                                                                                     (
-                                                                                     tweet1.get_id(), tweet2.get_id())])
-                j += 1
-
-        for edge in self.user_level_cooccurrence_hashtag_network.edges:
-            del self.user_level_cooccurrence_hashtag_network.edges[edge]["tweets"]
-
-    def user_level_cooccurrence_mention_network_building(self):
-        self.network_repository.append("user_level_cooccurrence_mention_network")
-
-        tweets_keys = list(self.tweets.keys())
-        for i in range(len(tweets_keys)):
-            tweet1 = self.tweets[tweets_keys[i]]
-            user1 = tweet1.get_twitter().get_screen_name()
-            tweet1_mentions = tweet1.get_mentions()
-
-            j = i + 1
-
-            self.user_level_cooccurrence_mention_network.add_node(user1)
-
-            tweet1_retweet_condition = tweet1.is_retweeted()
-            tweet1_quote_condition = tweet1.is_quote_available()
-
-            if tweet1_retweet_condition:
-                tweet1_rt = tweet1.get_retweeted()
-                user1_rt = tweet1_rt.get_twitter().get_screen_name()
-
-                if (user1, user1_rt) in self.user_level_cooccurrence_mention_network.edges:
-                    if (tweet1.get_id(), tweet1_rt.get_id()) not in \
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_rt][
-                                "tweets"] and (tweet1_rt.get_id(), tweet1.get_id()) not in \
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["tweets"]:
-                        for mt in tweet1_mentions:
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["weight"] += 1
-                            edge_label = "-" + mt
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["mentions"] += edge_label
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["tweets"] += [
-                                (tweet1.get_id(), tweet1_rt.get_id())]
-                else:
-                    for mt in tweet1_mentions:
-                        if (user1, user1_rt) in self.user_level_cooccurrence_mention_network.edges:
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["weight"] += 1
-                            edge_label = "-" + mt
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["mentions"] += edge_label
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["tweets"] += [
-                                (tweet1.get_id(), tweet1_rt.get_id())]
-                        else:
-                            self.user_level_cooccurrence_mention_network.add_edge(user1, user1_rt, weight=1, mentions=mt,
-                                                                     tweets=[(tweet1.get_id(), tweet1_rt.get_id())])
-
-                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                if tweet1_inner_quote_condition:
-                    tweet1_rt_qt = tweet1_rt.get_quote()
-                    user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                    tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                    if (user1, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                        if (tweet1.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["tweets"] and (
-                                tweet1_rt_qt.get_id(), tweet1.get_id()) not in \
-                                self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["tweets"]:
-                            for mt1 in tweet1_mentions:
-                                for mt2 in tweet1_rt_qt_mentions:
-                                    if mt1 == mt2:
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt][
-                                            "mentions"] += edge_label
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["tweets"] += [
-                                            (tweet1.get_id(), tweet1_rt_qt.get_id())]
-                    else:
-                        for mt1 in tweet1_mentions:
-                            for mt2 in tweet1_rt_qt_mentions:
-                                if mt1 == mt2:
-                                    if (user1, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt][
-                                            "mentions"] += edge_label
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["tweets"] += [
-                                            (tweet1.get_id(), tweet1_rt_qt.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_mention_network.add_edge(user1, user1_rt_qt, weight=1,
-                                                                                 mentions=mt1,
-                                                                                 tweets=[(tweet1.get_id(),
-                                                                                          tweet1_rt_qt.get_id())])
-
-                    if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                        if (tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["tweets"] and (
-                                tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["tweets"]:
-                            for mt1 in tweet1_mentions:
-                                for mt2 in tweet1_rt_qt_mentions:
-                                    if mt1 == mt2:
-                                        # if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt][
-                                            "mentions"] += edge_label
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
-                                            (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
-                    else:
-                        for mt1 in tweet1_mentions:
-                            for mt2 in tweet1_rt_qt_mentions:
-                                if mt1 == mt2:
-                                    if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt][
-                                            "mentions"] += edge_label
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
-                                            (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user1_rt_qt, weight=1,
-                                                                                 mentions=mt1, tweets=[
-                                                (tweet1_rt.get_id(), tweet1_rt_qt.get_id())])
-
-            if tweet1_quote_condition:
-                tweet1_qt = tweet1.get_quote()
-                user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                tweet1_qt_mentions = tweet1_qt.get_mentions()
-
-                if (user1, user1_qt) in self.user_level_cooccurrence_mention_network.edges:
-                    if (tweet1.get_id(), tweet1_qt.get_id()) not in \
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_qt][
-                                "tweets"] and (tweet1_qt.get_id(), tweet1.get_id()) not in \
-                            self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["tweets"]:
-                        for mt1 in tweet1_mentions:
-                            for mt2 in tweet1_qt_mentions:
-                                if mt1 == mt2:
-                                    # if (user1, user1_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["weight"] += 1
-                                    edge_label = "-" + mt1
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["mentions"] += edge_label
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["tweets"] += [
-                                        (tweet1.get_id(), tweet1_qt.get_id())]
-                else:
-                    for mt1 in tweet1_mentions:
-                        for mt2 in tweet1_qt_mentions:
-                            if mt1 == mt2:
-                                if (user1, user1_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["weight"] += 1
-                                    edge_label = "-" + mt1
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["mentions"] += edge_label
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["tweets"] += [
-                                        (tweet1.get_id(), tweet1_qt.get_id())]
-                                else:
-                                    self.user_level_cooccurrence_mention_network.add_edge(user1, user1_qt, weight=1, mentions=mt1,
-                                                                             tweets=[
-                                                                                 (tweet1.get_id(), tweet1_qt.get_id())])
-
-            while j != len(tweets_keys):
-                tweet2 = self.tweets[tweets_keys[j]]
-                user2 = tweet2.get_twitter().get_screen_name()
-                tweet2_mentions = tweet2.get_mentions()
-
-                tweet2_retweet_condition = tweet2.is_retweeted()
-                tweet2_quote_condition = tweet2.is_quote_available()
-
-                if tweet2_retweet_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-
-                    if tweet1.get_id() != tweet2_rt.get_id():
-                        if (user1, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
-                            if (tweet1.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["tweets"]:
-                                for mt1 in tweet1_mentions:
-                                    for mt2 in tweet2_mentions:
-                                        if mt1 == mt2:
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_rt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for mt1 in tweet1_mentions:
-                                for mt2 in tweet2_mentions:
-                                    if mt1 == mt2:
-                                        if (user1, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_rt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_mention_network.add_edge(user1, user2_rt, weight=1,
-                                                                                     mentions=mt1, tweets=[
-                                                    (tweet1.get_id(), tweet2_rt.get_id())])
-
-                        tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                        if tweet2_inner_quote_condition:
-                            tweet2_rt_qt = tweet2_rt.get_quote()
-                            user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                            tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
-
-                            if tweet1.get_id() != tweet2_rt_qt.get_id():
-                                if (user1, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                    if (tweet1.get_id(), tweet2_rt_qt.get_id()) not in \
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt]["tweets"] and (
-                                            tweet2_rt_qt.get_id(), tweet1.get_id()) not in \
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt]["tweets"]:
-                                        for mt1 in tweet1_mentions:
-                                            for mt2 in tweet2_rt_qt_mentions:
-                                                if mt1 == mt2:
-                                                    # if (user1, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
-                                                        "weight"] += 1
-                                                    edge_label = "-" + mt1
-                                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
-                                                        "mentions"] += edge_label
-                                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
-                                                        "tweets"] += [(tweet1.get_id(), tweet2_rt_qt.get_id())]
-                                else:
-                                    for mt1 in tweet1_mentions:
-                                        for mt2 in tweet2_rt_qt_mentions:
-                                            if mt1 == mt2:
-                                                if (user1, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
-                                                        "weight"] += 1
-                                                    edge_label = "-" + mt1
-                                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
-                                                        "mentions"] += edge_label
-                                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
-                                                        "tweets"] += [
-                                                        (tweet1.get_id(), tweet2_rt_qt.get_id())]
-                                                else:
-                                                    self.user_level_cooccurrence_mention_network.add_edge(user1, user2_rt_qt,
-                                                                                             weight=1,
-                                                                                             mentions=mt1, tweets=[
-                                                            (tweet1.get_id(), tweet2_rt_qt.get_id())])
-
-                if tweet2_quote_condition:
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_mentions = tweet2_qt.get_mentions()
-
-                    if tweet1.get_id() != tweet2_qt.get_id():
-                        if (user1, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                            if (tweet1.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["tweets"]:
-                                for mt1 in tweet1_mentions:
-                                    for mt2 in tweet2_qt_mentions:
-                                        if mt1 == mt2:
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_qt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for mt1 in tweet1_mentions:
-                                for mt2 in tweet2_qt_mentions:
-                                    if mt1 == mt2:
-                                        if (user1, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_qt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_mention_network.add_edge(user1, user2_qt, weight=1,
-                                                                                     mentions=mt1, tweets=[
-                                                    (tweet1.get_id(), tweet2_qt.get_id())])
-
-                if tweet1_retweet_condition and tweet2_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_mentions = tweet1_rt.get_mentions()
-
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-                    tweet2_rt_mentions = tweet1_rt.get_mentions()
-
-                    if tweet1_rt.get_id() != tweet2_rt.get_id():
-                        if (user1_rt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
-                            if (tweet1_rt.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["tweets"]:
-                                for mt1 in tweet1_rt_mentions:
-                                    for mt2 in tweet2_rt_mentions:
-                                        if mt1 == mt2:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for mt1 in tweet1_rt_mentions:
-                                for mt2 in tweet2_rt_mentions:
-                                    if mt1 == mt2:
-                                        if (user1_rt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user2_rt, weight=1,
-                                                                                     mentions=mt1, tweets=[
-                                                    (tweet1_rt.get_id(), tweet2_rt.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                        if tweet1_rt_qt.get_id() != tweet2_rt.get_id():
-                            if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_rt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt]["tweets"] and (
-                                        tweet2_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt]["tweets"]:
-                                    for mt1 in tweet1_rt_qt_mentions:
-                                        for mt2 in tweet2_rt_mentions:
-                                            if mt1 == mt2:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
-                            else:
-                                for mt1 in tweet1_rt_qt_mentions:
-                                    for mt2 in tweet2_rt_mentions:
-                                        if mt1 == mt2:
-                                            if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_mention_network.add_edge(user1_rt_qt, user2_rt,
-                                                                                         weight=1,
-                                                                                         mentions=mt1, tweets=[
-                                                        (tweet1_rt_qt.get_id(), tweet2_rt.get_id())])
-
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
-
-                        if tweet1_rt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                if (tweet1_rt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_rt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt]["tweets"]:
-                                    for mt1 in tweet1_rt_mentions:
-                                        for mt2 in tweet2_rt_qt_mentions:
-                                            if mt1 == mt2:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                for mt1 in tweet1_rt_mentions:
-                                    for mt2 in tweet2_rt_qt_mentions:
-                                        if mt1 == mt2:
-                                            if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user2_rt_qt,
-                                                                                         weight=1,
-                                                                                         mentions=mt1, tweets=[
-                                                        (tweet1_rt.get_id(), tweet2_rt_qt.get_id())])
-
-                    if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
-
-                        if tweet1_rt_qt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt]["tweets"]:
-                                    for mt1 in tweet1_rt_qt_mentions:
-                                        for mt2 in tweet2_rt_qt_mentions:
-                                            if mt1 == mt2:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt][
-                                                    "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                    for mt1 in tweet1_rt_qt_mentions:
-                                        for mt2 in tweet2_rt_qt_mentions:
-                                            if mt1 == mt2:
-                                                if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                                    self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
-                                                        "weight"] += 1
-                                                    edge_label = "-" + mt1
-                                                    self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt][
-                                                        "mentions"] += edge_label
-                                                    self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt][
-                                                        "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
-                                                else:
-                                                    self.user_level_cooccurrence_mention_network.add_edge(user1_rt_qt, user2_rt_qt,
-                                                                                             weight=1, mentions=mt1,
-                                                                                             tweets=[
-                                                                                                 (tweet1_rt_qt.get_id(),
-                                                                                                  tweet2_rt_qt.get_id())])
-
-                if tweet1_quote_condition and tweet2_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_mentions = tweet1_qt.get_mentions()
-
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_mentions = tweet2_qt.get_mentions()
-
-                    if tweet1_qt.get_id() != tweet2_qt.get_id():
-                        if (user1_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                            if (tweet1_qt.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["tweets"]:
-                                for mt1 in tweet1_qt_mentions:
-                                    for mt2 in tweet2_qt_mentions:
-                                        if mt1 == mt2:
-                                            # if (user1_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for mt1 in tweet1_qt_mentions:
-                                for mt2 in tweet2_qt_mentions:
-                                    if mt1 == mt2:
-                                        if (user1_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_mention_network.add_edge(user1_qt, user2_qt, weight=1,
-                                                                                     mentions=mt1, tweets=[
-                                                    (tweet1_qt.get_id(), tweet2_qt.get_id())])
-
-                if tweet1_retweet_condition and tweet2_quote_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_mentions = tweet1_rt.get_mentions()
-
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_mentions = tweet2_qt.get_mentions()
-
-                    if tweet1_rt.get_id() != tweet2_qt.get_id():
-                        if (user1_rt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                            if (tweet1_rt.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["tweets"]:
-                                for mt1 in tweet1_rt_mentions:
-                                    for mt2 in tweet2_qt_mentions:
-                                        if mt1 == mt2:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for mt1 in tweet1_rt_mentions:
-                                for mt2 in tweet2_qt_mentions:
-                                    if mt1 == mt2:
-                                        if (user1_rt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user2_qt, weight=1,
-                                                                                     mentions=mt1, tweets=[
-                                                    (tweet1_rt.get_id(), tweet2_qt.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                        if tweet1_rt_qt.get_id() != tweet2_qt.get_id():
-                            if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt]["tweets"] and (
-                                        tweet2_qt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt]["tweets"]:
-                                    for mt1 in tweet1_rt_qt_mentions:
-                                        for mt2 in tweet2_qt_mentions:
-                                            if mt1 == mt2:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
-                            else:
-                                for mt1 in tweet1_rt_qt_mentions:
-                                    for mt2 in tweet2_qt_mentions:
-                                        if mt1 == mt2:
-                                            if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_mention_network.add_edge(user1_rt_qt, user2_qt,
-                                                                                         weight=1,
-                                                                                         mentions=mt1, tweets=[
-                                                        (tweet1_rt_qt.get_id(), tweet2_qt.get_id())])
-
-                if tweet2_retweet_condition and tweet1_quote_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-                    tweet2_rt_mentions = tweet2_rt.get_mentions()
-
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_mentions = tweet1_qt.get_mentions()
-
-                    if tweet1_qt.get_id() != tweet2_rt.get_id():
-                        if (user1_qt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
-                            if (tweet1_qt.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["tweets"]:
-                                for mt1 in tweet1_qt_mentions:
-                                    for mt2 in tweet2_rt_mentions:
-                                        if mt1 == mt2:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for mt1 in tweet1_qt_mentions:
-                                for mt2 in tweet2_rt_mentions:
-                                    if mt1 == mt2:
-                                        if (user1_qt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_mention_network.add_edge(user1_qt, user2_rt, weight=1,
-                                                                                     mentions=mt1, tweets=[
-                                                    (tweet1_qt.get_id(), tweet2_rt.get_id())])
-
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2_rt.get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
-
-                        if tweet1_qt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                if (tweet1_qt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt]["tweets"]:
-                                    for mt1 in tweet1_qt_mentions:
-                                        for mt2 in tweet2_rt_qt_mentions:
-                                            if mt1 == mt2:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                for mt1 in tweet1_qt_mentions:
-                                    for mt2 in tweet2_rt_qt_mentions:
-                                        if mt1 == mt2:
-                                            if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
-                                                    "weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_mention_network.add_edge(user1_qt, user2_rt_qt,
-                                                                                         weight=1,
-                                                                                         mentions=mt1, tweets=[
-                                                        (tweet1_qt.get_id(), tweet2_rt_qt.get_id())])
-
-                if tweet1_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_mentions = tweet1_rt.get_mentions()
-
-                    if tweet1_rt.get_id() != tweet2.get_id():
-                        if (user1_rt, user2) in self.user_level_cooccurrence_mention_network.edges:
-                            if (tweet1_rt.get_id(), tweet2.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["tweets"] and (
-                                    tweet2.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["tweets"]:
-                                for mt1 in tweet1_rt_mentions:
-                                    for mt2 in tweet2_mentions:
-                                        if mt1 == mt2:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2.get_id())]
-                        else:
-                            for mt1 in tweet1_rt_mentions:
-                                for mt2 in tweet2_mentions:
-                                    if mt1 == mt2:
-                                        if (user1_rt, user2) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user2, weight=1,
-                                                                                     mentions=mt1, tweets=[
-                                                    (tweet1_rt.get_id(), tweet2.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
-
-                        if tweet1_rt_qt.get_id() != tweet2.get_id():
-                            if (user1_rt_qt, user2) in self.user_level_cooccurrence_mention_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["tweets"] and (
-                                        tweet2.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["tweets"]:
-                                    for mt1 in tweet1_rt_qt_mentions:
-                                        for mt2 in tweet2_mentions:
-                                            if mt1 == mt2:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2.get_id())]
-                            else:
-                                for mt1 in tweet1_rt_qt_mentions:
-                                    for mt2 in tweet2_mentions:
-                                        if mt1 == mt2:
-                                            if (user1_rt_qt, user2) in self.user_level_cooccurrence_mention_network.edges:
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["weight"] += 1
-                                                edge_label = "-" + mt1
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2][
-                                                    "mentions"] += edge_label
-                                                self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_mention_network.add_edge(user1_rt_qt, user2, weight=1,
-                                                                                         mentions=mt1, tweets=[
-                                                        (tweet1_rt_qt.get_id(), tweet2.get_id())])
-
-                if tweet1_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_mentions = tweet1_qt.get_mentions()
-
-                    if tweet1_qt.get_id() != tweet2.get_id():
-                        if (user1_qt, user2) in self.user_level_cooccurrence_mention_network.edges:
-                            if (tweet1_qt.get_id(), tweet2.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["tweets"] and (
-                                    tweet2.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["tweets"]:
-                                for mt1 in tweet1_qt_mentions:
-                                    for mt2 in tweet2_mentions:
-                                        if mt1 == mt2:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2.get_id())]
-                        else:
-                            for mt1 in tweet1_qt_mentions:
-                                for mt2 in tweet2_mentions:
-                                    if mt1 == mt2:
-                                        if (user1_qt, user2) in self.user_level_cooccurrence_mention_network.edges:
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["weight"] += 1
-                                            edge_label = "-" + mt1
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2][
-                                                "mentions"] += edge_label
-                                            self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_mention_network.add_edge(user1_qt, user2, weight=1,
-                                                                                     mentions=mt1, tweets=[
-                                                    (tweet1_qt.get_id(), tweet2.get_id())])
-
-                if tweet1.get_id() != tweet2.get_id():
-                    if (user1, user2) in self.user_level_cooccurrence_mention_network.edges:
-                        if (tweet1.get_id(), tweet2.get_id()) not in \
-                                self.user_level_cooccurrence_mention_network.edges[user1, user2][
-                                    "tweets"] and (tweet2.get_id(), tweet1.get_id()) not in \
-                                self.user_level_cooccurrence_mention_network.edges[user1, user2]["tweets"]:
-                            for mt1 in tweet1_mentions:
-                                for mt2 in tweet2_mentions:
-                                    if mt1 == mt2:
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user2]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user2]["mentions"] += edge_label
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user2]["tweets"] += [
-                                            (tweet1.get_id(), tweet2.get_id())]
-                    else:
-                        for mt1 in tweet1_mentions:
-                            for mt2 in tweet2_mentions:
-                                if mt1 == mt2:
-                                    if (user1, user2) in self.user_level_cooccurrence_mention_network.edges:
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user2]["weight"] += 1
-                                        edge_label = "-" + mt1
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user2]["mentions"] += edge_label
-                                        self.user_level_cooccurrence_mention_network.edges[user1, user2]["tweets"] += [
-                                            (tweet1.get_id(), tweet2.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_mention_network.add_edge(user1, user2, weight=1, mentions=mt1,
-                                                                                 tweets=[
-                                                                                     (
-                                                                                     tweet1.get_id(), tweet2.get_id())])
-                j += 1
-
-        for edge in self.user_level_cooccurrence_mention_network.edges:
-            del self.user_level_cooccurrence_mention_network.edges[edge]["tweets"]
-
-    def user_level_cooccurrence_url_network_building(self):
-        self.network_repository.append("user_level_cooccurrence_url_network")
-
-        tweets_keys = list(self.tweets.keys())
-        for i in range(len(tweets_keys)):
-            tweet1 = self.tweets[tweets_keys[i]]
-            user1 = tweet1.get_twitter().get_screen_name()
-            tweet1_urls = tweet1.get_tweet_urls(return_format="expanded_url")
-
-            j = i + 1
-
-            self.user_level_cooccurrence_url_network.add_node(user1)
-
-            tweet1_retweet_condition = tweet1.is_retweeted()
-            tweet1_quote_condition = tweet1.is_quote_available()
-
-            if tweet1_retweet_condition:
-                tweet1_rt = tweet1.get_retweeted()
-                user1_rt = tweet1_rt.get_twitter().get_screen_name()
-
-                if (user1, user1_rt) in self.user_level_cooccurrence_url_network.edges:
-                    if (tweet1.get_id(), tweet1_rt.get_id()) not in self.user_level_cooccurrence_url_network.edges[user1, user1_rt][
-                        "tweets"] and (tweet1_rt.get_id(), tweet1.get_id()) not in \
-                            self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["tweets"]:
-                        for ut in tweet1_urls:
-                            self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["weight"] += 1
-                            edge_label = "-" + ut
-                            self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["urls"] += edge_label
-                            self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["tweets"] += [
-                                (tweet1.get_id(), tweet1_rt.get_id())]
-                else:
-                    for ut in tweet1_urls:
-                        if (user1, user1_rt) in self.user_level_cooccurrence_url_network.edges:
-                            self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["weight"] += 1
-                            edge_label = "-" + ut
-                            self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["urls"] += edge_label
-                            self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["tweets"] += [
-                                (tweet1.get_id(), tweet1_rt.get_id())]
-                        else:
-                            self.user_level_cooccurrence_url_network.add_edge(user1, user1_rt, weight=1, urls=ut,
-                                                                 tweets=[(tweet1.get_id(), tweet1_rt.get_id())])
-
-                tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                if tweet1_inner_quote_condition:
-                    tweet1_rt_qt = tweet1_rt.get_quote()
-                    user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                    tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if (user1, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                        if (tweet1.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["tweets"] and (
-                                tweet1_rt_qt.get_id(), tweet1.get_id()) not in \
-                                self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["tweets"]:
-                            for ut1 in tweet1_urls:
-                                for ut2 in tweet1_rt_qt_urls:
-                                    if ut1 == ut2:
-                                        self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["urls"] += edge_label
-                                        self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["tweets"] += [
-                                            (tweet1.get_id(), tweet1_rt_qt.get_id())]
-                    else:
-                        for ut1 in tweet1_urls:
-                            for ut2 in tweet1_rt_qt_urls:
-                                if ut1 == ut2:
-                                    if (user1, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                        self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["urls"] += edge_label
-                                        self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["tweets"] += [
-                                            (tweet1.get_id(), tweet1_rt_qt.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_url_network.add_edge(user1, user1_rt_qt, weight=1, urls=ut1,
-                                                                             tweets=[
-                                                                                 (tweet1.get_id(),
-                                                                                  tweet1_rt_qt.get_id())])
-
-                    if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                        if (tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["tweets"] and (
-                                tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["tweets"]:
-                            for ut1 in tweet1_urls:
-                                for ut2 in tweet1_rt_qt_urls:
-                                    if ut1 == ut2:
-                                        # if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["urls"] += edge_label
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
-                                            (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
-                    else:
-                        for ut1 in tweet1_urls:
-                            for ut2 in tweet1_rt_qt_urls:
-                                if ut1 == ut2:
-                                    if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt][
-                                            "urls"] += edge_label
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
-                                            (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_url_network.add_edge(user1_rt, user1_rt_qt, weight=1, urls=ut1,
-                                                                             tweets=[(tweet1_rt.get_id(),
-                                                                                      tweet1_rt_qt.get_id())])
-
-            if tweet1_quote_condition:
-                tweet1_qt = tweet1.get_quote()
-                user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
-
-                if (user1, user1_qt) in self.user_level_cooccurrence_url_network.edges:
-                    if (tweet1.get_id(), tweet1_qt.get_id()) not in self.user_level_cooccurrence_url_network.edges[user1, user1_qt][
-                        "tweets"] and (tweet1_qt.get_id(), tweet1.get_id()) not in \
-                            self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["tweets"]:
-                        for ut1 in tweet1_urls:
-                            for ut2 in tweet1_qt_urls:
-                                if ut1 == ut2:
-                                    # if (user1, user1_qt) in self.user_level_cooccurrence_url_network.edges:
-                                    self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["weight"] += 1
-                                    edge_label = "-" + ut1
-                                    self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["urls"] += edge_label
-                                    self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["tweets"] += [
-                                        (tweet1.get_id(), tweet1_qt.get_id())]
-                else:
-                    for ut1 in tweet1_urls:
-                        for ut2 in tweet1_qt_urls:
-                            if ut1 == ut2:
-                                if (user1, user1_qt) in self.user_level_cooccurrence_url_network.edges:
-                                    self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["weight"] += 1
-                                    edge_label = "-" + ut1
-                                    self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["urls"] += edge_label
-                                    self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["tweets"] += [
-                                        (tweet1.get_id(), tweet1_qt.get_id())]
-                                else:
-                                    self.user_level_cooccurrence_url_network.add_edge(user1, user1_qt, weight=1, urls=ut1,
-                                                                         tweets=[(tweet1.get_id(), tweet1_qt.get_id())])
-
-            while j != len(tweets_keys):
-                tweet2 = self.tweets[tweets_keys[j]]
-                user2 = tweet2.get_twitter().get_screen_name()
-                tweet2_urls = tweet2.get_tweet_urls(return_format="expanded_url")
-
-                tweet2_retweet_condition = tweet2.is_retweeted()
-                tweet2_quote_condition = tweet2.is_quote_available()
-
-                if tweet2_retweet_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-
-                    if tweet1.get_id() != tweet2_rt.get_id():
-                        if (user1, user2_rt) in self.user_level_cooccurrence_url_network.edges:
-                            if (tweet1.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1, user2_rt][
-                                        "tweets"]:
-                                for ut1 in tweet1_urls:
-                                    for ut2 in tweet2_urls:
-                                        if ut1 == ut2:
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for ut1 in tweet1_urls:
-                                for ut2 in tweet2_urls:
-                                    if ut1 == ut2:
-                                        if (user1, user2_rt) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_url_network.add_edge(user1, user2_rt, weight=1, urls=ut1,
-                                                                                 tweets=[
-                                                                                     (tweet1.get_id(),
-                                                                                      tweet2_rt.get_id())])
-
-                        tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                        if tweet2_inner_quote_condition:
-                            tweet2_rt_qt = tweet2_rt.get_quote()
-                            user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                            tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                            if tweet1.get_id() != tweet2_rt_qt.get_id():
-                                if (user1, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                    if (tweet1.get_id(), tweet2_rt_qt.get_id()) not in \
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["tweets"] and (
-                                            tweet2_rt_qt.get_id(), tweet1.get_id()) not in \
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["tweets"]:
-                                        for ut1 in tweet1_urls:
-                                            for ut2 in tweet2_rt_qt_urls:
-                                                if ut1 == ut2:
-                                                    # if (user1, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                                    self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["weight"] += 1
-                                                    edge_label = "-" + ut1
-                                                    self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt][
-                                                        "urls"] += edge_label
-                                                    self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["tweets"] += [
-                                                        (tweet1.get_id(), tweet2_rt_qt.get_id())]
-                                else:
-                                    for ut1 in tweet1_urls:
-                                        for ut2 in tweet2_rt_qt_urls:
-                                            if ut1 == ut2:
-                                                if (user1, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                                    self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["weight"] += 1
-                                                    edge_label = "-" + ut1
-                                                    self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt][
-                                                        "urls"] += edge_label
-                                                    self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["tweets"] += [
-                                                        (tweet1.get_id(), tweet2_rt_qt.get_id())]
-                                                else:
-                                                    self.user_level_cooccurrence_url_network.add_edge(user1, user2_rt_qt, weight=1,
-                                                                                         urls=ut1, tweets=[
-                                                            (tweet1.get_id(), tweet2_rt_qt.get_id())])
-
-                if tweet2_quote_condition:
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1.get_id() != tweet2_qt.get_id():
-                        if (user1, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                            if (tweet1.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1, user2_qt][
-                                        "tweets"]:
-                                for ut1 in tweet1_urls:
-                                    for ut2 in tweet2_qt_urls:
-                                        if ut1 == ut2:
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for ut1 in tweet1_urls:
-                                for ut2 in tweet2_qt_urls:
-                                    if ut1 == ut2:
-                                        if (user1, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["tweets"] += [
-                                                (tweet1.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_url_network.add_edge(user1, user2_qt, weight=1, urls=ut1,
-                                                                                 tweets=[
-                                                                                     (tweet1.get_id(),
-                                                                                      tweet2_qt.get_id())])
-
-                if tweet1_retweet_condition and tweet2_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
-
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-                    tweet2_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_rt.get_id() != tweet2_rt.get_id():
-                        if (user1_rt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
-                            if (tweet1_rt.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["tweets"]:
-                                for ut1 in tweet1_rt_urls:
-                                    for ut2 in tweet2_rt_urls:
-                                        if ut1 == ut2:
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for ut1 in tweet1_rt_urls:
-                                for ut2 in tweet2_rt_urls:
-                                    if ut1 == ut2:
-                                        if (user1_rt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_url_network.add_edge(user1_rt, user2_rt, weight=1, urls=ut1,
-                                                                                 tweets=[(tweet1_rt.get_id(),
-                                                                                          tweet2_rt.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt_qt.get_id() != tweet2_rt.get_id():
-                            if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_rt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["tweets"] and (
-                                        tweet2_rt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["tweets"]:
-                                    for ut1 in tweet1_rt_qt_urls:
-                                        for ut2 in tweet2_rt_urls:
-                                            if ut1 == ut2:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
-                            else:
-                                for ut1 in tweet1_rt_qt_urls:
-                                    for ut2 in tweet2_rt_urls:
-                                        if ut1 == ut2:
-                                            if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_url_network.add_edge(user1_rt_qt, user2_rt, weight=1,
-                                                                                     urls=ut1, tweets=[
-                                                        (tweet1_rt_qt.get_id(), tweet2_rt.get_id())])
-
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                if (tweet1_rt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_rt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["tweets"]:
-                                    for ut1 in tweet1_rt_urls:
-                                        for ut2 in tweet2_rt_qt_urls:
-                                            if ut1 == ut2:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["tweets"] += [
-                                                    (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                for ut1 in tweet1_rt_urls:
-                                    for ut2 in tweet2_rt_qt_urls:
-                                        if ut1 == ut2:
-                                            if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["tweets"] += [
-                                                    (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_url_network.add_edge(user1_rt, user2_rt_qt, weight=1,
-                                                                                     urls=ut1, tweets=[
-                                                        (tweet1_rt.get_id(), tweet2_rt_qt.get_id())])
-
-                    if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        tweet2_rt_qt = tweet2.get_retweeted().get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt_qt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt]["tweets"]:
-                                    for ut1 in tweet1_rt_qt_urls:
-                                        for ut2 in tweet2_rt_qt_urls:
-                                            if ut1 == ut2:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt][
-                                                    "tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                    for ut1 in tweet1_rt_qt_urls:
-                                        for ut2 in tweet2_rt_qt_urls:
-                                            if ut1 == ut2:
-                                                if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                                    self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt][
-                                                        "weight"] += 1
-                                                    edge_label = "-" + ut1
-                                                    self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt][
-                                                        "urls"] += edge_label
-                                                    self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt][
-                                                        "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
-                                                else:
-                                                    self.user_level_cooccurrence_url_network.add_edge(user1_rt_qt, user2_rt_qt,
-                                                                                         weight=1,
-                                                                                         urls=ut1, tweets=[
-                                                            (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())])
-
-                if tweet1_quote_condition and tweet2_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
-
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_qt.get_id() != tweet2_qt.get_id():
-                        if (user1_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                            if (tweet1_qt.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["tweets"]:
-                                for ut1 in tweet1_qt_urls:
-                                    for ut2 in tweet2_qt_urls:
-                                        if ut1 == ut2:
-                                            # if (user1_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for ut1 in tweet1_qt_urls:
-                                for ut2 in tweet2_qt_urls:
-                                    if ut1 == ut2:
-                                        if (user1_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_url_network.add_edge(user1_qt, user2_qt, weight=1, urls=ut1,
-                                                                                 tweets=[
-                                                                                     (tweet1_qt.get_id(),
-                                                                                      tweet2_qt.get_id())])
-
-                if tweet1_retweet_condition and tweet2_quote_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
-
-                    tweet2_qt = tweet2.get_quote()
-                    user2_qt = tweet2_qt.get_twitter().get_screen_name()
-                    tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_rt.get_id() != tweet2_qt.get_id():
-                        if (user1_rt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                            if (tweet1_rt.get_id(), tweet2_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["tweets"] and (
-                                    tweet2_qt.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["tweets"]:
-                                for ut1 in tweet1_rt_urls:
-                                    for ut2 in tweet2_qt_urls:
-                                        if ut1 == ut2:
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_qt.get_id())]
-                        else:
-                            for ut1 in tweet1_rt_urls:
-                                for ut2 in tweet2_qt_urls:
-                                    if ut1 == ut2:
-                                        if (user1_rt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2_qt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_url_network.add_edge(user1_rt, user2_qt, weight=1, urls=ut1,
-                                                                                 tweets=[(tweet1_rt.get_id(),
-                                                                                          tweet2_qt.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1.get_retweeted().get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt_qt.get_id() != tweet2_qt.get_id():
-                            if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["tweets"] and (
-                                        tweet2_qt.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["tweets"]:
-                                    for ut1 in tweet1_rt_qt_urls:
-                                        for ut2 in tweet2_qt_urls:
-                                            if ut1 == ut2:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
-                            else:
-                                for ut1 in tweet1_rt_qt_urls:
-                                    for ut2 in tweet2_qt_urls:
-                                        if ut1 == ut2:
-                                            if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_url_network.add_edge(user1_rt_qt, user2_qt, weight=1,
-                                                                                     urls=ut1,
-                                                                                     tweets=[(tweet1_rt_qt.get_id(),
-                                                                                              tweet2_qt.get_id())])
-
-                if tweet2_retweet_condition and tweet1_quote_condition:
-                    tweet2_rt = tweet2.get_retweeted()
-                    user2_rt = tweet2_rt.get_twitter().get_screen_name()
-                    tweet2_rt_urls = tweet2_rt.get_tweet_urls(return_format="expanded_url")
-
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_qt.get_id() != tweet2_rt.get_id():
-                        if (user1_qt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
-                            if (tweet1_qt.get_id(), tweet2_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["tweets"] and (
-                                    tweet2_rt.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["tweets"]:
-                                for ut1 in tweet1_qt_urls:
-                                    for ut2 in tweet2_rt_urls:
-                                        if ut1 == ut2:
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_rt.get_id())]
-                        else:
-                            for ut1 in tweet1_qt_urls:
-                                for ut2 in tweet2_rt_urls:
-                                    if ut1 == ut2:
-                                        if (user1_qt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2_rt.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_url_network.add_edge(user1_qt, user2_rt, weight=1, urls=ut1,
-                                                                                 tweets=[(tweet1_qt.get_id(),
-                                                                                          tweet2_rt.get_id())])
-
-                    tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
-                    if tweet2_inner_quote_condition:
-                        tweet2_rt_qt = tweet2_rt.get_quote()
-                        user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
-                        tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_qt.get_id() != tweet2_rt_qt.get_id():
-                            if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                if (tweet1_qt.get_id(), tweet2_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["tweets"] and (
-                                        tweet2_rt_qt.get_id(), tweet1_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["tweets"]:
-                                    for ut1 in tweet1_qt_urls:
-                                        for ut2 in tweet2_rt_qt_urls:
-                                            if ut1 == ut2:
-                                                self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["tweets"] += [
-                                                    (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
-                            else:
-                                for ut1 in tweet1_qt_urls:
-                                    for ut2 in tweet2_rt_qt_urls:
-                                        if ut1 == ut2:
-                                            if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
-                                                self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["tweets"] += [
-                                                    (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_url_network.add_edge(user1_qt, user2_rt_qt, weight=1,
-                                                                                     urls=ut1, tweets=[
-                                                        (tweet1_qt.get_id(), tweet2_rt_qt.get_id())])
-
-                if tweet1_retweet_condition:
-                    tweet1_rt = tweet1.get_retweeted()
-                    user1_rt = tweet1_rt.get_twitter().get_screen_name()
-                    tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_rt.get_id() != tweet2.get_id():
-                        if (user1_rt, user2) in self.user_level_cooccurrence_url_network.edges:
-                            if (tweet1_rt.get_id(), tweet2.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["tweets"] and (
-                                    tweet2.get_id(), tweet1_rt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_rt, user2][
-                                        "tweets"]:
-                                for ut1 in tweet1_rt_urls:
-                                    for ut2 in tweet2_urls:
-                                        if ut1 == ut2:
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2.get_id())]
-                        else:
-                            for ut1 in tweet1_rt_urls:
-                                for ut2 in tweet2_urls:
-                                    if ut1 == ut2:
-                                        if (user1_rt, user2) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["tweets"] += [
-                                                (tweet1_rt.get_id(), tweet2.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_url_network.add_edge(user1_rt, user2, weight=1, urls=ut1,
-                                                                                 tweets=[
-                                                                                     (tweet1_rt.get_id(),
-                                                                                      tweet2.get_id())])
-
-                    tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
-                    if tweet1_inner_quote_condition:
-                        tweet1_rt_qt = tweet1_rt.get_quote()
-                        user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
-                        tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
-
-                        if tweet1_rt_qt.get_id() != tweet2.get_id():
-                            if (user1_rt_qt, user2) in self.user_level_cooccurrence_url_network.edges:
-                                if (tweet1_rt_qt.get_id(), tweet2.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["tweets"] and (
-                                        tweet2.get_id(), tweet1_rt_qt.get_id()) not in \
-                                        self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["tweets"]:
-                                    for ut1 in tweet1_rt_qt_urls:
-                                        for ut2 in tweet2_urls:
-                                            if ut1 == ut2:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2.get_id())]
-                            else:
-                                for ut1 in tweet1_rt_qt_urls:
-                                    for ut2 in tweet2_urls:
-                                        if ut1 == ut2:
-                                            if (user1_rt_qt, user2) in self.user_level_cooccurrence_url_network.edges:
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["weight"] += 1
-                                                edge_label = "-" + ut1
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2][
-                                                    "urls"] += edge_label
-                                                self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["tweets"] += [
-                                                    (tweet1_rt_qt.get_id(), tweet2.get_id())]
-                                            else:
-                                                self.user_level_cooccurrence_url_network.add_edge(user1_rt_qt, user2, weight=1,
-                                                                                     urls=ut1,
-                                                                                     tweets=[(tweet1_rt_qt.get_id(),
-                                                                                              tweet2.get_id())])
-
-                if tweet1_quote_condition:
-                    tweet1_qt = tweet1.get_quote()
-                    user1_qt = tweet1_qt.get_twitter().get_screen_name()
-                    tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
-
-                    if tweet1_qt.get_id() != tweet2.get_id():
-                        if (user1_qt, user2) in self.user_level_cooccurrence_url_network.edges:
-                            if (tweet1_qt.get_id(), tweet2.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["tweets"] and (
-                                    tweet2.get_id(), tweet1_qt.get_id()) not in \
-                                    self.user_level_cooccurrence_url_network.edges[user1_qt, user2][
-                                        "tweets"]:
-                                for ut1 in tweet1_qt_urls:
-                                    for ut2 in tweet2_urls:
-                                        if ut1 == ut2:
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2.get_id())]
-                        else:
-                            for ut1 in tweet1_qt_urls:
-                                for ut2 in tweet2_urls:
-                                    if ut1 == ut2:
-                                        if (user1_qt, user2) in self.user_level_cooccurrence_url_network.edges:
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["weight"] += 1
-                                            edge_label = "-" + ut1
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["urls"] += edge_label
-                                            self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["tweets"] += [
-                                                (tweet1_qt.get_id(), tweet2.get_id())]
-                                        else:
-                                            self.user_level_cooccurrence_url_network.add_edge(user1_qt, user2, weight=1, urls=ut1,
-                                                                                 tweets=[
-                                                                                     (tweet1_qt.get_id(),
-                                                                                      tweet2.get_id())])
-
-                if tweet1.get_id() != tweet2.get_id():
-                    if (user1, user2) in self.user_level_cooccurrence_url_network.edges:
-                        if (tweet1.get_id(), tweet2.get_id()) not in self.user_level_cooccurrence_url_network.edges[user1, user2][
-                            "tweets"] and (tweet2.get_id(), tweet1.get_id()) not in \
-                                self.user_level_cooccurrence_url_network.edges[user1, user2]["tweets"]:
-                            for ut1 in tweet1_urls:
-                                for ut2 in tweet2_urls:
-                                    if ut1 == ut2:
-                                        self.user_level_cooccurrence_url_network.edges[user1, user2]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.user_level_cooccurrence_url_network.edges[user1, user2]["urls"] += edge_label
-                                        self.user_level_cooccurrence_url_network.edges[user1, user2]["tweets"] += [
-                                            (tweet1.get_id(), tweet2.get_id())]
-                    else:
-                        for ut1 in tweet1_urls:
-                            for ut2 in tweet2_urls:
-                                if ut1 == ut2:
-                                    if (user1, user2) in self.user_level_cooccurrence_url_network.edges:
-                                        self.user_level_cooccurrence_url_network.edges[user1, user2]["weight"] += 1
-                                        edge_label = "-" + ut1
-                                        self.user_level_cooccurrence_url_network.edges[user1, user2]["urls"] += edge_label
-                                        self.user_level_cooccurrence_url_network.edges[user1, user2]["tweets"] += [
-                                            (tweet1.get_id(), tweet2.get_id())]
-                                    else:
-                                        self.user_level_cooccurrence_url_network.add_edge(user1, user2, weight=1, urls=ut1,
-                                                                             tweets=[
-                                                                                 (tweet1.get_id(), tweet2.get_id())])
-                j += 1
-
-        for edge in self.user_level_cooccurrence_url_network.edges:
-            del self.user_level_cooccurrence_url_network.edges[edge]["tweets"]
-
-    # bipartite version of user-level hashtag/mention/url networks
-    def user_hashtag_bipartite_network_building(self):
-        self.network_repository.append("user_hashtag_bipartite_network")
-        for tweet_id, tweet in self.tweets.items():
-            source = tweet.get_twitter().get_screen_name()
-            hashtag_list = tweet.get_hashtags()
-
-            for hashtag in hashtag_list:
-                if self.user_hashtag_bipartite_network.has_edge(source, hashtag):
-                    self.user_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
-                    self.user_hashtag_bipartite_network.edges[source, hashtag]["shared_content"] += tweet.get_text()
-                else:
-                    self.user_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
-                                                       shared_content=tweet.get_text())
-
-            if tweet.is_retweeted():
-                source = tweet.get_retweeted().get_twitter().get_screen_name()
-                hashtag_list = tweet.get_hashtags()
-                for hashtag in hashtag_list:
-
-                    if self.user_hashtag_bipartite_network.has_edge(source, hashtag):
-                        self.user_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
-                        self.user_hashtag_bipartite_network.edges[source, hashtag][
-                            "shared_content"] += tweet.get_retweeted().get_text()
-                    else:
-                        self.user_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
-                                                           shared_content=tweet.get_retweeted().get_text())
-                if tweet.get_retweeted().is_quote_available():
-                    source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                    hashtag_list = tweet.get_retweeted().get_quote().get_hashtags()
-                    for hashtag in hashtag_list:
-
-                        if self.user_hashtag_bipartite_network.has_edge(source, hashtag):
-                            self.user_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
-                            self.user_hashtag_bipartite_network.edges[source, hashtag][
-                                "shared_content"] += tweet.get_retweeted().get_quote().get_text()
-                        else:
-                            self.user_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
-                                                               shared_content=tweet.get_retweeted().get_quote().get_text())
-            elif tweet.is_quote_available():
-                source = tweet.get_quote().get_twitter().get_screen_name()
-                hashtag_list = tweet.get_quote().get_hashtags()
-                for hashtag in hashtag_list:
-
-                    if self.user_hashtag_bipartite_network.has_edge(source, hashtag):
-                        self.user_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
-                        self.user_hashtag_bipartite_network.edges[source, hashtag][
-                            "shared_content"] += tweet.get_quote().get_text()
-                    else:
-                        self.user_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
-                                                           shared_content=tweet.get_quote().get_text())
-
-    def user_mention_bipartite_network_building(self):
-        self.network_repository.append("user_mention_bipartite_network")
-        for tweet_id, tweet in self.tweets.items():
-            source = tweet.get_twitter().get_screen_name()
-            mention_list = tweet.get_mentions()
-
-            for mention in mention_list:
-                if self.user_mention_bipartite_network.has_edge(source, mention):
-                    self.user_mention_bipartite_network.edges[source, mention]["weight"] += 1
-                    self.user_mention_bipartite_network.edges[source, mention]["shared_content"] += tweet.get_text()
-                else:
-                    self.user_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1, shared_content=tweet.get_text())
-
-            if tweet.is_retweeted():
-                source = tweet.get_retweeted().get_twitter().get_screen_name()
-                mention_list = tweet.get_mentions()
-                for mention in mention_list:
-
-                    if self.user_mention_bipartite_network.has_edge(source, mention):
-                        self.user_mention_bipartite_network.edges[source, mention]["weight"] += 1
-                        self.user_mention_bipartite_network.edges[source, mention]["shared_content"] += tweet.get_retweeted().get_text()
-                    else:
-                        self.user_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
-                                                            shared_content=tweet.get_retweeted().get_text())
-                if tweet.get_retweeted().is_quote_available():
-                    source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                    mention_list = tweet.get_retweeted().get_quote().get_mentions()
-                    for mention in mention_list:
-
-                        if self.user_mention_bipartite_network.has_edge(source, mention):
-                            self.user_mention_bipartite_network.edges[source, mention]["weight"] += 1
-                            self.user_mention_bipartite_network.edges[source, mention][
-                                "shared_content"] += tweet.get_retweeted().get_quote().get_text()
-                        else:
-                            self.user_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
-                                                               shared_content=tweet.get_retweeted().get_quote().get_text())
-            elif tweet.is_quote_available():
-                source = tweet.get_quote().get_twitter().get_screen_name()
-                mention_list = tweet.get_quote().get_mentions()
-                for mention in mention_list:
-
-                    if self.user_mention_bipartite_network.has_edge(source, mention):
-                        self.user_mention_bipartite_network.edges[source, mention]["weight"] += 1
-                        self.user_mention_bipartite_network.edges[source, mention][
-                            "shared_content"] += tweet.get_quote().get_text()
-                    else:
-                        self.user_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
-                                                           shared_content=tweet.get_quote().get_text())
-
-    def user_url_bipartite_network_building(self):
-        self.network_repository.append("user_url_bipartite_network")
-        for tweet_id, tweet in self.tweets.items():
-            source = tweet.get_twitter().get_screen_name()
-            url_list = tweet.get_tweet_urls(return_format="expanded_url")
-
-            for url in url_list:
-                if self.user_url_bipartite_network.has_edge(source, url):
-                    self.user_url_bipartite_network.edges[source, url]["weight"] += 1
-                    self.user_url_bipartite_network.edges[source, url]["shared_content"] += tweet.get_text()
-                else:
-                    self.user_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
-                                                   shared_content=tweet.get_text())
-
-            if tweet.is_retweeted():
-                source = tweet.get_retweeted().get_twitter().get_screen_name()
-                url_list = tweet.get_tweet_urls(return_format="expanded_url")
-                for url in url_list:
-
-                    if self.user_url_bipartite_network.has_edge(source, url):
-                        self.user_url_bipartite_network.edges[source, url]["weight"] += 1
-                        self.user_url_bipartite_network.edges[source, url]["shared_content"] += tweet.get_retweeted().get_text()
-                    else:
-                        self.user_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
-                                                       shared_content=tweet.get_retweeted().get_text())
-                if tweet.get_retweeted().is_quote_available():
-                    source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
-                    url_list = tweet.get_retweeted().get_quote().get_tweet_urls(return_format="expanded_url")
-                    for url in url_list:
-
-                        if self.user_url_bipartite_network.has_edge(source, url):
-                            self.user_url_bipartite_network.edges[source, url]["weight"] += 1
-                            self.user_url_bipartite_network.edges[source, url][
-                                "shared_content"] += tweet.get_retweeted().get_quote().get_text()
-                        else:
-                            self.user_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
-                                                           shared_content=tweet.get_retweeted().get_quote().get_text())
-            elif tweet.is_quote_available():
-                source = tweet.get_quote().get_twitter().get_screen_name()
-                url_list = tweet.get_quote().get_tweet_urls(return_format="expanded_url")
-                for url in url_list:
-
-                    if self.user_url_bipartite_network.has_edge(source, url):
-                        self.user_url_bipartite_network.edges[source, url]["weight"] += 1
-                        self.user_url_bipartite_network.edges[source, url][
-                            "shared_content"] += tweet.get_quote().get_text()
-                    else:
-                        self.user_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
-                                                       shared_content=tweet.get_quote().get_text())
+#TRANSFERRED
+# class Network:
+#     def __init__(self, tweets):
+#         """
+#         This is a constructor of a network class.
+#         :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
+#         """
+#         # self.network = nx.DiGraph()
+#         self.tweets = tweets
+#         # self.network = nx.DiGraph()
+#
+#         ### The network here should be DiGraph and not MultiGraph becasue it is not possible to have multiple edges for retweet, quote, and reply networks.
+#         self.tweet_level_retweet_network = nx.DiGraph()
+#         self.tweet_level_quote_network = nx.DiGraph()
+#         self.tweet_level_reply_network = nx.DiGraph()
+#         self.tweet_level_quote_reply_network = nx.DiGraph()
+#         self.tweet_level_retweet_reply_network = nx.DiGraph()
+#         self.tweet_level_retweet_quote_network = nx.DiGraph()
+#         self.tweet_level_retweet_quote_reply_network = nx.DiGraph()
+#
+#         self.tweet_level_cooccurrence_hashtag_network = nx.Graph()
+#         self.tweet_level_cooccurrence_mention_network = nx.Graph()
+#         self.tweet_level_cooccurrence_url_network = nx.Graph()
+#
+#         self.tweet_hashtag_bipartite_network = nx.DiGraph()
+#         self.tweet_mention_bipartite_network = nx.DiGraph()
+#         self.tweet_url_bipartite_network = nx.DiGraph()
+#
+#
+#
+#         ### But here we need to have a multi graph becasue a user can retweet/quote/reply to the other user at the same time
+#         self.user_level_retweet_network = nx.DiGraph()
+#         self.user_level_quote_network = nx.DiGraph()
+#         self.user_level_reply_network = nx.DiGraph()
+#         self.user_level_quote_reply_network = nx.MultiDiGraph()
+#         self.user_level_retweet_reply_network = nx.MultiDiGraph()
+#         self.user_level_retweet_quote_network = nx.MultiDiGraph()
+#         self.user_level_retweet_quote_reply_network = nx.MultiDiGraph()
+#
+#         self.user_level_cooccurrence_hashtag_network = nx.Graph()
+#         self.user_level_cooccurrence_mention_network = nx.Graph()
+#         self.user_level_cooccurrence_url_network = nx.Graph()
+#
+#         self.user_hashtag_bipartite_network = nx.DiGraph()
+#         self.user_mention_bipartite_network = nx.DiGraph()
+#         self.user_url_bipartite_network = nx.DiGraph()
+#
+#
+#
+#         self.network_repository = []
+#
+#         self.quote_reply_key_keepers = {}
+#         self.retweet_reply_key_keepers = {}
+#         self.retweet_quote_key_keepers = {}
+#         self.retweet_quote_reply_key_keepers = {}
+#
+#
+#         self.tweets_quotes_retweets = TwifexUtility.tweets_retweets_retweetedquotes_quotes(tweets)
+        # for tweet_id, tweet in self.tweets.items():
+        #     self.tweets_quotes_retweets[tweet_id] = {}
+        #     self.tweets_quotes_retweets[tweet_id]["type"] = "twt"
+        #     self.tweets_quotes_retweets[tweet_id]["object"] = tweet
+        #     if tweet.is_retweeted():
+        #         retweeted_tweet = tweet.get_retweeted()
+        #         self.tweets_quotes_retweets[retweeted_tweet.get_id()] = {}
+        #         self.tweets_quotes_retweets[retweeted_tweet.get_id()]["type"] = "rt"
+        #         self.tweets_quotes_retweets[retweeted_tweet.get_id()]["object"] = retweeted_tweet
+        #
+        #         if retweeted_tweet.is_quoted():
+        #             quoted_tweet = tweet.get_retweeted().get_quote()
+        #             self.tweets_quotes_retweets[quoted_tweet.get_id()] = {}
+        #             self.tweets_quotes_retweets[quoted_tweet.get_id()]["type"] = "rt_qt"
+        #             self.tweets_quotes_retweets[quoted_tweet.get_id()]["object"] = quoted_tweet
+        #
+        #     if tweet.is_quote_available():
+        #         quoted_tweet = tweet.get_quote()
+        #         self.tweets_quotes_retweets[quoted_tweet.get_id()] = {}
+        #         self.tweets_quotes_retweets[quoted_tweet.get_id()]["type"] = "qt"
+        #         self.tweets_quotes_retweets[quoted_tweet.get_id()]["object"] = quoted_tweet
+
+    # ### Tweet-level network
+    # # retweet/quote/reply networks
+    # def tweet_level_retweet_network_building(self):
+    #     self.network_repository.append("tweet_level_retweet_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         retweet_condition = tweet.is_retweeted()
+    #
+    #         if retweet_condition:
+    #             self.tweet_level_retweet_network.add_edge(tweet.get_id(),
+    #                                                       tweet.get_retweeted().get_id(), kind="retweet")
+    #         else:
+    #             self.tweet_level_retweet_network.add_node(tweet.get_id())
+    #
+    # def tweet_level_quote_network_building(self):
+    #     self.network_repository.append("tweet_level_quote_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         quote_condition = tweet.is_quote_available()
+    #
+    #         if quote_condition:
+    #             self.tweet_level_quote_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_quote_condition:
+    #                 self.tweet_level_quote_network.add_edge(tweet.get_quote().get_id(),
+    #                                                         tweet.get_quote().get_quote_status_id(), kind="quote")
+    #         else:
+    #             self.tweet_level_quote_network.add_node(tweet.get_id())
+    #
+    # def tweet_level_reply_network_building(self):
+    #     self.network_repository.append("tweet_level_reply_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         reply_condition = tweet.is_this_a_reply()
+    #
+    #         if reply_condition:
+    #             self.tweet_level_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+    #         else:
+    #             self.tweet_level_reply_network.add_node(tweet.get_id())
+    #
+    # # quote-reply/retweet-reply/retweet-quote networks
+    # def tweet_level_quote_reply_network_building(self):
+    #     self.network_repository.append("tweet_level_quote_reply_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         quote_condition = tweet.is_quote_available()
+    #         reply_condition = tweet.is_this_a_reply()
+    #
+    #         if quote_condition is True and reply_condition is True:
+    #             self.tweet_level_quote_reply_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+    #             self.tweet_level_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="quote")
+    #             inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+    #             inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+    #             if inner_reply_condition_level_one:
+    #                 self.tweet_level_quote_reply_network.add_edge(tweet.get_quote().get_id(),
+    #                                                               tweet.get_quote().get_reply_to_id(), kind="reply")
+    #             if inner_quote_condition_level_one:
+    #                 self.tweet_level_quote_reply_network.add_edge(tweet.get_quote().get_id(),
+    #                                                               tweet.get_quote().get_quote_status_id(), kind="quote")
+    #
+    #         elif quote_condition is True and reply_condition is False:
+    #             self.tweet_level_quote_reply_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+    #             inner_reply_condition = tweet.get_quote().is_this_a_reply()
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_reply_condition:
+    #                 self.tweet_level_quote_reply_network.add_edge(tweet.get_quote().get_id(),
+    #                                                               tweet.get_quote().get_reply_to_id(), kind="reply")
+    #             if inner_quote_condition:
+    #                 self.tweet_level_quote_reply_network.add_edge(tweet.get_quote().get_id(),
+    #                                                               tweet.get_quote().get_quote_status_id(), kind="quote")
+    #         elif quote_condition is False and reply_condition is True:
+    #             self.tweet_level_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+    #         elif quote_condition is False and reply_condition is False:
+    #             self.tweet_level_quote_reply_network.add_node(tweet.get_id())
+    #
+    # def tweet_level_retweet_reply_network_building(self):
+    #     self.network_repository.append("tweet_level_retweet_reply_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         retweet_condition = tweet.is_retweeted()
+    #         reply_condition = tweet.is_this_a_reply()
+    #
+    #         if retweet_condition is True and reply_condition is True:  #######This condition seems impossible to happen
+    #             self.tweet_level_retweet_reply_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+    #             self.tweet_level_retweet_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+    #             inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+    #             if inner_reply_condition:
+    #                 self.tweet_level_retweet_reply_network.add_edge(tweet.get_retweeted().get_id(),
+    #                                                                 tweet.get_retweeted().get_reply_to_id(), kind="reply")
+    #         elif retweet_condition is True and reply_condition is False:
+    #             self.tweet_level_retweet_reply_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+    #             inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+    #             if inner_reply_condition:
+    #                 self.tweet_level_retweet_reply_network.add_edge(tweet.get_retweeted().get_id(),
+    #                                                                 tweet.get_retweeted().get_reply_to_id(), kind="reply")
+    #         elif retweet_condition is False and reply_condition is True:
+    #             self.tweet_level_retweet_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+    #         elif retweet_condition is False and reply_condition is False:
+    #             self.tweet_level_retweet_reply_network.add_node(tweet.get_id())
+    #
+    # def tweet_level_retweet_quote_network_building(self):
+    #     self.network_repository.append("tweet_level_retweet_quote_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         retweet_condition = tweet.is_retweeted()
+    #         quote_condition = tweet.is_quote_available()
+    #
+    #         ####### if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
+    #         if retweet_condition is True and quote_condition is False:
+    #             self.tweet_level_retweet_quote_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+    #             inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+    #             if inner_quote_condition_level_one:
+    #                 self.tweet_level_retweet_quote_network.add_edge(tweet.get_retweeted().get_id(),
+    #                                                                 tweet.get_retweeted().get_quote().get_id(), kind="quote")
+    #                 inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+    #                 if inner_quote_condition_level_two:
+    #                     self.tweet_level_retweet_quote_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+    #                                      tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
+    #         elif retweet_condition is False and quote_condition is True:
+    #             self.tweet_level_retweet_quote_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_quote_condition:
+    #                 self.tweet_level_retweet_quote_network.add_edge(tweet.get_quote().get_id(),
+    #                                                                 tweet.get_quote().get_quote_status_id(), kind="quote")
+    #         elif retweet_condition is False and quote_condition is False:
+    #             self.tweet_level_retweet_quote_network.add_node(tweet.get_id())
+    #
+    # # retweet-quote-reply network
+    # def tweet_level_retweet_quote_reply_network_building(self):
+    #     self.network_repository.append("tweet_level_retweet_quote_reply_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         retweet_condition = tweet.is_retweeted()
+    #         quote_condition = tweet.is_quote_available()
+    #         reply_condition = tweet.is_this_a_reply()
+    #
+    #
+    #         # The first two conditions never occur
+    #         # if retweet_condition is True and quote_condition is True and reply_condition is True:
+    #         # elif retweet_condition is True and quote_condition is True and reply_condition is False:
+    #         if retweet_condition is True and quote_condition is False and reply_condition is True:  #######This condition seems impossible to happen
+    #             self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+    #             self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+    #             inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
+    #             inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+    #             if inner_reply_condition_level_one:
+    #                 self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(),
+    #                                  kind="reply")
+    #             if inner_quote_condition_level_one:
+    #                 self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(),
+    #                                  kind="quote")
+    #                 inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+    #                 inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
+    #                 if inner_quote_condition_level_two:
+    #                     self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+    #                                      tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
+    #                 if inner_reply_condition_level_two:
+    #                     self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+    #                                      tweet.get_retweeted().get_quote().get_reply_to_id(), kind="reply")
+    #
+    #         elif retweet_condition is True and quote_condition is False and reply_condition is False:
+    #             self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind="retweet")
+    #             inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
+    #             inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+    #             if inner_reply_condition_level_one:
+    #                 self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_reply_to_id(), kind="reply")
+    #             if inner_quote_condition_level_one:
+    #                 self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind="quote")
+    #                 inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+    #                 inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
+    #                 if inner_quote_condition_level_two:
+    #                     self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+    #                                      tweet.get_retweeted().get_quote().get_quote_status_id(), kind="quote")
+    #                 if inner_reply_condition_level_two:
+    #                     self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_retweeted().get_quote().get_id(),
+    #                                      tweet.get_retweeted().get_quote().get_reply_to_id(), kind="reply")
+    #
+    #         elif retweet_condition is False and quote_condition is True and reply_condition is True:
+    #             self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+    #             self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+    #             inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+    #             inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+    #             if inner_reply_condition_level_one:
+    #                 self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
+    #             if inner_quote_condition_level_one:
+    #                 self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
+    #
+    #         elif retweet_condition is False and quote_condition is True and reply_condition is False:
+    #             self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind="quote")
+    #             inner_reply_condition_level_one = tweet.get_quote().is_this_a_reply()
+    #             inner_quote_condition_level_one = tweet.get_quote().is_quoted()
+    #             if inner_reply_condition_level_one:
+    #                 self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_reply_to_id(), kind="reply")
+    #             if inner_quote_condition_level_one:
+    #                 self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_quote().get_id(), tweet.get_quote().get_quote_status_id(), kind="quote")
+    #
+    #         elif retweet_condition is False and quote_condition is False and reply_condition is True:
+    #             self.tweet_level_retweet_quote_reply_network.add_edge(tweet.get_id(), tweet.get_reply_to_id(), kind="reply")
+    #         elif retweet_condition is False and quote_condition is False and reply_condition is False:
+    #             self.tweet_level_retweet_quote_reply_network.add_node(tweet.get_id())
+    #
+    #         # # if retweet_condition is True and quote_condition is True: #This condition seems impossible to happen
+    #         # if retweet_condition is True and quote_condition is False:
+    #         #     network.add_edge(tweet.get_id(), tweet.get_retweeted().get_id(), kind=network_type)
+    #         #     inner_quote_condition = tweet.get_retweeted().is_quoted()
+    #         #     if inner_quote_condition:
+    #         #         network.add_edge(tweet.get_retweeted().get_id(), tweet.get_retweeted().get_quote().get_id(), kind=network_type)
+    #         # elif retweet_condition is False and quote_condition is True:
+    #         #     network.add_edge(tweet.get_id(), tweet.get_quote().get_id(), kind=network_type)
+    #         # elif retweet_condition is False and quote_condition is False:
+    #         #     network.add_node(tweet.get_id())
+    #
+    # # hashtag/mention/url networks
+    # def tweet_level_cooccurrence_hashtag_network_building(self):
+    #     self.network_repository.append("tweet_level_cooccurrence_hashtag_network")
+    #
+    #     tweets_keys = list(self.tweets.keys())
+    #     for i in range(len(tweets_keys)):
+    #         tweet1 = self.tweets[tweets_keys[i]]
+    #         tweet1_id = tweet1.get_id()
+    #         tweet1_hashtags = tweet1.get_hashtags()
+    #
+    #         j = i + 1
+    #
+    #         self.tweet_level_cooccurrence_hashtag_network.add_node(tweet1_id)
+    #
+    #         tweet1_retweet_condition = tweet1.is_retweeted()
+    #         tweet1_quote_condition = tweet1.is_quote_available()
+    #
+    #         if tweet1_retweet_condition:
+    #             tweet1_rt = tweet1.get_retweeted()
+    #             tweet1_rt_id = tweet1_rt.get_id()
+    #
+    #             for ht in tweet1_hashtags:
+    #                 if (tweet1_id, tweet1_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_rt_id]["weight"] += 1
+    #                     edge_label = "-" + ht
+    #                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_rt_id]["hashtags"] += edge_label
+    #                 else:
+    #                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet1_rt_id, weight=1, hashtags=ht)
+    #
+    #             tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #             if tweet1_inner_quote_condition:
+    #                 tweet1_rt_qt = tweet1_rt.get_quote()
+    #                 tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                 tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                 for ht1 in tweet1_hashtags:
+    #                     for ht2 in tweet1_rt_qt_hashtags:
+    #                         if ht1 == ht2:
+    #                             if (tweet1_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                 self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_rt_qt_id]["weight"] += 1
+    #                                 edge_label = "-" + ht1
+    #                                 self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_rt_qt_id][
+    #                                     "hashtags"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet1_rt_qt_id, weight=1,
+    #                                                                           hashtags=ht1)
+    #
+    #                 for ht1 in tweet1_hashtags:
+    #                     for ht2 in tweet1_rt_qt_hashtags:
+    #                         if ht1 == ht2:
+    #                             if (tweet1_rt_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                 self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet1_rt_qt_id]["weight"] += 1
+    #                                 edge_label = "-" + ht1
+    #                                 self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet1_rt_qt_id][
+    #                                     "hashtags"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet1_rt_qt_id, weight=1,
+    #                                                                           hashtags=ht1)
+    #
+    #         if tweet1_quote_condition:
+    #             tweet1_qt = tweet1.get_quote()
+    #             tweet1_qt_id = tweet1_qt.get_id()
+    #             tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+    #
+    #             for ht1 in tweet1_hashtags:
+    #                 for ht2 in tweet1_qt_hashtags:
+    #                     if ht1 == ht2:
+    #                         if (tweet1_id, tweet1_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                             self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_qt_id]["weight"] += 1
+    #                             edge_label = "-" + ht1
+    #                             self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet1_qt_id][
+    #                                 "hashtags"] += edge_label
+    #                         else:
+    #                             self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet1_qt_id, weight=1,
+    #                                                                       hashtags=ht1)
+    #
+    #         while j != len(tweets_keys):
+    #             tweet2 = self.tweets[tweets_keys[j]]
+    #             tweet2_id = tweet2.get_id()
+    #             tweet2_hashtags = tweet2.get_hashtags()
+    #
+    #             tweet2_retweet_condition = tweet2.is_retweeted()
+    #             tweet2_quote_condition = tweet2.is_quote_available()
+    #
+    #             if tweet2_retweet_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #
+    #                 if tweet1_id != tweet2_rt_id:
+    #                     for ht1 in tweet1_hashtags:
+    #                         for ht2 in tweet2_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (tweet1_id, tweet2_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_rt_id]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_rt_id][
+    #                                         "hashtags"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet2_rt_id, weight=1,
+    #                                                                               hashtags=ht1)
+    #
+    #                     tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                     if tweet2_inner_quote_condition:
+    #                         tweet2_rt_qt = tweet2_rt.get_quote()
+    #                         tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                         tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+    #
+    #                         if tweet1_id != tweet2_rt_qt_id:
+    #                             for ht1 in tweet1_hashtags:
+    #                                 for ht2 in tweet2_rt_qt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         if (tweet1_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                             self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_rt_qt_id][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_rt_qt_id][
+    #                                                 "hashtags"] += edge_label
+    #                                         else:
+    #                                             self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet2_rt_qt_id,
+    #                                                                                       weight=1,
+    #                                                                                       hashtags=ht1)
+    #
+    #             if tweet2_quote_condition:
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_hashtags = tweet2_qt.get_hashtags()
+    #
+    #                 if tweet1_id != tweet2_qt_id:
+    #                     for ht1 in tweet1_hashtags:
+    #                         for ht2 in tweet2_qt_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (tweet1_id, tweet2_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_qt_id]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_qt_id][
+    #                                         "hashtags"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet2_qt_id, weight=1,
+    #                                                                               hashtags=ht1)
+    #
+    #             if tweet1_retweet_condition and tweet2_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_id()
+    #                 tweet1_rt_hashtags = tweet1_rt.get_hashtags()
+    #
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #                 tweet2_rt_hashtags = tweet1_rt.get_hashtags()
+    #
+    #                 if tweet1_rt_id != tweet2_rt_id:
+    #                     for ht1 in tweet1_rt_hashtags:
+    #                         for ht2 in tweet2_rt_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (tweet1_rt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_rt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_rt_id][
+    #                                         "hashtags"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet2_rt_id, weight=1,
+    #                                                                               hashtags=ht1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt_qt_id != tweet2_rt_id:
+    #                         for ht1 in tweet1_rt_qt_hashtags:
+    #                             for ht2 in tweet2_rt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (tweet1_rt_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+    #                                             "hashtags"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_qt_id, tweet2_rt_id,
+    #                                                                                   weight=1, hashtags=ht1)
+    #
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt_id != tweet2_rt_qt_id:
+    #                         for ht1 in tweet1_rt_hashtags:
+    #                             for ht2 in tweet2_rt_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (tweet1_rt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+    #                                             "hashtags"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet2_rt_qt_id,
+    #                                                                                   weight=1, hashtags=ht1)
+    #
+    #                 if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt_qt_id != tweet2_rt_qt_id:
+    #                         for ht1 in tweet1_rt_qt_hashtags:
+    #                             for ht2 in tweet2_rt_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (tweet1_rt_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+    #                                             "hashtags"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_qt_id, tweet2_rt_qt_id,
+    #                                                                                   weight=1, hashtags=ht1)
+    #
+    #             if tweet1_quote_condition and tweet2_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_hashtags = tweet2_qt.get_hashtags()
+    #
+    #                 if tweet1_qt_id != tweet2_qt_id:
+    #                     for ht1 in tweet1_qt_hashtags:
+    #                         for ht2 in tweet2_qt_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (tweet1_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_qt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_qt_id][
+    #                                         "hashtags"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_qt_id, tweet2_qt_id, weight=1,
+    #                                                                               hashtags=ht1)
+    #
+    #             if tweet1_retweet_condition and tweet2_quote_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_id()
+    #                 tweet1_rt_hashtags = tweet1_rt.get_hashtags()
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_hashtags = tweet2_qt.get_hashtags()
+    #
+    #                 if tweet1_rt_id != tweet2_qt_id:
+    #                     for ht1 in tweet1_rt_hashtags:
+    #                         for ht2 in tweet2_qt_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (tweet1_rt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_qt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_qt_id][
+    #                                         "hashtags"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet2_qt_id, weight=1,
+    #                                                                               hashtags=ht1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt_qt_id != tweet2_qt_id:
+    #                         for ht1 in tweet1_rt_qt_hashtags:
+    #                             for ht2 in tweet2_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (tweet1_rt_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+    #                                             "hashtags"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_qt_id, tweet2_qt_id,
+    #                                                                                   weight=1, hashtags=ht1)
+    #
+    #             if tweet2_retweet_condition and tweet1_quote_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #                 tweet2_rt_hashtags = tweet2_rt.get_hashtags()
+    #
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+    #
+    #                 if tweet1_qt_id != tweet2_rt_id:
+    #                     for ht1 in tweet1_qt_hashtags:
+    #                         for ht2 in tweet2_rt_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (tweet1_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_rt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_rt_id][
+    #                                         "hashtags"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_qt_id, tweet2_rt_id, weight=1,
+    #                                                                               hashtags=ht1)
+    #
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2_rt.get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_qt_id != tweet2_rt_qt_id:
+    #                         for ht1 in tweet1_qt_hashtags:
+    #                             for ht2 in tweet2_rt_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (tweet1_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+    #                                             "hashtags"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_qt_id, tweet2_rt_qt_id,
+    #                                                                                   weight=1,
+    #                                                                                   hashtags=ht1)
+    #
+    #             if tweet1_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_hashtags = tweet1_rt.get_hashtags()
+    #
+    #                 if tweet1_rt_id != tweet2_id:
+    #                     for ht1 in tweet1_rt_hashtags:
+    #                         for ht2 in tweet2_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (tweet1_rt_id, tweet2_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_id]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_id, tweet2_id][
+    #                                         "hashtags"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_id, tweet2_id, weight=1,
+    #                                                                               hashtags=ht1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                     if tweet2_id != tweet1_rt_qt_id:
+    #                         for ht1 in tweet1_rt_qt_hashtags:
+    #                             for ht2 in tweet2_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (tweet1_rt_qt_id, tweet2_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_rt_qt_id, tweet2_id][
+    #                                             "hashtags"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_rt_qt_id, tweet2_id,
+    #                                                                                   weight=1,
+    #                                                                                   hashtags=ht1)
+    #
+    #             if tweet1_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+    #
+    #                 if tweet1_qt_id != tweet2_id:
+    #                     for ht1 in tweet1_qt_hashtags:
+    #                         for ht2 in tweet2_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (tweet1_qt_id, tweet2_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_id]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_qt_id, tweet2_id][
+    #                                         "hashtags"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_qt_id, tweet2_id, weight=1,
+    #                                                                               hashtags=ht1)
+    #
+    #             if tweet1_id != tweet2_id:
+    #                 for ht1 in tweet1_hashtags:
+    #                     for ht2 in tweet2_hashtags:
+    #                         if ht1 == ht2:
+    #                             if (tweet1_id, tweet2_id) in self.tweet_level_cooccurrence_hashtag_network.edges:
+    #                                 self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_id]["weight"] += 1
+    #                                 edge_label = "-" + ht1
+    #                                 self.tweet_level_cooccurrence_hashtag_network.edges[tweet1_id, tweet2_id][
+    #                                     "hashtags"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_hashtag_network.add_edge(tweet1_id, tweet2_id, weight=1,
+    #                                                                           hashtags=ht1)
+    #             j += 1
+    #
+    # def tweet_level_cooccurrence_mention_network_building(self):
+    #     self.network_repository.append("tweet_level_cooccurrence_mention_network")
+    #
+    #     tweets_keys = list(self.tweets.keys())
+    #     for i in range(len(tweets_keys)):
+    #         tweet1 = self.tweets[tweets_keys[i]]
+    #         tweet1_id = tweet1.get_id()
+    #         tweet1_mentions = tweet1.get_mentions()
+    #
+    #         j = i + 1
+    #
+    #         self.tweet_level_cooccurrence_mention_network.add_node(tweet1_id)
+    #
+    #         tweet1_retweet_condition = tweet1.is_retweeted()
+    #         tweet1_quote_condition = tweet1.is_quote_available()
+    #
+    #         if tweet1_retweet_condition:
+    #             tweet1_rt = tweet1.get_retweeted()
+    #             tweet1_rt_id = tweet1_rt.get_id()
+    #
+    #             for mt in tweet1_mentions:
+    #                 if (tweet1_id, tweet1_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_rt_id]["weight"] += 1
+    #                     edge_label = "-" + mt
+    #                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_rt_id]["mentions"] += edge_label
+    #                 else:
+    #                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet1_rt_id, weight=1, mentions=mt)
+    #
+    #             tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #             if tweet1_inner_quote_condition:
+    #                 tweet1_rt_qt = tweet1_rt.get_quote()
+    #                 tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                 tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                 for mt1 in tweet1_mentions:
+    #                     for mt2 in tweet1_rt_qt_mentions:
+    #                         if mt1 == mt2:
+    #                             if (tweet1_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                 self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_rt_qt_id]["weight"] += 1
+    #                                 edge_label = "-" + mt1
+    #                                 self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_rt_qt_id][
+    #                                     "mentions"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet1_rt_qt_id, weight=1,
+    #                                                                           mentions=mt1)
+    #
+    #                 for mt1 in tweet1_mentions:
+    #                     for mt2 in tweet1_rt_qt_mentions:
+    #                         if mt1 == mt2:
+    #                             if (tweet1_rt_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                 self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet1_rt_qt_id]["weight"] += 1
+    #                                 edge_label = "-" + mt1
+    #                                 self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet1_rt_qt_id][
+    #                                     "mentions"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet1_rt_qt_id, weight=1,
+    #                                                                           mentions=mt1)
+    #
+    #         if tweet1_quote_condition:
+    #             tweet1_qt = tweet1.get_quote()
+    #             tweet1_qt_id = tweet1_qt.get_id()
+    #             tweet1_qt_mentions = tweet1_qt.get_mentions()
+    #
+    #             for mt1 in tweet1_mentions:
+    #                 for mt2 in tweet1_qt_mentions:
+    #                     if mt1 == mt2:
+    #                         if (tweet1_id, tweet1_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                             self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_qt_id]["weight"] += 1
+    #                             edge_label = "-" + mt1
+    #                             self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet1_qt_id][
+    #                                 "mentions"] += edge_label
+    #                         else:
+    #                             self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet1_qt_id, weight=1,
+    #                                                                       mentions=mt1)
+    #
+    #         while j != len(tweets_keys):
+    #             tweet2 = self.tweets[tweets_keys[j]]
+    #             tweet2_id = tweet2.get_id()
+    #             tweet2_mentions = tweet2.get_mentions()
+    #
+    #             tweet2_retweet_condition = tweet2.is_retweeted()
+    #             tweet2_quote_condition = tweet2.is_quote_available()
+    #
+    #             if tweet2_retweet_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #
+    #                 if tweet1_id != tweet2_rt_id:
+    #                     for mt1 in tweet1_mentions:
+    #                         for mt2 in tweet2_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (tweet1_id, tweet2_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_rt_id]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_rt_id][
+    #                                         "mentions"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet2_rt_id, weight=1,
+    #                                                                               mentions=mt1)
+    #
+    #                     tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                     if tweet2_inner_quote_condition:
+    #                         tweet2_rt_qt = tweet2_rt.get_quote()
+    #                         tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                         tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+    #
+    #                         if tweet1_id != tweet2_rt_qt_id:
+    #                             for mt1 in tweet1_mentions:
+    #                                 for mt2 in tweet2_rt_qt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         if (tweet1_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                             self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_rt_qt_id][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_rt_qt_id][
+    #                                                 "mentions"] += edge_label
+    #                                         else:
+    #                                             self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet2_rt_qt_id,
+    #                                                                                       weight=1,
+    #                                                                                       mentions=mt1)
+    #
+    #             if tweet2_quote_condition:
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_mentions = tweet2_qt.get_mentions()
+    #
+    #                 if tweet1_id != tweet2_qt_id:
+    #                     for mt1 in tweet1_mentions:
+    #                         for mt2 in tweet2_qt_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (tweet1_id, tweet2_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_qt_id]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_qt_id][
+    #                                         "mentions"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet2_qt_id, weight=1,
+    #                                                                               mentions=mt1)
+    #
+    #             if tweet1_retweet_condition and tweet2_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_id()
+    #                 tweet1_rt_mentions = tweet1_rt.get_mentions()
+    #
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #                 tweet2_rt_mentions = tweet1_rt.get_mentions()
+    #
+    #                 if tweet1_rt_id != tweet2_rt_id:
+    #                     for mt1 in tweet1_rt_mentions:
+    #                         for mt2 in tweet2_rt_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (tweet1_rt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_rt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_rt_id][
+    #                                         "mentions"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet2_rt_id, weight=1,
+    #                                                                               mentions=mt1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt_qt_id != tweet2_rt_id:
+    #                         for mt1 in tweet1_rt_qt_mentions:
+    #                             for mt2 in tweet2_rt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (tweet1_rt_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+    #                                             "mentions"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_qt_id, tweet2_rt_id,
+    #                                                                                   weight=1, mentions=mt1)
+    #
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt_id != tweet2_rt_qt_id:
+    #                         for mt1 in tweet1_rt_mentions:
+    #                             for mt2 in tweet2_rt_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (tweet1_rt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+    #                                             "mentions"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet2_rt_qt_id,
+    #                                                                                   weight=1, mentions=mt1)
+    #
+    #                 if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt_qt_id != tweet2_rt_qt_id:
+    #                         for mt1 in tweet1_rt_qt_mentions:
+    #                             for mt2 in tweet2_rt_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (tweet1_rt_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+    #                                             "mentions"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_qt_id, tweet2_rt_qt_id,
+    #                                                                                   weight=1, mentions=mt1)
+    #
+    #             if tweet1_quote_condition and tweet2_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_mentions = tweet1_qt.get_mentions()
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_mentions = tweet2_qt.get_mentions()
+    #
+    #                 if tweet1_qt_id != tweet2_qt_id:
+    #                     for mt1 in tweet1_qt_mentions:
+    #                         for mt2 in tweet2_qt_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (tweet1_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_qt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_qt_id][
+    #                                         "mentions"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_qt_id, tweet2_qt_id, weight=1,
+    #                                                                               mentions=mt1)
+    #
+    #             if tweet1_retweet_condition and tweet2_quote_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_id()
+    #                 tweet1_rt_mentions = tweet1_rt.get_mentions()
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_mentions = tweet2_qt.get_mentions()
+    #
+    #                 if tweet1_rt_id != tweet2_qt_id:
+    #                     for mt1 in tweet1_rt_mentions:
+    #                         for mt2 in tweet2_qt_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (tweet1_rt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_qt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_qt_id][
+    #                                         "mentions"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet2_qt_id, weight=1,
+    #                                                                               mentions=mt1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt_qt_id != tweet2_qt_id:
+    #                         for mt1 in tweet1_rt_qt_mentions:
+    #                             for mt2 in tweet2_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (tweet1_rt_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+    #                                             "mentions"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_qt_id, tweet2_qt_id,
+    #                                                                                   weight=1, mentions=mt1)
+    #
+    #             if tweet2_retweet_condition and tweet1_quote_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #                 tweet2_rt_mentions = tweet2_rt.get_mentions()
+    #
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_mentions = tweet1_qt.get_mentions()
+    #
+    #                 if tweet1_qt_id != tweet2_rt_id:
+    #                     for mt1 in tweet1_qt_mentions:
+    #                         for mt2 in tweet2_rt_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (tweet1_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_rt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_rt_id][
+    #                                         "mentions"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_qt_id, tweet2_rt_id, weight=1,
+    #                                                                               mentions=mt1)
+    #
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2_rt.get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+    #
+    #                     if tweet1_qt_id != tweet2_rt_qt_id:
+    #                         for mt1 in tweet1_qt_mentions:
+    #                             for mt2 in tweet2_rt_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (tweet1_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+    #                                             "mentions"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_qt_id, tweet2_rt_qt_id,
+    #                                                                                   weight=1,
+    #                                                                                   mentions=mt1)
+    #
+    #             if tweet1_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_mentions = tweet1_rt.get_mentions()
+    #
+    #                 if tweet1_rt_id != tweet2_id:
+    #                     for mt1 in tweet1_rt_mentions:
+    #                         for mt2 in tweet2_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (tweet1_rt_id, tweet2_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_id]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_id, tweet2_id][
+    #                                         "mentions"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_id, tweet2_id, weight=1,
+    #                                                                               mentions=mt1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                     if tweet2_id != tweet1_rt_qt_id:
+    #                         for mt1 in tweet1_rt_qt_mentions:
+    #                             for mt2 in tweet2_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (tweet1_rt_qt_id, tweet2_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.tweet_level_cooccurrence_mention_network.edges[tweet1_rt_qt_id, tweet2_id][
+    #                                             "mentions"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_rt_qt_id, tweet2_id,
+    #                                                                                   weight=1,
+    #                                                                                   mentions=mt1)
+    #
+    #             if tweet1_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_mentions = tweet1_qt.get_mentions()
+    #
+    #                 if tweet1_qt_id != tweet2_id:
+    #                     for mt1 in tweet1_qt_mentions:
+    #                         for mt2 in tweet2_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (tweet1_qt_id, tweet2_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_id]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.tweet_level_cooccurrence_mention_network.edges[tweet1_qt_id, tweet2_id][
+    #                                         "mentions"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_qt_id, tweet2_id, weight=1,
+    #                                                                               mentions=mt1)
+    #
+    #             if tweet1_id != tweet2_id:
+    #                 for mt1 in tweet1_mentions:
+    #                     for mt2 in tweet2_mentions:
+    #                         if mt1 == mt2:
+    #                             if (tweet1_id, tweet2_id) in self.tweet_level_cooccurrence_mention_network.edges:
+    #                                 self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_id]["weight"] += 1
+    #                                 edge_label = "-" + mt1
+    #                                 self.tweet_level_cooccurrence_mention_network.edges[tweet1_id, tweet2_id][
+    #                                     "mentions"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_mention_network.add_edge(tweet1_id, tweet2_id, weight=1,
+    #                                                                           mentions=mt1)
+    #             j += 1
+    #
+    # def tweet_level_cooccurrence_url_network_building(self):
+    #     self.network_repository.append("tweet_level_cooccurrence_url_network")
+    #
+    #     tweets_keys = list(self.tweets.keys())
+    #     for i in range(len(tweets_keys)):
+    #         tweet1 = self.tweets[tweets_keys[i]]
+    #         tweet1_id = tweet1.get_id()
+    #         tweet1_urls = tweet1.get_tweet_urls(return_format="expanded_url")
+    #
+    #         j = i + 1
+    #
+    #         self.tweet_level_cooccurrence_url_network.add_node(tweet1_id)
+    #
+    #         tweet1_retweet_condition = tweet1.is_retweeted()
+    #         tweet1_quote_condition = tweet1.is_quote_available()
+    #
+    #         if tweet1_retweet_condition:
+    #             tweet1_rt = tweet1.get_retweeted()
+    #             tweet1_rt_id = tweet1_rt.get_id()
+    #
+    #             for ut in tweet1_urls:
+    #                 if (tweet1_id, tweet1_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                     self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_rt_id]["weight"] += 1
+    #                     edge_label = "-" + ut
+    #                     self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_rt_id]["urls"] += edge_label
+    #                 else:
+    #                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet1_rt_id, weight=1, urls=ut)
+    #
+    #             tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #             if tweet1_inner_quote_condition:
+    #                 tweet1_rt_qt = tweet1_rt.get_quote()
+    #                 tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                 tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 for ut1 in tweet1_urls:
+    #                     for ut2 in tweet1_rt_qt_urls:
+    #                         if ut1 == ut2:
+    #                             if (tweet1_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                 self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_rt_qt_id]["weight"] += 1
+    #                                 edge_label = "-" + ut1
+    #                                 self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_rt_qt_id][
+    #                                     "urls"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet1_rt_qt_id, weight=1,
+    #                                                                       urls=ut1)
+    #
+    #                 for ut1 in tweet1_urls:
+    #                     for ut2 in tweet1_rt_qt_urls:
+    #                         if ut1 == ut2:
+    #                             if (tweet1_rt_id, tweet1_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                 self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet1_rt_qt_id]["weight"] += 1
+    #                                 edge_label = "-" + ut1
+    #                                 self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet1_rt_qt_id][
+    #                                     "urls"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet1_rt_qt_id, weight=1,
+    #                                                                       urls=ut1)
+    #
+    #         if tweet1_quote_condition:
+    #             tweet1_qt = tweet1.get_quote()
+    #             tweet1_qt_id = tweet1_qt.get_id()
+    #             tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #             for ut1 in tweet1_urls:
+    #                 for ut2 in tweet1_qt_urls:
+    #                     if ut1 == ut2:
+    #                         if (tweet1_id, tweet1_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                             self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_qt_id]["weight"] += 1
+    #                             edge_label = "-" + ut1
+    #                             self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet1_qt_id][
+    #                                 "urls"] += edge_label
+    #                         else:
+    #                             self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet1_qt_id, weight=1,
+    #                                                                   urls=ut1)
+    #
+    #         while j != len(tweets_keys):
+    #             tweet2 = self.tweets[tweets_keys[j]]
+    #             tweet2_id = tweet2.get_id()
+    #             tweet2_urls = tweet2.get_tweet_urls(return_format="expanded_url")
+    #
+    #             tweet2_retweet_condition = tweet2.is_retweeted()
+    #             tweet2_quote_condition = tweet2.is_quote_available()
+    #
+    #             if tweet2_retweet_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #
+    #                 if tweet1_id != tweet2_rt_id:
+    #                     for ut1 in tweet1_urls:
+    #                         for ut2 in tweet2_urls:
+    #                             if ut1 == ut2:
+    #                                 if (tweet1_id, tweet2_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_rt_id]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_rt_id][
+    #                                         "urls"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet2_rt_id, weight=1,
+    #                                                                           urls=ut1)
+    #
+    #                     tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                     if tweet2_inner_quote_condition:
+    #                         tweet2_rt_qt = tweet2_rt.get_quote()
+    #                         tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                         tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                         if tweet1_id != tweet2_rt_qt_id:
+    #                             for ut1 in tweet1_urls:
+    #                                 for ut2 in tweet2_rt_qt_urls:
+    #                                     if ut1 == ut2:
+    #                                         if (tweet1_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                             self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_rt_qt_id][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_rt_qt_id][
+    #                                                 "urls"] += edge_label
+    #                                         else:
+    #                                             self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet2_rt_qt_id,
+    #                                                                                   weight=1,
+    #                                                                                   urls=ut1)
+    #
+    #             if tweet2_quote_condition:
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_id != tweet2_qt_id:
+    #                     for ut1 in tweet1_urls:
+    #                         for ut2 in tweet2_qt_urls:
+    #                             if ut1 == ut2:
+    #                                 if (tweet1_id, tweet2_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_qt_id]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_qt_id][
+    #                                         "urls"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet2_qt_id, weight=1,
+    #                                                                           urls=ut1)
+    #
+    #             if tweet1_retweet_condition and tweet2_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_id()
+    #                 tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #                 tweet2_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_rt_id != tweet2_rt_id:
+    #                     for ut1 in tweet1_rt_urls:
+    #                         for ut2 in tweet2_rt_urls:
+    #                             if ut1 == ut2:
+    #                                 if (tweet1_rt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_rt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_rt_id][
+    #                                         "urls"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet2_rt_id, weight=1,
+    #                                                                           urls=ut1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt_qt_id != tweet2_rt_id:
+    #                         for ut1 in tweet1_rt_qt_urls:
+    #                             for ut2 in tweet2_rt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (tweet1_rt_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_rt_id][
+    #                                             "urls"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_qt_id, tweet2_rt_id,
+    #                                                                               weight=1, urls=ut1)
+    #
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt_id != tweet2_rt_qt_id:
+    #                         for ut1 in tweet1_rt_urls:
+    #                             for ut2 in tweet2_rt_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (tweet1_rt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_rt_qt_id][
+    #                                             "urls"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet2_rt_qt_id,
+    #                                                                               weight=1, urls=ut1)
+    #
+    #                 if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt_qt_id != tweet2_rt_qt_id:
+    #                         for ut1 in tweet1_rt_qt_urls:
+    #                             for ut2 in tweet2_rt_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (tweet1_rt_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_rt_qt_id][
+    #                                             "urls"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_qt_id, tweet2_rt_qt_id,
+    #                                                                               weight=1, urls=ut1)
+    #
+    #             if tweet1_quote_condition and tweet2_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_qt_id != tweet2_qt_id:
+    #                     for ut1 in tweet1_qt_urls:
+    #                         for ut2 in tweet2_qt_urls:
+    #                             if ut1 == ut2:
+    #                                 if (tweet1_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_qt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_qt_id][
+    #                                         "urls"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_qt_id, tweet2_qt_id, weight=1,
+    #                                                                           urls=ut1)
+    #
+    #             if tweet1_retweet_condition and tweet2_quote_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_id()
+    #                 tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 tweet2_qt_id = tweet2_qt.get_id()
+    #                 tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_rt_id != tweet2_qt_id:
+    #                     for ut1 in tweet1_rt_urls:
+    #                         for ut2 in tweet2_qt_urls:
+    #                             if ut1 == ut2:
+    #                                 if (tweet1_rt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_qt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_qt_id][
+    #                                         "urls"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet2_qt_id, weight=1,
+    #                                                                           urls=ut1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt_qt_id != tweet2_qt_id:
+    #                         for ut1 in tweet1_rt_qt_urls:
+    #                             for ut2 in tweet2_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (tweet1_rt_qt_id, tweet2_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_qt_id][
+    #                                             "urls"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_qt_id, tweet2_qt_id,
+    #                                                                               weight=1, urls=ut1)
+    #
+    #             if tweet2_retweet_condition and tweet1_quote_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 tweet2_rt_id = tweet2_rt.get_id()
+    #                 tweet2_rt_urls = tweet2_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_qt_id != tweet2_rt_id:
+    #                     for ut1 in tweet1_qt_urls:
+    #                         for ut2 in tweet2_rt_urls:
+    #                             if ut1 == ut2:
+    #                                 if (tweet1_qt_id, tweet2_rt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_rt_id][
+    #                                         "weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_rt_id][
+    #                                         "urls"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_qt_id, tweet2_rt_id, weight=1,
+    #                                                                           urls=ut1)
+    #
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2_rt.get_quote()
+    #                     tweet2_rt_qt_id = tweet2_rt_qt.get_id()
+    #                     tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_qt_id != tweet2_rt_qt_id:
+    #                         for ut1 in tweet1_qt_urls:
+    #                             for ut2 in tweet2_rt_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (tweet1_qt_id, tweet2_rt_qt_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_rt_qt_id][
+    #                                             "urls"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_url_network.add_edge(tweet1_qt_id, tweet2_rt_qt_id,
+    #                                                                               weight=1,
+    #                                                                               urls=ut1)
+    #
+    #             if tweet1_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 tweet1_rt_id = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_rt_id != tweet2_id:
+    #                     for ut1 in tweet1_rt_urls:
+    #                         for ut2 in tweet2_urls:
+    #                             if ut1 == ut2:
+    #                                 if (tweet1_rt_id, tweet2_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_id]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_id, tweet2_id][
+    #                                         "urls"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_id, tweet2_id, weight=1,
+    #                                                                           urls=ut1)
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     tweet1_rt_qt_id = tweet1_rt_qt.get_id()
+    #                     tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet2_id != tweet1_rt_qt_id:
+    #                         for ut1 in tweet1_rt_qt_urls:
+    #                             for ut2 in tweet2_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (tweet1_rt_qt_id, tweet2_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_id][
+    #                                             "weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.tweet_level_cooccurrence_url_network.edges[tweet1_rt_qt_id, tweet2_id][
+    #                                             "urls"] += edge_label
+    #                                     else:
+    #                                         self.tweet_level_cooccurrence_url_network.add_edge(tweet1_rt_qt_id, tweet2_id,
+    #                                                                               weight=1,
+    #                                                                               urls=ut1)
+    #
+    #             if tweet1_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 tweet1_qt_id = tweet1_qt.get_id()
+    #                 tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_qt_id != tweet2_id:
+    #                     for ut1 in tweet1_qt_urls:
+    #                         for ut2 in tweet2_urls:
+    #                             if ut1 == ut2:
+    #                                 if (tweet1_qt_id, tweet2_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_id]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.tweet_level_cooccurrence_url_network.edges[tweet1_qt_id, tweet2_id][
+    #                                         "urls"] += edge_label
+    #                                 else:
+    #                                     self.tweet_level_cooccurrence_url_network.add_edge(tweet1_qt_id, tweet2_id, weight=1,
+    #                                                                           urls=ut1)
+    #
+    #             if tweet1_id != tweet2_id:
+    #                 for ut1 in tweet1_urls:
+    #                     for ut2 in tweet2_urls:
+    #                         if ut1 == ut2:
+    #                             if (tweet1_id, tweet2_id) in self.tweet_level_cooccurrence_url_network.edges:
+    #                                 self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_id]["weight"] += 1
+    #                                 edge_label = "-" + ut1
+    #                                 self.tweet_level_cooccurrence_url_network.edges[tweet1_id, tweet2_id][
+    #                                     "urls"] += edge_label
+    #                             else:
+    #                                 self.tweet_level_cooccurrence_url_network.add_edge(tweet1_id, tweet2_id, weight=1,
+    #                                                                       urls=ut1)
+    #             j += 1
+    #
+    # # bipartite version of tweet-level hashtag/mention/url networks
+    # def tweet_hashtag_bipartite_network_building(self):
+    #     self.network_repository.append("tweet_hashtag_bipartite_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         source = tweet.get_id()
+    #         hashtag_list = tweet.get_hashtags()
+    #
+    #         for hashtag in hashtag_list:
+    #             if self.tweet_hashtag_bipartite_network.has_edge(source, hashtag):
+    #                 self.tweet_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
+    #                 self.tweet_hashtag_bipartite_network.edges[source, hashtag][
+    #                     "shared_author"] += tweet.get_twitter().get_screen_name()
+    #             else:
+    #                 self.tweet_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+    #                                                     shared_author=tweet.get_twitter().get_screen_name())
+    #
+    #         if tweet.is_retweeted():
+    #             source = tweet.get_retweeted().get_id()
+    #             hashtag_list = tweet.get_hashtags()
+    #             for hashtag in hashtag_list:
+    #
+    #                 if self.tweet_hashtag_bipartite_network.has_edge(source, hashtag):
+    #                     self.tweet_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
+    #                     self.tweet_hashtag_bipartite_network.edges[source, hashtag][
+    #                         "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
+    #                 else:
+    #                     self.tweet_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+    #                                                         shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
+    #             if tweet.get_retweeted().is_quote_available():
+    #                 source = tweet.get_retweeted().get_quote().get_id()
+    #                 hashtag_list = tweet.get_retweeted().get_quote().get_hashtags()
+    #                 for hashtag in hashtag_list:
+    #
+    #                     if self.tweet_hashtag_bipartite_network.has_edge(source, hashtag):
+    #                         self.tweet_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
+    #                         self.tweet_hashtag_bipartite_network.edges[source, hashtag][
+    #                             "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                     else:
+    #                         self.tweet_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+    #                                                             shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
+    #         elif tweet.is_quote_available():
+    #             source = tweet.get_quote().get_id()
+    #             hashtag_list = tweet.get_quote().get_hashtags()
+    #             for hashtag in hashtag_list:
+    #
+    #                 if self.tweet_hashtag_bipartite_network.has_edge(source, hashtag):
+    #                     self.tweet_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
+    #                     self.tweet_hashtag_bipartite_network.edges[source, hashtag][
+    #                         "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
+    #                 else:
+    #                     self.tweet_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+    #                                                         shared_author=tweet.get_quote().get_twitter().get_screen_name())
+    #
+    # def tweet_mention_bipartite_network_building(self):
+    #     self.network_repository.append("tweet_mention_bipartite_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         source = tweet.get_id()
+    #         mention_list = tweet.get_mentions()
+    #
+    #         for mention in mention_list:
+    #             if self.tweet_mention_bipartite_network.has_edge(source, mention):
+    #                 self.tweet_mention_bipartite_network.edges[source, mention]["weight"] += 1
+    #                 self.tweet_mention_bipartite_network.edges[source, mention]["shared_author"] += tweet.get_twitter().get_screen_name()
+    #             else:
+    #                 self.tweet_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
+    #                                                    shared_author=tweet.get_twitter().get_screen_name())
+    #
+    #         if tweet.is_retweeted():
+    #             source = tweet.get_retweeted().get_id()
+    #             mention_list = tweet.get_mentions()
+    #             for mention in mention_list:
+    #
+    #                 if self.tweet_mention_bipartite_network.has_edge(source, mention):
+    #                     self.tweet_mention_bipartite_network.edges[source, mention]["weight"] += 1
+    #                     self.tweet_mention_bipartite_network.edges[source, mention][
+    #                         "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
+    #                 else:
+    #                     self.tweet_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
+    #                                                        shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
+    #             if tweet.get_retweeted().is_quote_available():
+    #                 source = tweet.get_retweeted().get_quote().get_id()
+    #                 mention_list = tweet.get_retweeted().get_quote().get_mentions()
+    #                 for mention in mention_list:
+    #
+    #                     if self.tweet_mention_bipartite_network.has_edge(source, mention):
+    #                         self.tweet_mention_bipartite_network.edges[source, mention]["weight"] += 1
+    #                         self.tweet_mention_bipartite_network.edges[source, mention][
+    #                             "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                     else:
+    #                         self.tweet_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
+    #                                                            shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
+    #         elif tweet.is_quote_available():
+    #             source = tweet.get_quote().get_id()
+    #             mention_list = tweet.get_quote().get_mentions()
+    #             for mention in mention_list:
+    #
+    #                 if self.tweet_mention_bipartite_network.has_edge(source, mention):
+    #                     self.tweet_mention_bipartite_network.edges[source, mention]["weight"] += 1
+    #                     self.tweet_mention_bipartite_network.edges[source, mention][
+    #                         "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
+    #                 else:
+    #                     self.tweet_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
+    #                                                        shared_author=tweet.get_quote().get_twitter().get_screen_name())
+    #
+    # def tweet_url_bipartite_network_building(self):
+    #     self.network_repository.append("tweet_url_bipartite_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         source = tweet.get_id()
+    #         url_list = tweet.get_tweet_urls(return_format="expanded_url")
+    #
+    #         for url in url_list:
+    #             if self.tweet_url_bipartite_network.has_edge(source, url):
+    #                 self.tweet_url_bipartite_network.edges[source, url]["weight"] += 1
+    #                 self.tweet_url_bipartite_network.edges[source, url]["shared_author"] += tweet.get_twitter().get_screen_name()
+    #             else:
+    #                 self.tweet_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
+    #                                                 shared_author=tweet.get_twitter().get_screen_name())
+    #
+    #         if tweet.is_retweeted():
+    #             source = tweet.get_retweeted().get_id()
+    #             url_list = tweet.get_tweet_urls(return_format="expanded_url")
+    #             for url in url_list:
+    #
+    #                 if self.tweet_url_bipartite_network.has_edge(source, url):
+    #                     self.tweet_url_bipartite_network.edges[source, url]["weight"] += 1
+    #                     self.tweet_url_bipartite_network.edges[source, url][
+    #                         "shared_author"] += tweet.get_retweeted().get_twitter().get_screen_name()
+    #                 else:
+    #                     self.tweet_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
+    #                                                     shared_author=tweet.get_retweeted().get_twitter().get_screen_name())
+    #             if tweet.get_retweeted().is_quote_available():
+    #                 source = tweet.get_retweeted().get_quote().get_id()
+    #                 url_list = tweet.get_retweeted().get_quote().get_tweet_urls(return_format="expanded_url")
+    #                 for url in url_list:
+    #
+    #                     if self.tweet_url_bipartite_network.has_edge(source, url):
+    #                         self.tweet_url_bipartite_network.edges[source, url]["weight"] += 1
+    #                         self.tweet_url_bipartite_network.edges[source, url][
+    #                             "shared_author"] += tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                     else:
+    #                         self.tweet_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
+    #                                                         shared_author=tweet.get_retweeted().get_quote().get_twitter().get_screen_name())
+    #         elif tweet.is_quote_available():
+    #             source = tweet.get_quote().get_id()
+    #             url_list = tweet.get_quote().get_tweet_urls(return_format="expanded_url")
+    #             for url in url_list:
+    #
+    #                 if self.tweet_url_bipartite_network.has_edge(source, url):
+    #                     self.tweet_url_bipartite_network.edges[source, url]["weight"] += 1
+    #                     self.tweet_url_bipartite_network.edges[source, url][
+    #                         "shared_author"] += tweet.get_quote().get_twitter().get_screen_name()
+    #                 else:
+    #                     self.tweet_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
+    #                                                     shared_author=tweet.get_quote().get_twitter().get_screen_name())
+    # ####################################################################
+    #
+    # ### User-level network
+    # # retweet/quote/reply networks
+    # def user_level_retweet_network_building(self):
+    #     self.network_repository.append("user_level_retweet_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         retweet_condition = tweet.is_retweeted()
+    #         source = tweet.get_twitter().get_screen_name()
+    #         if retweet_condition:
+    #             destination = tweet.get_retweeted().get_twitter().get_screen_name()
+    #             if self.user_level_retweet_network.has_edge(source, destination):
+    #                 self.user_level_retweet_network.edges[source, destination]["weight"] += 1
+    #             else:
+    #                 self.user_level_retweet_network.add_edge(source, destination, kind="retweet", weight=1)
+    #         else:
+    #             self.user_level_retweet_network.add_node(source)
+    #
+    # def user_level_quote_network_building(self):
+    #     self.network_repository.append("user_level_quote_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         quote_condition = tweet.is_quote_available()
+    #
+    #         source = tweet.get_twitter().get_screen_name()
+    #         if quote_condition:
+    #             destination = tweet.get_quote().get_twitter().get_screen_name()
+    #             if self.user_level_quote_network.has_edge(source, destination):
+    #                 self.user_level_quote_network.edges[source, destination]["weight"] += 1
+    #             else:
+    #                 self.user_level_quote_network.add_edge(source, destination, kind="quote", weight=1)
+    #
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_quote_condition:
+    #                 inner_source = tweet.get_quote().get_twitter().get_screen_name()
+    #                 inner_destination = tweet.get_quote().get_inner_quote_screen_name()
+    #                 if self.user_level_quote_network.has_edge(inner_source, inner_destination):
+    #                     self.user_level_quote_network.edges[inner_source, inner_destination]["weight"] += 1
+    #                 else:
+    #                     self.user_level_quote_network.add_edge(inner_source, inner_destination, kind="quote", weight=1)
+    #         else:
+    #             self.user_level_quote_network.add_node(source)
+    #
+    # def user_level_reply_network_building(self):
+    #     self.network_repository.append("user_level_reply_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         reply_condition = tweet.is_this_a_reply()
+    #
+    #         source = tweet.get_twitter().get_screen_name()
+    #         if reply_condition:
+    #             destination = tweet.get_in_reply_to_screen_name()
+    #             if self.user_level_reply_network.has_edge(source, destination):
+    #                 self.user_level_reply_network.edges[source, destination]["weight"] += 1
+    #             else:
+    #                 self.user_level_reply_network.add_edge(source, destination, kind="reply", weight=1)
+    #         else:
+    #             self.user_level_reply_network.add_node(source)
+    #
+    # # quote-reply/retweet-reply/retweet-quote networks
+    # def user_level_quote_reply_network_building(self):
+    #     self.network_repository.append("user_level_quote_reply_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         quote_condition = tweet.is_quote_available()
+    #         reply_condition = tweet.is_this_a_reply()
+    #
+    #         key_code = 0
+    #         source = tweet.get_twitter().get_screen_name()
+    #
+    #         if quote_condition is True and reply_condition is True:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             quote_destination = tweet.get_quote().get_twitter().get_screen_name()
+    #
+    #             # key_code = 0
+    #             if (source, quote_destination, "quote") in self.quote_reply_key_keepers.keys():
+    #                 self.user_level_quote_reply_network.edges[source, quote_destination, self.quote_reply_key_keepers[
+    #                     (source, quote_destination, "quote")]]["weight"] += 1
+    #             else:
+    #                 self.quote_reply_key_keepers[(source, quote_destination, "quote")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_quote_reply_network.add_edge(source, quote_destination, key=self.quote_reply_key_keepers[
+    #                     (source, quote_destination, "quote")], kind="quote", weight=1)
+    #
+    #             reply_destination = tweet.get_in_reply_to_screen_name()
+    #             if (source, reply_destination, "reply") in self.quote_reply_key_keepers.keys():
+    #                 self.user_level_quote_reply_network.edges[
+    #                     source, reply_destination, self.quote_reply_key_keepers[
+    #                         (source, reply_destination, "reply")]][
+    #                     "weight"] += 1
+    #             else:
+    #                 self.quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_quote_reply_network.add_edge(source, reply_destination, key=self.quote_reply_key_keepers[
+    #                     (source, reply_destination, "reply")], kind="reply", weight=1)
+    #
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_quote_condition:
+    #                 inner_source = tweet.get_quote().get_twitter().get_screen_name()
+    #                 inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
+    #                 if (
+    #                         inner_source, inner_quote_destination, "quote") in self.quote_reply_key_keepers.keys():
+    #                     self.user_level_quote_reply_network.edges[
+    #                         inner_source, inner_quote_destination, self.quote_reply_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.quote_reply_key_keepers[(inner_source, inner_quote_destination, "quote")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_quote_reply_network.add_edge(inner_source, inner_quote_destination,
+    #                                            key=self.quote_reply_key_keepers[
+    #                                                (inner_source, inner_quote_destination, "quote")],
+    #                                            kind="quote", weight=1)
+    #                 inner_reply_condition = tweet.get_quote().is_this_a_reply()
+    #                 if inner_reply_condition:
+    #                     inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
+    #                     if (
+    #                             inner_source, inner_reply_destination,
+    #                             "reply") in self.quote_reply_key_keepers.keys():
+    #                         self.user_level_quote_reply_network.edges[
+    #                             inner_source, inner_reply_destination, self.quote_reply_key_keepers[
+    #                                 (inner_source, inner_reply_destination, network_type)]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.quote_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_quote_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                                key=self.quote_reply_key_keepers[
+    #                                                    (inner_source, inner_reply_destination, "reply")],
+    #                                                kind="reply", weight=1)
+    #
+    #         elif quote_condition is True and reply_condition is False:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             quote_destination = tweet.get_quote().get_twitter().get_screen_name()
+    #
+    #             # key_code = 0
+    #             if (source, quote_destination, "quote") in self.quote_reply_key_keepers.keys():
+    #                 self.user_level_quote_reply_network.edges[source, quote_destination, self.quote_reply_key_keepers[
+    #                     (source, quote_destination, "quote")]]["weight"] += 1
+    #             else:
+    #                 self.quote_reply_key_keepers[(source, quote_destination, "quote")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_quote_reply_network.add_edge(source, quote_destination, key=self.quote_reply_key_keepers[
+    #                     (source, quote_destination, "quote")], kind="quote", weight=1)
+    #
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_quote_condition:
+    #                 inner_source = tweet.get_quote().get_twitter().get_screen_name()
+    #                 inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
+    #                 if (inner_source, inner_quote_destination, "quote") in self.quote_reply_key_keepers.keys():
+    #                     self.user_level_quote_reply_network.edges[
+    #                         inner_source, inner_quote_destination, self.quote_reply_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.quote_reply_key_keepers[(inner_source, inner_quote_destination, "quote")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_quote_reply_network.add_edge(inner_source, inner_quote_destination,
+    #                                            key=self.quote_reply_key_keepers[
+    #                                                (inner_source, inner_quote_destination, "quote")],
+    #                                            kind="quote", weight=1)
+    #                 inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
+    #                 if inner_reply_destination:
+    #                     if (
+    #                             inner_source, inner_reply_destination,
+    #                             "reply") in self.quote_reply_key_keepers.keys():
+    #                         self.user_level_quote_reply_network.edges[
+    #                             inner_source, inner_reply_destination, self.quote_reply_key_keepers[
+    #                                 (inner_source, inner_reply_destination, "reply")]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.quote_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_quote_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                                key=self.quote_reply_key_keepers[
+    #                                                    (inner_source, inner_reply_destination, "reply")],
+    #                                                kind="reply", weight=1)
+    #
+    #         elif quote_condition is False and reply_condition is True:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             reply_destination = tweet.get_in_reply_to_screen_name()
+    #             if (source, reply_destination, "reply") in self.quote_reply_key_keepers.keys():
+    #                 self.user_level_quote_reply_network.edges[
+    #                     source, reply_destination, self.quote_reply_key_keepers[
+    #                         (source, reply_destination, "reply")]][
+    #                     "weight"] += 1
+    #             else:
+    #                 self.quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_quote_reply_network.add_edge(source, reply_destination, key=self.quote_reply_key_keepers[
+    #                     (source, reply_destination, "reply")], kind="reply", weight=1)
+    #
+    #         elif quote_condition is False and reply_condition is False:
+    #             self.user_level_quote_reply_network.add_node(source)
+    #
+    # def user_level_retweet_reply_network_building(self):
+    #     self.network_repository.append("user_level_retweet_reply_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         retweet_condition = tweet.is_retweeted()
+    #         reply_condition = tweet.is_this_a_reply()
+    #
+    #         key_code = 0
+    #         source = tweet.get_twitter().get_screen_name()
+    #
+    #         if retweet_condition is True and reply_condition is True:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
+    #
+    #             if (source, retweet_destination, "retweet") in self.retweet_reply_key_keepers.keys():
+    #                 self.user_level_retweet_reply_network.edges[source, retweet_destination, self.retweet_reply_key_keepers[
+    #                     (source, retweet_destination, "retweet")]]["weight"] += 1
+    #             else:
+    #                 self.retweet_reply_key_keepers[(source, retweet_destination, "retweet")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_reply_network.add_edge(source, retweet_destination, key=self.retweet_reply_key_keepers[
+    #                     (source, retweet_destination, "retweet")], kind="retweet", weight=1)
+    #
+    #             reply_destination = tweet.get_in_reply_to_screen_name()
+    #             if (source, reply_destination, "reply") in self.retweet_reply_key_keepers.keys():
+    #                 self.user_level_retweet_reply_network.edges[
+    #                     source, reply_destination, self.retweet_reply_key_keepers[
+    #                         (source, reply_destination, "reply")]][
+    #                     "weight"] += 1
+    #             else:
+    #                 self.retweet_reply_key_keepers[(source, reply_destination, "reply")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_reply_network.add_edge(source, reply_destination, key=self.retweet_reply_key_keepers[
+    #                     (source, reply_destination, "reply")], kind="reply", weight=1)
+    #
+    #             inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+    #             if inner_reply_condition:
+    #                 inner_source = retweet_destination
+    #                 inner_reply_destination = tweet.get_retweeted().get_in_reply_to_screen_name()
+    #
+    #                 if (
+    #                         inner_source, inner_reply_destination,
+    #                         "reply") in self.retweet_reply_key_keepers.keys():
+    #                     self.user_level_retweet_reply_network.edges[
+    #                         inner_source, inner_reply_destination, self.retweet_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_reply_key_keepers[
+    #                         (inner_source, inner_reply_destination, "reply")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                            key=self.retweet_reply_key_keepers[
+    #                                                (inner_source, inner_reply_destination, "reply")],
+    #                                            kind="reply", weight=1)
+    #
+    #         elif retweet_condition is True and reply_condition is False:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
+    #
+    #             if (source, retweet_destination, "retweet") in self.retweet_reply_key_keepers.keys():
+    #                 self.user_level_retweet_reply_network.edges[source, retweet_destination, self.retweet_reply_key_keepers[
+    #                     (source, retweet_destination, "retweet")]]["weight"] += 1
+    #             else:
+    #                 self.retweet_reply_key_keepers[(source, retweet_destination, "retweet")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_reply_network.add_edge(source, retweet_destination, key=self.retweet_reply_key_keepers[
+    #                     (source, retweet_destination, "retweet")], kind="retweet", weight=1)
+    #
+    #             inner_reply_condition = tweet.get_retweeted().is_this_a_reply()
+    #             if inner_reply_condition:
+    #                 inner_source = retweet_destination
+    #                 inner_reply_destination = tweet.get_retweeted().get_in_reply_to_screen_name()
+    #
+    #                 if (
+    #                         inner_source, inner_reply_destination,
+    #                         "reply") in self.retweet_reply_key_keepers.keys():
+    #                     self.user_level_retweet_reply_network.edges[
+    #                         inner_source, inner_reply_destination, self.retweet_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_reply_key_keepers[
+    #                         (inner_source, inner_reply_destination, "reply")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                            key=self.retweet_reply_key_keepers[
+    #                                                (inner_source, inner_reply_destination, "reply")],
+    #                                            kind="reply", weight=1)
+    #
+    #         elif retweet_condition is False and reply_condition is True:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             reply_destination = tweet.get_in_reply_to_screen_name()
+    #             if (source, reply_destination, "reply") in self.retweet_reply_key_keepers.keys():
+    #                 self.user_level_retweet_reply_network.edges[
+    #                     source, reply_destination, self.retweet_reply_key_keepers[
+    #                         (source, reply_destination, "reply")]][
+    #                     "weight"] += 1
+    #             else:
+    #                 self.retweet_reply_key_keepers[(source, reply_destination, "reply")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_reply_network.add_edge(source, reply_destination, key=self.retweet_reply_key_keepers[
+    #                     (source, reply_destination, "reply")], kind="reply", weight=1)
+    #
+    #         elif retweet_condition is False and reply_condition is False:
+    #             self.user_level_retweet_reply_network.add_node(source)
+    #
+    # def user_level_retweet_quote_network_building(self):
+    #     self.network_repository.append("user_level_retweet_quote_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         retweet_condition = tweet.is_retweeted()
+    #         quote_condition = tweet.is_quote_available()
+    #
+    #         key_code = 0
+    #         source = tweet.get_twitter().get_screen_name()
+    #         # if retweet_condition is True and quote_condition is True: #Not possible
+    #         if retweet_condition is True and quote_condition is False:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
+    #
+    #             if (source, retweet_destination, "retweet") in self.retweet_quote_key_keepers.keys():
+    #                 self.user_level_retweet_quote_network.edges[source, retweet_destination, self.retweet_quote_key_keepers[
+    #                     (source, retweet_destination, "retweet")]]["weight"] += 1
+    #             else:
+    #                 self.retweet_quote_key_keepers[(source, retweet_destination, "retweet")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_network.add_edge(source, retweet_destination, key=self.retweet_quote_key_keepers[
+    #                     (source, retweet_destination, "retweet")], kind="retweet", weight=1)
+    #
+    #             inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+    #             if inner_quote_condition_level_one:
+    #                 inner_source = retweet_destination
+    #                 inner_quote_destination = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                 # inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
+    #                 if (inner_source, inner_quote_destination, "quote") in self.retweet_quote_key_keepers.keys():
+    #                     self.user_level_retweet_quote_network.edges[
+    #                         inner_source, inner_quote_destination, self.retweet_quote_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_quote_key_keepers[(inner_source, inner_quote_destination, "quote")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_quote_network.add_edge(inner_source, inner_quote_destination,
+    #                                            key=self.retweet_quote_key_keepers[
+    #                                                (inner_source, inner_quote_destination, "quote")],
+    #                                            kind="quote", weight=1)
+    #
+    #                 inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+    #                 if inner_quote_condition_level_two:
+    #                     inner_source_level_two = inner_quote_destination
+    #                     inner_quote_destination_level_two = tweet.get_quote().get_inner_quote_screen_name()
+    #                     if (inner_source_level_two, inner_quote_destination_level_two,
+    #                         "quote") in self.retweet_quote_key_keepers.keys():
+    #                         self.user_level_retweet_quote_network.edges[
+    #                             inner_source_level_two, inner_quote_destination_level_two,
+    #                             self.retweet_quote_key_keepers[
+    #                                 (inner_source_level_two, inner_quote_destination_level_two, "quote")]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.retweet_quote_key_keepers[
+    #                             (inner_source_level_two, inner_quote_destination_level_two, "quote")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_retweet_quote_network.add_edge(inner_source_level_two, inner_quote_destination_level_two,
+    #                                                key=self.retweet_quote_key_keepers[
+    #                                                    (inner_source_level_two, inner_quote_destination_level_two,
+    #                                                     "quote")],
+    #                                                kind="quote", weight=1)
+    #
+    #         elif retweet_condition is False and quote_condition is True:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             quote_destination = tweet.get_quote().get_twitter().get_screen_name()
+    #
+    #             # key_code = 0
+    #             if (source, quote_destination, "quote") in self.retweet_quote_key_keepers.keys():
+    #                 self.user_level_retweet_quote_network.edges[source, quote_destination, self.retweet_quote_key_keepers[
+    #                     (source, quote_destination, "quote")]]["weight"] += 1
+    #             else:
+    #                 self.retweet_quote_key_keepers[(source, quote_destination, "quote")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_network.add_edge(source, quote_destination, key=self.retweet_quote_key_keepers[
+    #                     (source, quote_destination, "quote")], kind="quote", weight=1)
+    #
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_quote_condition:
+    #                 inner_source = quote_destination
+    #                 inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
+    #                 if (inner_source, inner_quote_destination, "quote") in self.retweet_quote_key_keepers.keys():
+    #                     self.user_level_retweet_quote_network.edges[
+    #                         inner_source, inner_quote_destination, self.retweet_quote_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_quote_key_keepers[(inner_source, inner_quote_destination, "quote")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_quote_network.add_edge(inner_source, inner_quote_destination,
+    #                                            key=self.retweet_quote_key_keepers[
+    #                                                (inner_source, inner_quote_destination, "quote")],
+    #                                            kind="quote", weight=1)
+    #
+    #         elif retweet_condition is False and quote_condition is False:
+    #             self.user_level_retweet_quote_network.add_node(source)
+    #
+    # # retweet-quote-reply network
+    # def user_level_retweet_quote_reply_network_building(self):
+    #     self.network_repository.append("user_level_retweet_quote_reply_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         retweet_condition = tweet.is_retweeted()
+    #         quote_condition = tweet.is_quote_available()
+    #         reply_condition = tweet.is_this_a_reply()
+    #
+    #         key_code = 0
+    #         source = tweet.get_twitter().get_screen_name()
+    #
+    #         if retweet_condition is True and quote_condition is False and reply_condition is True:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
+    #
+    #             if (source, retweet_destination, "retweet") in self.retweet_quote_reply_key_keepers.keys():
+    #                 self.user_level_retweet_quote_reply_network.edges[source, retweet_destination, self.retweet_quote_reply_key_keepers[
+    #                     (source, retweet_destination, "retweet")]]["weight"] += 1
+    #             else:
+    #                 self.retweet_quote_reply_key_keepers[(source, retweet_destination, "retweet")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_reply_network.add_edge(source, retweet_destination, key=self.retweet_quote_reply_key_keepers[
+    #                     (source, retweet_destination, "retweet")], kind="retweet", weight=1)
+    #
+    #             reply_destination = tweet.get_in_reply_to_screen_name()
+    #             if (source, reply_destination, "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                 self.user_level_retweet_quote_reply_network.edges[
+    #                     source, reply_destination, self.retweet_quote_reply_key_keepers[
+    #                         (source, reply_destination, "reply")]][
+    #                     "weight"] += 1
+    #             else:
+    #                 self.retweet_quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_reply_network.add_edge(source, reply_destination, key=self.retweet_quote_reply_key_keepers[
+    #                     (source, reply_destination, "reply")], kind="reply", weight=1)
+    #
+    #             inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
+    #             inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+    #
+    #             if inner_reply_condition_level_one:
+    #                 inner_source = retweet_destination
+    #                 inner_reply_destination = tweet.get_retweeted().get_in_reply_to_screen_name()
+    #
+    #                 if (
+    #                         inner_source, inner_reply_destination,
+    #                         "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                     self.user_level_retweet_quote_reply_network.edges[
+    #                         inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_quote_reply_key_keepers[
+    #                         (inner_source, inner_reply_destination, "reply")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                            key=self.retweet_quote_reply_key_keepers[
+    #                                                (inner_source, inner_reply_destination, "reply")],
+    #                                            kind="reply", weight=1)
+    #             if inner_quote_condition_level_one:
+    #                 inner_source = retweet_destination
+    #                 inner_quote_destination = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                 if (
+    #                         inner_source, inner_quote_destination,
+    #                         "quote") in self.retweet_quote_reply_key_keepers.keys():
+    #                     self.user_level_retweet_quote_reply_network.edges[
+    #                         inner_source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_quote_reply_key_keepers[
+    #                         (inner_source, inner_quote_destination, "quote")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
+    #                                            key=self.retweet_quote_reply_key_keepers[
+    #                                                (inner_source, inner_quote_destination, "quote")],
+    #                                            kind="quote", weight=1)
+    #
+    #                 inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+    #                 inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
+    #
+    #                 if inner_reply_condition_level_two:
+    #                     inner_source = inner_quote_destination
+    #                     inner_reply_destination = tweet.get_retweeted().get_quote().get_in_reply_to_screen_name()
+    #
+    #                     if (
+    #                             inner_source, inner_reply_destination,
+    #                             "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                         self.user_level_retweet_quote_reply_network.edges[
+    #                             inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
+    #                                 (inner_source, inner_reply_destination, "reply")]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                                key=self.retweet_quote_reply_key_keepers[
+    #                                                    (inner_source, inner_reply_destination, "reply")],
+    #                                                kind="reply", weight=1)
+    #                 if inner_quote_condition_level_two:
+    #                     inner_source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                     inner_quote_destination = inner_quote_destination
+    #                     if (
+    #                             inner_source, inner_quote_destination,
+    #                             "quote") in self.retweet_quote_reply_key_keepers.keys():
+    #                         self.user_level_retweet_quote_reply_network.edges[
+    #                             source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
+    #                                 (source, inner_quote_destination, "quote")]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
+    #                                                key=self.retweet_quote_reply_key_keepers[
+    #                                                    (inner_source, inner_quote_destination, "quote")],
+    #                                                kind="quote", weight=1)
+    #         elif retweet_condition is True and quote_condition is False and reply_condition is False:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             retweet_destination = tweet.get_retweeted().get_twitter().get_screen_name()
+    #
+    #             if (source, retweet_destination, "retweet") in self.retweet_quote_reply_key_keepers.keys():
+    #                 self.user_level_retweet_quote_reply_network.edges[source, retweet_destination, self.retweet_quote_reply_key_keepers[
+    #                     (source, retweet_destination, "retweet")]]["weight"] += 1
+    #             else:
+    #                 self.retweet_quote_reply_key_keepers[(source, retweet_destination, "retweet")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_reply_network.add_edge(source, retweet_destination,
+    #                                        key=self.retweet_quote_reply_key_keepers[
+    #                                            (source, retweet_destination, "retweet")], kind="retweet",
+    #                                        weight=1)
+    #
+    #             inner_reply_condition_level_one = tweet.get_retweeted().is_this_a_reply()
+    #             inner_quote_condition_level_one = tweet.get_retweeted().is_quote_available()
+    #
+    #             if inner_reply_condition_level_one:
+    #                 inner_source = retweet_destination
+    #                 inner_reply_destination = tweet.get_retweeted().get_in_reply_to_screen_name()
+    #
+    #                 if (
+    #                         inner_source, inner_reply_destination,
+    #                         "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                     self.user_level_retweet_quote_reply_network.edges[
+    #                         inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_quote_reply_key_keepers[
+    #                         (inner_source, inner_reply_destination, "reply")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                            key=self.retweet_quote_reply_key_keepers[
+    #                                                (inner_source, inner_reply_destination, "reply")],
+    #                                            kind="reply", weight=1)
+    #             if inner_quote_condition_level_one:
+    #                 inner_source = retweet_destination
+    #                 inner_quote_destination = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                 if (
+    #                         inner_source, inner_quote_destination,
+    #                         "quote") in self.retweet_quote_reply_key_keepers.keys():
+    #                     self.user_level_retweet_quote_reply_network.edges[
+    #                         inner_source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_quote_reply_key_keepers[
+    #                         (inner_source, inner_quote_destination, "quote")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
+    #                                            key=self.retweet_quote_reply_key_keepers[
+    #                                                (inner_source, inner_quote_destination, "quote")],
+    #                                            kind="quote", weight=1)
+    #
+    #                 inner_quote_condition_level_two = tweet.get_retweeted().get_quote().is_quoted()
+    #                 inner_reply_condition_level_two = tweet.get_retweeted().get_quote().is_this_a_reply()
+    #
+    #                 if inner_reply_condition_level_two:
+    #                     inner_source = inner_quote_destination
+    #                     inner_reply_destination = tweet.get_retweeted().get_quote().get_in_reply_to_screen_name()
+    #
+    #                     if (
+    #                             inner_source, inner_reply_destination,
+    #                             "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                         self.user_level_retweet_quote_reply_network.edges[
+    #                             inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
+    #                                 (inner_source, inner_reply_destination, "reply")]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                                key=self.retweet_quote_reply_key_keepers[
+    #                                                    (inner_source, inner_reply_destination, "reply")],
+    #                                                kind="reply", weight=1)
+    #                 if inner_quote_condition_level_two:
+    #                     inner_source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                     inner_quote_destination = inner_quote_destination
+    #                     if (
+    #                             inner_source, inner_quote_destination,
+    #                             "quote") in self.retweet_quote_reply_key_keepers.keys():
+    #                         self.user_level_retweet_quote_reply_network.edges[
+    #                             source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
+    #                                 (source, inner_quote_destination, "quote")]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
+    #                                                key=self.retweet_quote_reply_key_keepers[
+    #                                                    (inner_source, inner_quote_destination, "quote")],
+    #                                                kind="quote", weight=1)
+    #         elif retweet_condition is False and quote_condition is True and reply_condition is True:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             quote_destination = tweet.get_quote().get_twitter().get_screen_name()
+    #
+    #             # key_code = 0
+    #             if (source, quote_destination, "quote") in self.retweet_quote_reply_key_keepers.keys():
+    #                 self.user_level_retweet_quote_reply_network.edges[source, quote_destination, self.retweet_quote_reply_key_keepers[
+    #                     (source, quote_destination, "quote")]]["weight"] += 1
+    #             else:
+    #                 self.retweet_quote_reply_key_keepers[(source, quote_destination, "quote")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_reply_network.add_edge(source, quote_destination, key=self.retweet_quote_reply_key_keepers[
+    #                     (source, quote_destination, "quote")], kind="quote", weight=1)
+    #
+    #             reply_destination = tweet.get_in_reply_to_screen_name()
+    #             if (source, reply_destination, "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                 self.user_level_retweet_quote_reply_network.edges[
+    #                     source, reply_destination, self.retweet_quote_reply_key_keepers[
+    #                         (source, reply_destination, "reply")]][
+    #                     "weight"] += 1
+    #             else:
+    #                 self.retweet_quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_reply_network.add_edge(source, reply_destination, key=self.retweet_quote_reply_key_keepers[
+    #                     (source, reply_destination, "reply")], kind="reply", weight=1)
+    #
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_quote_condition:
+    #                 inner_source = quote_destination
+    #                 inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
+    #                 if (
+    #                         inner_source, inner_quote_destination,
+    #                         "quote") in self.retweet_quote_reply_key_keepers.keys():
+    #                     self.user_level_retweet_quote_reply_network.edges[
+    #                         inner_source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_quote_reply_key_keepers[
+    #                         (inner_source, inner_quote_destination, "quote")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
+    #                                            key=self.retweet_quote_reply_key_keepers[
+    #                                                (inner_source, inner_quote_destination, "quote")],
+    #                                            kind="quote", weight=1)
+    #                 inner_reply_condition = tweet.get_quote().is_this_a_reply()
+    #                 if inner_reply_condition:
+    #                     inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
+    #                     if (
+    #                             inner_source, inner_reply_destination,
+    #                             "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                         self.user_level_retweet_quote_reply_network.edges[
+    #                             inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
+    #                                 (inner_source, inner_reply_destination, "reply")]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                                key=self.retweet_quote_reply_key_keepers[
+    #                                                    (inner_source, inner_reply_destination, "reply")],
+    #                                                kind="reply", weight=1)
+    #         elif retweet_condition is False and quote_condition is True and reply_condition is False:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             quote_destination = tweet.get_quote().get_twitter().get_screen_name()
+    #
+    #             # key_code = 0
+    #             if (source, quote_destination, "quote") in self.retweet_quote_reply_key_keepers.keys():
+    #                 self.user_level_retweet_quote_reply_network.edges[source, quote_destination, self.retweet_quote_reply_key_keepers[
+    #                     (source, quote_destination, "quote")]]["weight"] += 1
+    #             else:
+    #                 self.retweet_quote_reply_key_keepers[(source, quote_destination, "quote")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_reply_network.add_edge(source, quote_destination, key=self.retweet_quote_reply_key_keepers[
+    #                     (source, quote_destination, "quote")], kind="quote", weight=1)
+    #
+    #             inner_quote_condition = tweet.get_quote().is_quoted()
+    #             if inner_quote_condition:
+    #                 inner_source = quote_destination
+    #                 inner_quote_destination = tweet.get_quote().get_inner_quote_screen_name()
+    #                 if (
+    #                         inner_source, inner_quote_destination,
+    #                         "quote") in self.retweet_quote_reply_key_keepers.keys():
+    #                     self.user_level_retweet_quote_reply_network.edges[
+    #                         inner_source, inner_quote_destination, self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_quote_destination, "quote")]][
+    #                         "weight"] += 1
+    #                 else:
+    #                     self.retweet_quote_reply_key_keepers[
+    #                         (inner_source, inner_quote_destination, "quote")] = key_code
+    #                     key_code += 1
+    #                     self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_quote_destination,
+    #                                            key=self.retweet_quote_reply_key_keepers[
+    #                                                (inner_source, inner_quote_destination, "quote")],
+    #                                            kind="quote", weight=1)
+    #                 inner_reply_condition = tweet.get_quote().is_this_a_reply()
+    #                 if inner_reply_condition:
+    #                     inner_reply_destination = tweet.get_quote().get_in_reply_to_screen_name()
+    #                     if (
+    #                             inner_source, inner_reply_destination,
+    #                             "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                         self.user_level_retweet_quote_reply_network.edges[
+    #                             inner_source, inner_reply_destination, self.retweet_quote_reply_key_keepers[
+    #                                 (inner_source, inner_reply_destination, "reply")]][
+    #                             "weight"] += 1
+    #                     else:
+    #                         self.retweet_quote_reply_key_keepers[
+    #                             (inner_source, inner_reply_destination, "reply")] = key_code
+    #                         key_code += 1
+    #                         self.user_level_retweet_quote_reply_network.add_edge(inner_source, inner_reply_destination,
+    #                                                key=self.retweet_quote_reply_key_keepers[
+    #                                                    (inner_source, inner_reply_destination, "reply")],
+    #                                                kind="reply", weight=1)
+    #         elif retweet_condition is False and quote_condition is False and reply_condition is True:
+    #             # source = tweet.get_twitter().get_screen_name()
+    #             reply_destination = tweet.get_in_reply_to_screen_name()
+    #             if (source, reply_destination, "reply") in self.retweet_quote_reply_key_keepers.keys():
+    #                 self.user_level_retweet_quote_reply_network.edges[
+    #                     source, reply_destination, self.retweet_quote_reply_key_keepers[
+    #                         (source, reply_destination, "reply")]][
+    #                     "weight"] += 1
+    #             else:
+    #                 self.retweet_quote_reply_key_keepers[(source, reply_destination, "reply")] = key_code
+    #                 key_code += 1
+    #                 self.user_level_retweet_quote_reply_network.add_edge(source, reply_destination, key=self.retweet_quote_reply_key_keepers[
+    #                     (source, reply_destination, "reply")], kind="reply", weight=1)
+    #         elif retweet_condition is False and quote_condition is False and reply_condition is False:
+    #             self.user_level_retweet_quote_reply_network.add_node(source)
+    #
+    # # user-level co-occurence hashtag/mention/url networks
+    # def user_level_cooccurrence_hashtag_network_building(self):  # Thinking of pruning hashtags      #also adding tweet_ids as a feature instead of deleting them (convert them to a a string)
+    #     self.network_repository.append("user_level_cooccurrence_hashtag_network")
+    #
+    #     tweets_keys = list(self.tweets.keys())
+    #     for i in range(len(tweets_keys)):
+    #         tweet1 = self.tweets[tweets_keys[i]]
+    #         user1 = tweet1.get_twitter().get_screen_name()
+    #         tweet1_hashtags = tweet1.get_hashtags()
+    #
+    #         j = i + 1
+    #
+    #         self.user_level_cooccurrence_hashtag_network.add_node(user1)
+    #
+    #         tweet1_retweet_condition = tweet1.is_retweeted()
+    #         tweet1_quote_condition = tweet1.is_quote_available()
+    #
+    #         if tweet1_retweet_condition:
+    #             tweet1_rt = tweet1.get_retweeted()
+    #             user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #
+    #             if (user1, user1_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                 if (tweet1.get_id(), tweet1_rt.get_id()) not in \
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt][
+    #                             "tweets"] and (tweet1_rt.get_id(), tweet1.get_id()) not in \
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["tweets"]:
+    #                     for ht in tweet1_hashtags:
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["weight"] += 1
+    #                         edge_label = "-" + ht
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["hashtags"] += edge_label
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["tweets"] += [
+    #                             (tweet1.get_id(), tweet1_rt.get_id())]
+    #             else:
+    #                 for ht in tweet1_hashtags:
+    #                     if (user1, user1_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["weight"] += 1
+    #                         edge_label = "-" + ht
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["hashtags"] += edge_label
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt]["tweets"] += [
+    #                             (tweet1.get_id(), tweet1_rt.get_id())]
+    #                     else:
+    #                         self.user_level_cooccurrence_hashtag_network.add_edge(user1, user1_rt, weight=1, hashtags=ht,
+    #                                                                  tweets=[(tweet1.get_id(), tweet1_rt.get_id())])
+    #
+    #             tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #             if tweet1_inner_quote_condition:
+    #                 tweet1_rt_qt = tweet1_rt.get_quote()
+    #                 user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                 tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                 if (user1, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                     if (tweet1.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["tweets"] and (
+    #                             tweet1_rt_qt.get_id(), tweet1.get_id()) not in \
+    #                             self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["tweets"]:
+    #                         for ht1 in tweet1_hashtags:
+    #                             for ht2 in tweet1_rt_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt][
+    #                                         "hashtags"] += edge_label
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet1_rt_qt.get_id())]
+    #                 else:
+    #                     for ht1 in tweet1_hashtags:
+    #                         for ht2 in tweet1_rt_qt_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (user1, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt][
+    #                                         "hashtags"] += edge_label
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet1_rt_qt.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_hashtag_network.add_edge(user1, user1_rt_qt, weight=1,
+    #                                                                              hashtags=ht1,
+    #                                                                              tweets=[(tweet1.get_id(),
+    #                                                                                       tweet1_rt_qt.get_id())])
+    #
+    #                 if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                     if (tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"] and (
+    #                             tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"]:
+    #                         for ht1 in tweet1_hashtags:
+    #                             for ht2 in tweet1_rt_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     # if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt][
+    #                                         "hashtags"] += edge_label
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
+    #                 else:
+    #                     for ht1 in tweet1_hashtags:
+    #                         for ht2 in tweet1_rt_qt_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt][
+    #                                         "hashtags"] += edge_label
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user1_rt_qt, weight=1,
+    #                                                                              hashtags=ht1, tweets=[
+    #                                             (tweet1_rt.get_id(), tweet1_rt_qt.get_id())])
+    #
+    #         if tweet1_quote_condition:
+    #             tweet1_qt = tweet1.get_quote()
+    #             user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #             tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+    #
+    #             if (user1, user1_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                 if (tweet1.get_id(), tweet1_qt.get_id()) not in \
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt][
+    #                             "tweets"] and (tweet1_qt.get_id(), tweet1.get_id()) not in \
+    #                         self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["tweets"]:
+    #                     for ht1 in tweet1_hashtags:
+    #                         for ht2 in tweet1_qt_hashtags:
+    #                             if ht1 == ht2:
+    #                                 # if (user1, user1_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["weight"] += 1
+    #                                 edge_label = "-" + ht1
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["hashtags"] += edge_label
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["tweets"] += [
+    #                                     (tweet1.get_id(), tweet1_qt.get_id())]
+    #             else:
+    #                 for ht1 in tweet1_hashtags:
+    #                     for ht2 in tweet1_qt_hashtags:
+    #                         if ht1 == ht2:
+    #                             if (user1, user1_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["weight"] += 1
+    #                                 edge_label = "-" + ht1
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["hashtags"] += edge_label
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user1_qt]["tweets"] += [
+    #                                     (tweet1.get_id(), tweet1_qt.get_id())]
+    #                             else:
+    #                                 self.user_level_cooccurrence_hashtag_network.add_edge(user1, user1_qt, weight=1, hashtags=ht1,
+    #                                                                          tweets=[
+    #                                                                              (tweet1.get_id(), tweet1_qt.get_id())])
+    #
+    #         while j != len(tweets_keys):
+    #             tweet2 = self.tweets[tweets_keys[j]]
+    #             user2 = tweet2.get_twitter().get_screen_name()
+    #             tweet2_hashtags = tweet2.get_hashtags()
+    #
+    #             tweet2_retweet_condition = tweet2.is_retweeted()
+    #             tweet2_quote_condition = tweet2.is_quote_available()
+    #
+    #             if tweet2_retweet_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #
+    #                 if tweet1.get_id() != tweet2_rt.get_id():
+    #                     if (user1, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         if (tweet1.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["tweets"]:
+    #                             for ht1 in tweet1_hashtags:
+    #                                 for ht2 in tweet2_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for ht1 in tweet1_hashtags:
+    #                             for ht2 in tweet2_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (user1, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_hashtag_network.add_edge(user1, user2_rt, weight=1,
+    #                                                                                  hashtags=ht1, tweets=[
+    #                                                 (tweet1.get_id(), tweet2_rt.get_id())])
+    #
+    #                     tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                     if tweet2_inner_quote_condition:
+    #                         tweet2_rt_qt = tweet2_rt.get_quote()
+    #                         user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                         tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+    #
+    #                         if tweet1.get_id() != tweet2_rt_qt.get_id():
+    #                             if (user1, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                 if (tweet1.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt]["tweets"] and (
+    #                                         tweet2_rt_qt.get_id(), tweet1.get_id()) not in \
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt]["tweets"]:
+    #                                     for ht1 in tweet1_hashtags:
+    #                                         for ht2 in tweet2_rt_qt_hashtags:
+    #                                             if ht1 == ht2:
+    #                                                 # if (user1, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
+    #                                                     "weight"] += 1
+    #                                                 edge_label = "-" + ht1
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
+    #                                                     "hashtags"] += edge_label
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
+    #                                                     "tweets"] += [(tweet1.get_id(), tweet2_rt_qt.get_id())]
+    #                             else:
+    #                                 for ht1 in tweet1_hashtags:
+    #                                     for ht2 in tweet2_rt_qt_hashtags:
+    #                                         if ht1 == ht2:
+    #                                             if (user1, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
+    #                                                     "weight"] += 1
+    #                                                 edge_label = "-" + ht1
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
+    #                                                     "hashtags"] += edge_label
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_rt_qt][
+    #                                                     "tweets"] += [
+    #                                                     (tweet1.get_id(), tweet2_rt_qt.get_id())]
+    #                                             else:
+    #                                                 self.user_level_cooccurrence_hashtag_network.add_edge(user1, user2_rt_qt,
+    #                                                                                          weight=1,
+    #                                                                                          hashtags=ht1, tweets=[
+    #                                                         (tweet1.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #             if tweet2_quote_condition:
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_hashtags = tweet2_qt.get_hashtags()
+    #
+    #                 if tweet1.get_id() != tweet2_qt.get_id():
+    #                     if (user1, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         if (tweet1.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["tweets"]:
+    #                             for ht1 in tweet1_hashtags:
+    #                                 for ht2 in tweet2_qt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for ht1 in tweet1_hashtags:
+    #                             for ht2 in tweet2_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (user1, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1, user2_qt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_hashtag_network.add_edge(user1, user2_qt, weight=1,
+    #                                                                                  hashtags=ht1, tweets=[
+    #                                                 (tweet1.get_id(), tweet2_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition and tweet2_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_hashtags = tweet1_rt.get_hashtags()
+    #
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #                 tweet2_rt_hashtags = tweet1_rt.get_hashtags()
+    #
+    #                 if tweet1_rt.get_id() != tweet2_rt.get_id():
+    #                     if (user1_rt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["tweets"]:
+    #                             for ht1 in tweet1_rt_hashtags:
+    #                                 for ht2 in tweet2_rt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for ht1 in tweet1_rt_hashtags:
+    #                             for ht2 in tweet2_rt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (user1_rt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user2_rt, weight=1,
+    #                                                                                  hashtags=ht1, tweets=[
+    #                                                 (tweet1_rt.get_id(), tweet2_rt.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_rt.get_id():
+    #                         if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_rt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt]["tweets"] and (
+    #                                     tweet2_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt]["tweets"]:
+    #                                 for ht1 in tweet1_rt_qt_hashtags:
+    #                                     for ht2 in tweet2_rt_hashtags:
+    #                                         if ht1 == ht2:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
+    #                         else:
+    #                             for ht1 in tweet1_rt_qt_hashtags:
+    #                                 for ht2 in tweet2_rt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt_qt, user2_rt,
+    #                                                                                      weight=1,
+    #                                                                                      hashtags=ht1, tweets=[
+    #                                                     (tweet1_rt_qt.get_id(), tweet2_rt.get_id())])
+    #
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                             if (tweet1_rt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_rt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt]["tweets"]:
+    #                                 for ht1 in tweet1_rt_hashtags:
+    #                                     for ht2 in tweet2_rt_qt_hashtags:
+    #                                         if ht1 == ht2:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             for ht1 in tweet1_rt_hashtags:
+    #                                 for ht2 in tweet2_rt_qt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user2_rt_qt,
+    #                                                                                      weight=1,
+    #                                                                                      hashtags=ht1, tweets=[
+    #                                                     (tweet1_rt.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #                 if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt]["tweets"]:
+    #                                 for ht1 in tweet1_rt_qt_hashtags:
+    #                                     for ht2 in tweet2_rt_qt_hashtags:
+    #                                         if ht1 == ht2:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                 "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                 for ht1 in tweet1_rt_qt_hashtags:
+    #                                     for ht2 in tweet2_rt_qt_hashtags:
+    #                                         if ht1 == ht2:
+    #                                             if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_rt_qt][
+    #                                                     "weight"] += 1
+    #                                                 edge_label = "-" + ht1
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                     "hashtags"] += edge_label
+    #                                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                     "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                                             else:
+    #                                                 self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt_qt, user2_rt_qt,
+    #                                                                                          weight=1, hashtags=ht1,
+    #                                                                                          tweets=[
+    #                                                                                              (tweet1_rt_qt.get_id(),
+    #                                                                                               tweet2_rt_qt.get_id())])
+    #
+    #             if tweet1_quote_condition and tweet2_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_hashtags = tweet2_qt.get_hashtags()
+    #
+    #                 if tweet1_qt.get_id() != tweet2_qt.get_id():
+    #                     if (user1_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["tweets"]:
+    #                             for ht1 in tweet1_qt_hashtags:
+    #                                 for ht2 in tweet2_qt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         # if (user1_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for ht1 in tweet1_qt_hashtags:
+    #                             for ht2 in tweet2_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (user1_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_qt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2_qt, weight=1,
+    #                                                                                  hashtags=ht1, tweets=[
+    #                                                 (tweet1_qt.get_id(), tweet2_qt.get_id())])
+    #                                 # else:
+    #                                 #     self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2_qt, weight=1, hashtags=ht1, tweets=[(tweet1_qt.get_id(), tweet2_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition and tweet2_quote_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_hashtags = tweet1_rt.get_hashtags()
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_hashtags = tweet2_qt.get_hashtags()
+    #
+    #                 if tweet1_rt.get_id() != tweet2_qt.get_id():
+    #                     if (user1_rt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["tweets"]:
+    #                             for ht1 in tweet1_rt_hashtags:
+    #                                 for ht2 in tweet2_qt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for ht1 in tweet1_rt_hashtags:
+    #                             for ht2 in tweet2_qt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (user1_rt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2_qt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user2_qt, weight=1,
+    #                                                                                  hashtags=ht1, tweets=[
+    #                                                 (tweet1_rt.get_id(), tweet2_qt.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_qt.get_id():
+    #                         if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt]["tweets"] and (
+    #                                     tweet2_qt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt]["tweets"]:
+    #                                 for ht1 in tweet1_rt_qt_hashtags:
+    #                                     for ht2 in tweet2_qt_hashtags:
+    #                                         if ht1 == ht2:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
+    #                         else:
+    #                             for ht1 in tweet1_rt_qt_hashtags:
+    #                                 for ht2 in tweet2_qt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt_qt, user2_qt,
+    #                                                                                      weight=1,
+    #                                                                                      hashtags=ht1, tweets=[
+    #                                                     (tweet1_rt_qt.get_id(), tweet2_qt.get_id())])
+    #
+    #             if tweet2_retweet_condition and tweet1_quote_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #                 tweet2_rt_hashtags = tweet2_rt.get_hashtags()
+    #
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+    #
+    #                 if tweet1_qt.get_id() != tweet2_rt.get_id():
+    #                     if (user1_qt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["tweets"]:
+    #                             for ht1 in tweet1_qt_hashtags:
+    #                                 for ht2 in tweet2_rt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for ht1 in tweet1_qt_hashtags:
+    #                             for ht2 in tweet2_rt_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (user1_qt, user2_rt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2_rt, weight=1,
+    #                                                                                  hashtags=ht1, tweets=[
+    #                                                 (tweet1_qt.get_id(), tweet2_rt.get_id())])
+    #
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2_rt.get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_hashtags = tweet2_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_qt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                             if (tweet1_qt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt]["tweets"]:
+    #                                 for ht1 in tweet1_qt_hashtags:
+    #                                     for ht2 in tweet2_rt_qt_hashtags:
+    #                                         if ht1 == ht2:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             for ht1 in tweet1_qt_hashtags:
+    #                                 for ht2 in tweet2_rt_qt_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2_rt_qt,
+    #                                                                                      weight=1,
+    #                                                                                      hashtags=ht1, tweets=[
+    #                                                     (tweet1_qt.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_hashtags = tweet1_rt.get_hashtags()
+    #
+    #                 if tweet1_rt.get_id() != tweet2.get_id():
+    #                     if (user1_rt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["tweets"] and (
+    #                                 tweet2.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["tweets"]:
+    #                             for ht1 in tweet1_rt_hashtags:
+    #                                 for ht2 in tweet2_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2.get_id())]
+    #                     else:
+    #                         for ht1 in tweet1_rt_hashtags:
+    #                             for ht2 in tweet2_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (user1_rt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_rt, user2]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt, user2, weight=1,
+    #                                                                                  hashtags=ht1, tweets=[
+    #                                                 (tweet1_rt.get_id(), tweet2.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_hashtags = tweet1_rt_qt.get_hashtags()
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2.get_id():
+    #                         if (user1_rt_qt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["tweets"] and (
+    #                                     tweet2.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["tweets"]:
+    #                                 for ht1 in tweet1_rt_qt_hashtags:
+    #                                     for ht2 in tweet2_hashtags:
+    #                                         if ht1 == ht2:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2.get_id())]
+    #                         else:
+    #                             for ht1 in tweet1_rt_qt_hashtags:
+    #                                 for ht2 in tweet2_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         if (user1_rt_qt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["weight"] += 1
+    #                                             edge_label = "-" + ht1
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2][
+    #                                                 "hashtags"] += edge_label
+    #                                             self.user_level_cooccurrence_hashtag_network.edges[user1_rt_qt, user2]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_hashtag_network.add_edge(user1_rt_qt, user2, weight=1,
+    #                                                                                      hashtags=ht1, tweets=[
+    #                                                     (tweet1_rt_qt.get_id(), tweet2.get_id())])
+    #
+    #             if tweet1_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_hashtags = tweet1_qt.get_hashtags()
+    #
+    #                 if tweet1_qt.get_id() != tweet2.get_id():
+    #                     if (user1_qt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["tweets"] and (
+    #                                 tweet2.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["tweets"]:
+    #                             for ht1 in tweet1_qt_hashtags:
+    #                                 for ht2 in tweet2_hashtags:
+    #                                     if ht1 == ht2:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2.get_id())]
+    #                     else:
+    #                         for ht1 in tweet1_qt_hashtags:
+    #                             for ht2 in tweet2_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     if (user1_qt, user2) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["weight"] += 1
+    #                                         edge_label = "-" + ht1
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2][
+    #                                             "hashtags"] += edge_label
+    #                                         self.user_level_cooccurrence_hashtag_network.edges[user1_qt, user2]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_hashtag_network.add_edge(user1_qt, user2, weight=1,
+    #                                                                                  hashtags=ht1, tweets=[
+    #                                                 (tweet1_qt.get_id(), tweet2.get_id())])
+    #
+    #             if tweet1.get_id() != tweet2.get_id():
+    #                 if (user1, user2) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                     if (tweet1.get_id(), tweet2.get_id()) not in \
+    #                             self.user_level_cooccurrence_hashtag_network.edges[user1, user2][
+    #                                 "tweets"] and (tweet2.get_id(), tweet1.get_id()) not in \
+    #                             self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["tweets"]:
+    #                         for ht1 in tweet1_hashtags:
+    #                             for ht2 in tweet2_hashtags:
+    #                                 if ht1 == ht2:
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["hashtags"] += edge_label
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet2.get_id())]
+    #                 else:
+    #                     for ht1 in tweet1_hashtags:
+    #                         for ht2 in tweet2_hashtags:
+    #                             if ht1 == ht2:
+    #                                 if (user1, user2) in self.user_level_cooccurrence_hashtag_network.edges:
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["weight"] += 1
+    #                                     edge_label = "-" + ht1
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["hashtags"] += edge_label
+    #                                     self.user_level_cooccurrence_hashtag_network.edges[user1, user2]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet2.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_hashtag_network.add_edge(user1, user2, weight=1, hashtags=ht1,
+    #                                                                              tweets=[
+    #                                                                                  (
+    #                                                                                  tweet1.get_id(), tweet2.get_id())])
+    #             j += 1
+    #
+    #     for edge in self.user_level_cooccurrence_hashtag_network.edges:
+    #         del self.user_level_cooccurrence_hashtag_network.edges[edge]["tweets"]
+    #
+    # def user_level_cooccurrence_mention_network_building(self):
+    #     self.network_repository.append("user_level_cooccurrence_mention_network")
+    #
+    #     tweets_keys = list(self.tweets.keys())
+    #     for i in range(len(tweets_keys)):
+    #         tweet1 = self.tweets[tweets_keys[i]]
+    #         user1 = tweet1.get_twitter().get_screen_name()
+    #         tweet1_mentions = tweet1.get_mentions()
+    #
+    #         j = i + 1
+    #
+    #         self.user_level_cooccurrence_mention_network.add_node(user1)
+    #
+    #         tweet1_retweet_condition = tweet1.is_retweeted()
+    #         tweet1_quote_condition = tweet1.is_quote_available()
+    #
+    #         if tweet1_retweet_condition:
+    #             tweet1_rt = tweet1.get_retweeted()
+    #             user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #
+    #             if (user1, user1_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                 if (tweet1.get_id(), tweet1_rt.get_id()) not in \
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_rt][
+    #                             "tweets"] and (tweet1_rt.get_id(), tweet1.get_id()) not in \
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["tweets"]:
+    #                     for mt in tweet1_mentions:
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["weight"] += 1
+    #                         edge_label = "-" + mt
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["mentions"] += edge_label
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["tweets"] += [
+    #                             (tweet1.get_id(), tweet1_rt.get_id())]
+    #             else:
+    #                 for mt in tweet1_mentions:
+    #                     if (user1, user1_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["weight"] += 1
+    #                         edge_label = "-" + mt
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["mentions"] += edge_label
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_rt]["tweets"] += [
+    #                             (tweet1.get_id(), tweet1_rt.get_id())]
+    #                     else:
+    #                         self.user_level_cooccurrence_mention_network.add_edge(user1, user1_rt, weight=1, mentions=mt,
+    #                                                                  tweets=[(tweet1.get_id(), tweet1_rt.get_id())])
+    #
+    #             tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #             if tweet1_inner_quote_condition:
+    #                 tweet1_rt_qt = tweet1_rt.get_quote()
+    #                 user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                 tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                 if (user1, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                     if (tweet1.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["tweets"] and (
+    #                             tweet1_rt_qt.get_id(), tweet1.get_id()) not in \
+    #                             self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["tweets"]:
+    #                         for mt1 in tweet1_mentions:
+    #                             for mt2 in tweet1_rt_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt][
+    #                                         "mentions"] += edge_label
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet1_rt_qt.get_id())]
+    #                 else:
+    #                     for mt1 in tweet1_mentions:
+    #                         for mt2 in tweet1_rt_qt_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (user1, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt][
+    #                                         "mentions"] += edge_label
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet1_rt_qt.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_mention_network.add_edge(user1, user1_rt_qt, weight=1,
+    #                                                                              mentions=mt1,
+    #                                                                              tweets=[(tweet1.get_id(),
+    #                                                                                       tweet1_rt_qt.get_id())])
+    #
+    #                 if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                     if (tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["tweets"] and (
+    #                             tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["tweets"]:
+    #                         for mt1 in tweet1_mentions:
+    #                             for mt2 in tweet1_rt_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     # if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt][
+    #                                         "mentions"] += edge_label
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
+    #                 else:
+    #                     for mt1 in tweet1_mentions:
+    #                         for mt2 in tweet1_rt_qt_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt][
+    #                                         "mentions"] += edge_label
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user1_rt_qt, weight=1,
+    #                                                                              mentions=mt1, tweets=[
+    #                                             (tweet1_rt.get_id(), tweet1_rt_qt.get_id())])
+    #
+    #         if tweet1_quote_condition:
+    #             tweet1_qt = tweet1.get_quote()
+    #             user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #             tweet1_qt_mentions = tweet1_qt.get_mentions()
+    #
+    #             if (user1, user1_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                 if (tweet1.get_id(), tweet1_qt.get_id()) not in \
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_qt][
+    #                             "tweets"] and (tweet1_qt.get_id(), tweet1.get_id()) not in \
+    #                         self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["tweets"]:
+    #                     for mt1 in tweet1_mentions:
+    #                         for mt2 in tweet1_qt_mentions:
+    #                             if mt1 == mt2:
+    #                                 # if (user1, user1_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["weight"] += 1
+    #                                 edge_label = "-" + mt1
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["mentions"] += edge_label
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["tweets"] += [
+    #                                     (tweet1.get_id(), tweet1_qt.get_id())]
+    #             else:
+    #                 for mt1 in tweet1_mentions:
+    #                     for mt2 in tweet1_qt_mentions:
+    #                         if mt1 == mt2:
+    #                             if (user1, user1_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["weight"] += 1
+    #                                 edge_label = "-" + mt1
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["mentions"] += edge_label
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user1_qt]["tweets"] += [
+    #                                     (tweet1.get_id(), tweet1_qt.get_id())]
+    #                             else:
+    #                                 self.user_level_cooccurrence_mention_network.add_edge(user1, user1_qt, weight=1, mentions=mt1,
+    #                                                                          tweets=[
+    #                                                                              (tweet1.get_id(), tweet1_qt.get_id())])
+    #
+    #         while j != len(tweets_keys):
+    #             tweet2 = self.tweets[tweets_keys[j]]
+    #             user2 = tweet2.get_twitter().get_screen_name()
+    #             tweet2_mentions = tweet2.get_mentions()
+    #
+    #             tweet2_retweet_condition = tweet2.is_retweeted()
+    #             tweet2_quote_condition = tweet2.is_quote_available()
+    #
+    #             if tweet2_retweet_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #
+    #                 if tweet1.get_id() != tweet2_rt.get_id():
+    #                     if (user1, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                         if (tweet1.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["tweets"]:
+    #                             for mt1 in tweet1_mentions:
+    #                                 for mt2 in tweet2_mentions:
+    #                                     if mt1 == mt2:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_rt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for mt1 in tweet1_mentions:
+    #                             for mt2 in tweet2_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (user1, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_rt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_rt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_mention_network.add_edge(user1, user2_rt, weight=1,
+    #                                                                                  mentions=mt1, tweets=[
+    #                                                 (tweet1.get_id(), tweet2_rt.get_id())])
+    #
+    #                     tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                     if tweet2_inner_quote_condition:
+    #                         tweet2_rt_qt = tweet2_rt.get_quote()
+    #                         user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                         tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+    #
+    #                         if tweet1.get_id() != tweet2_rt_qt.get_id():
+    #                             if (user1, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                 if (tweet1.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt]["tweets"] and (
+    #                                         tweet2_rt_qt.get_id(), tweet1.get_id()) not in \
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt]["tweets"]:
+    #                                     for mt1 in tweet1_mentions:
+    #                                         for mt2 in tweet2_rt_qt_mentions:
+    #                                             if mt1 == mt2:
+    #                                                 # if (user1, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
+    #                                                     "weight"] += 1
+    #                                                 edge_label = "-" + mt1
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
+    #                                                     "mentions"] += edge_label
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
+    #                                                     "tweets"] += [(tweet1.get_id(), tweet2_rt_qt.get_id())]
+    #                             else:
+    #                                 for mt1 in tweet1_mentions:
+    #                                     for mt2 in tweet2_rt_qt_mentions:
+    #                                         if mt1 == mt2:
+    #                                             if (user1, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
+    #                                                     "weight"] += 1
+    #                                                 edge_label = "-" + mt1
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
+    #                                                     "mentions"] += edge_label
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_rt_qt][
+    #                                                     "tweets"] += [
+    #                                                     (tweet1.get_id(), tweet2_rt_qt.get_id())]
+    #                                             else:
+    #                                                 self.user_level_cooccurrence_mention_network.add_edge(user1, user2_rt_qt,
+    #                                                                                          weight=1,
+    #                                                                                          mentions=mt1, tweets=[
+    #                                                         (tweet1.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #             if tweet2_quote_condition:
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_mentions = tweet2_qt.get_mentions()
+    #
+    #                 if tweet1.get_id() != tweet2_qt.get_id():
+    #                     if (user1, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                         if (tweet1.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["tweets"]:
+    #                             for mt1 in tweet1_mentions:
+    #                                 for mt2 in tweet2_qt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_qt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for mt1 in tweet1_mentions:
+    #                             for mt2 in tweet2_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (user1, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_qt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1, user2_qt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_mention_network.add_edge(user1, user2_qt, weight=1,
+    #                                                                                  mentions=mt1, tweets=[
+    #                                                 (tweet1.get_id(), tweet2_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition and tweet2_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_mentions = tweet1_rt.get_mentions()
+    #
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #                 tweet2_rt_mentions = tweet1_rt.get_mentions()
+    #
+    #                 if tweet1_rt.get_id() != tweet2_rt.get_id():
+    #                     if (user1_rt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["tweets"]:
+    #                             for mt1 in tweet1_rt_mentions:
+    #                                 for mt2 in tweet2_rt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for mt1 in tweet1_rt_mentions:
+    #                             for mt2 in tweet2_rt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (user1_rt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user2_rt, weight=1,
+    #                                                                                  mentions=mt1, tweets=[
+    #                                                 (tweet1_rt.get_id(), tweet2_rt.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_rt.get_id():
+    #                         if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_rt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt]["tweets"] and (
+    #                                     tweet2_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt]["tweets"]:
+    #                                 for mt1 in tweet1_rt_qt_mentions:
+    #                                     for mt2 in tweet2_rt_mentions:
+    #                                         if mt1 == mt2:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
+    #                         else:
+    #                             for mt1 in tweet1_rt_qt_mentions:
+    #                                 for mt2 in tweet2_rt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_mention_network.add_edge(user1_rt_qt, user2_rt,
+    #                                                                                      weight=1,
+    #                                                                                      mentions=mt1, tweets=[
+    #                                                     (tweet1_rt_qt.get_id(), tweet2_rt.get_id())])
+    #
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                             if (tweet1_rt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_rt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt]["tweets"]:
+    #                                 for mt1 in tweet1_rt_mentions:
+    #                                     for mt2 in tweet2_rt_qt_mentions:
+    #                                         if mt1 == mt2:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             for mt1 in tweet1_rt_mentions:
+    #                                 for mt2 in tweet2_rt_qt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user2_rt_qt,
+    #                                                                                      weight=1,
+    #                                                                                      mentions=mt1, tweets=[
+    #                                                     (tweet1_rt.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #                 if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt]["tweets"]:
+    #                                 for mt1 in tweet1_rt_qt_mentions:
+    #                                     for mt2 in tweet2_rt_qt_mentions:
+    #                                         if mt1 == mt2:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                 "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                 for mt1 in tweet1_rt_qt_mentions:
+    #                                     for mt2 in tweet2_rt_qt_mentions:
+    #                                         if mt1 == mt2:
+    #                                             if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_rt_qt][
+    #                                                     "weight"] += 1
+    #                                                 edge_label = "-" + mt1
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                     "mentions"] += edge_label
+    #                                                 self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                     "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                                             else:
+    #                                                 self.user_level_cooccurrence_mention_network.add_edge(user1_rt_qt, user2_rt_qt,
+    #                                                                                          weight=1, mentions=mt1,
+    #                                                                                          tweets=[
+    #                                                                                              (tweet1_rt_qt.get_id(),
+    #                                                                                               tweet2_rt_qt.get_id())])
+    #
+    #             if tweet1_quote_condition and tweet2_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_mentions = tweet1_qt.get_mentions()
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_mentions = tweet2_qt.get_mentions()
+    #
+    #                 if tweet1_qt.get_id() != tweet2_qt.get_id():
+    #                     if (user1_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["tweets"]:
+    #                             for mt1 in tweet1_qt_mentions:
+    #                                 for mt2 in tweet2_qt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         # if (user1_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for mt1 in tweet1_qt_mentions:
+    #                             for mt2 in tweet2_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (user1_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_qt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_mention_network.add_edge(user1_qt, user2_qt, weight=1,
+    #                                                                                  mentions=mt1, tweets=[
+    #                                                 (tweet1_qt.get_id(), tweet2_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition and tweet2_quote_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_mentions = tweet1_rt.get_mentions()
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_mentions = tweet2_qt.get_mentions()
+    #
+    #                 if tweet1_rt.get_id() != tweet2_qt.get_id():
+    #                     if (user1_rt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["tweets"]:
+    #                             for mt1 in tweet1_rt_mentions:
+    #                                 for mt2 in tweet2_qt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for mt1 in tweet1_rt_mentions:
+    #                             for mt2 in tweet2_qt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (user1_rt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2_qt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user2_qt, weight=1,
+    #                                                                                  mentions=mt1, tweets=[
+    #                                                 (tweet1_rt.get_id(), tweet2_qt.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_qt.get_id():
+    #                         if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt]["tweets"] and (
+    #                                     tweet2_qt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt]["tweets"]:
+    #                                 for mt1 in tweet1_rt_qt_mentions:
+    #                                     for mt2 in tweet2_qt_mentions:
+    #                                         if mt1 == mt2:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
+    #                         else:
+    #                             for mt1 in tweet1_rt_qt_mentions:
+    #                                 for mt2 in tweet2_qt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_mention_network.add_edge(user1_rt_qt, user2_qt,
+    #                                                                                      weight=1,
+    #                                                                                      mentions=mt1, tweets=[
+    #                                                     (tweet1_rt_qt.get_id(), tweet2_qt.get_id())])
+    #
+    #             if tweet2_retweet_condition and tweet1_quote_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #                 tweet2_rt_mentions = tweet2_rt.get_mentions()
+    #
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_mentions = tweet1_qt.get_mentions()
+    #
+    #                 if tweet1_qt.get_id() != tweet2_rt.get_id():
+    #                     if (user1_qt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["tweets"]:
+    #                             for mt1 in tweet1_qt_mentions:
+    #                                 for mt2 in tweet2_rt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for mt1 in tweet1_qt_mentions:
+    #                             for mt2 in tweet2_rt_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (user1_qt, user2_rt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_mention_network.add_edge(user1_qt, user2_rt, weight=1,
+    #                                                                                  mentions=mt1, tweets=[
+    #                                                 (tweet1_qt.get_id(), tweet2_rt.get_id())])
+    #
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2_rt.get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_mentions = tweet2_rt_qt.get_mentions()
+    #
+    #                     if tweet1_qt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                             if (tweet1_qt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt]["tweets"]:
+    #                                 for mt1 in tweet1_qt_mentions:
+    #                                     for mt2 in tweet2_rt_qt_mentions:
+    #                                         if mt1 == mt2:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             for mt1 in tweet1_qt_mentions:
+    #                                 for mt2 in tweet2_rt_qt_mentions:
+    #                                     if mt1 == mt2:
+    #                                         if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_mention_network.edges:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_mention_network.add_edge(user1_qt, user2_rt_qt,
+    #                                                                                      weight=1,
+    #                                                                                      mentions=mt1, tweets=[
+    #                                                     (tweet1_qt.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_mentions = tweet1_rt.get_mentions()
+    #
+    #                 if tweet1_rt.get_id() != tweet2.get_id():
+    #                     if (user1_rt, user2) in self.user_level_cooccurrence_mention_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["tweets"] and (
+    #                                 tweet2.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["tweets"]:
+    #                             for mt1 in tweet1_rt_mentions:
+    #                                 for mt2 in tweet2_mentions:
+    #                                     if mt1 == mt2:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2.get_id())]
+    #                     else:
+    #                         for mt1 in tweet1_rt_mentions:
+    #                             for mt2 in tweet2_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (user1_rt, user2) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_rt, user2]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_mention_network.add_edge(user1_rt, user2, weight=1,
+    #                                                                                  mentions=mt1, tweets=[
+    #                                                 (tweet1_rt.get_id(), tweet2.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_mentions = tweet1_rt_qt.get_mentions()
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2.get_id():
+    #                         if (user1_rt_qt, user2) in self.user_level_cooccurrence_mention_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["tweets"] and (
+    #                                     tweet2.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["tweets"]:
+    #                                 for mt1 in tweet1_rt_qt_mentions:
+    #                                     for mt2 in tweet2_mentions:
+    #                                         if mt1 == mt2:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2.get_id())]
+    #                         else:
+    #                             for mt1 in tweet1_rt_qt_mentions:
+    #                                 for mt2 in tweet2_mentions:
+    #                                     if mt1 == mt2:
+    #                                         if (user1_rt_qt, user2) in self.user_level_cooccurrence_mention_network.edges:
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["weight"] += 1
+    #                                             edge_label = "-" + mt1
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2][
+    #                                                 "mentions"] += edge_label
+    #                                             self.user_level_cooccurrence_mention_network.edges[user1_rt_qt, user2]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_mention_network.add_edge(user1_rt_qt, user2, weight=1,
+    #                                                                                      mentions=mt1, tweets=[
+    #                                                     (tweet1_rt_qt.get_id(), tweet2.get_id())])
+    #
+    #             if tweet1_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_mentions = tweet1_qt.get_mentions()
+    #
+    #                 if tweet1_qt.get_id() != tweet2.get_id():
+    #                     if (user1_qt, user2) in self.user_level_cooccurrence_mention_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["tweets"] and (
+    #                                 tweet2.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["tweets"]:
+    #                             for mt1 in tweet1_qt_mentions:
+    #                                 for mt2 in tweet2_mentions:
+    #                                     if mt1 == mt2:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2.get_id())]
+    #                     else:
+    #                         for mt1 in tweet1_qt_mentions:
+    #                             for mt2 in tweet2_mentions:
+    #                                 if mt1 == mt2:
+    #                                     if (user1_qt, user2) in self.user_level_cooccurrence_mention_network.edges:
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["weight"] += 1
+    #                                         edge_label = "-" + mt1
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2][
+    #                                             "mentions"] += edge_label
+    #                                         self.user_level_cooccurrence_mention_network.edges[user1_qt, user2]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_mention_network.add_edge(user1_qt, user2, weight=1,
+    #                                                                                  mentions=mt1, tweets=[
+    #                                                 (tweet1_qt.get_id(), tweet2.get_id())])
+    #
+    #             if tweet1.get_id() != tweet2.get_id():
+    #                 if (user1, user2) in self.user_level_cooccurrence_mention_network.edges:
+    #                     if (tweet1.get_id(), tweet2.get_id()) not in \
+    #                             self.user_level_cooccurrence_mention_network.edges[user1, user2][
+    #                                 "tweets"] and (tweet2.get_id(), tweet1.get_id()) not in \
+    #                             self.user_level_cooccurrence_mention_network.edges[user1, user2]["tweets"]:
+    #                         for mt1 in tweet1_mentions:
+    #                             for mt2 in tweet2_mentions:
+    #                                 if mt1 == mt2:
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user2]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user2]["mentions"] += edge_label
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user2]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet2.get_id())]
+    #                 else:
+    #                     for mt1 in tweet1_mentions:
+    #                         for mt2 in tweet2_mentions:
+    #                             if mt1 == mt2:
+    #                                 if (user1, user2) in self.user_level_cooccurrence_mention_network.edges:
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user2]["weight"] += 1
+    #                                     edge_label = "-" + mt1
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user2]["mentions"] += edge_label
+    #                                     self.user_level_cooccurrence_mention_network.edges[user1, user2]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet2.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_mention_network.add_edge(user1, user2, weight=1, mentions=mt1,
+    #                                                                              tweets=[
+    #                                                                                  (
+    #                                                                                  tweet1.get_id(), tweet2.get_id())])
+    #             j += 1
+    #
+    #     for edge in self.user_level_cooccurrence_mention_network.edges:
+    #         del self.user_level_cooccurrence_mention_network.edges[edge]["tweets"]
+    #
+    # def user_level_cooccurrence_url_network_building(self):
+    #     self.network_repository.append("user_level_cooccurrence_url_network")
+    #
+    #     tweets_keys = list(self.tweets.keys())
+    #     for i in range(len(tweets_keys)):
+    #         tweet1 = self.tweets[tweets_keys[i]]
+    #         user1 = tweet1.get_twitter().get_screen_name()
+    #         tweet1_urls = tweet1.get_tweet_urls(return_format="expanded_url")
+    #
+    #         j = i + 1
+    #
+    #         self.user_level_cooccurrence_url_network.add_node(user1)
+    #
+    #         tweet1_retweet_condition = tweet1.is_retweeted()
+    #         tweet1_quote_condition = tweet1.is_quote_available()
+    #
+    #         if tweet1_retweet_condition:
+    #             tweet1_rt = tweet1.get_retweeted()
+    #             user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #
+    #             if (user1, user1_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                 if (tweet1.get_id(), tweet1_rt.get_id()) not in self.user_level_cooccurrence_url_network.edges[user1, user1_rt][
+    #                     "tweets"] and (tweet1_rt.get_id(), tweet1.get_id()) not in \
+    #                         self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["tweets"]:
+    #                     for ut in tweet1_urls:
+    #                         self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["weight"] += 1
+    #                         edge_label = "-" + ut
+    #                         self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["urls"] += edge_label
+    #                         self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["tweets"] += [
+    #                             (tweet1.get_id(), tweet1_rt.get_id())]
+    #             else:
+    #                 for ut in tweet1_urls:
+    #                     if (user1, user1_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                         self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["weight"] += 1
+    #                         edge_label = "-" + ut
+    #                         self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["urls"] += edge_label
+    #                         self.user_level_cooccurrence_url_network.edges[user1, user1_rt]["tweets"] += [
+    #                             (tweet1.get_id(), tweet1_rt.get_id())]
+    #                     else:
+    #                         self.user_level_cooccurrence_url_network.add_edge(user1, user1_rt, weight=1, urls=ut,
+    #                                                              tweets=[(tweet1.get_id(), tweet1_rt.get_id())])
+    #
+    #             tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #             if tweet1_inner_quote_condition:
+    #                 tweet1_rt_qt = tweet1_rt.get_quote()
+    #                 user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                 tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if (user1, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                     if (tweet1.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["tweets"] and (
+    #                             tweet1_rt_qt.get_id(), tweet1.get_id()) not in \
+    #                             self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["tweets"]:
+    #                         for ut1 in tweet1_urls:
+    #                             for ut2 in tweet1_rt_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["urls"] += edge_label
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet1_rt_qt.get_id())]
+    #                 else:
+    #                     for ut1 in tweet1_urls:
+    #                         for ut2 in tweet1_rt_qt_urls:
+    #                             if ut1 == ut2:
+    #                                 if (user1, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["urls"] += edge_label
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet1_rt_qt.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_url_network.add_edge(user1, user1_rt_qt, weight=1, urls=ut1,
+    #                                                                          tweets=[
+    #                                                                              (tweet1.get_id(),
+    #                                                                               tweet1_rt_qt.get_id())])
+    #
+    #                 if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                     if (tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["tweets"] and (
+    #                             tweet1_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                             self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["tweets"]:
+    #                         for ut1 in tweet1_urls:
+    #                             for ut2 in tweet1_rt_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     # if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["urls"] += edge_label
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
+    #                 else:
+    #                     for ut1 in tweet1_urls:
+    #                         for ut2 in tweet1_rt_qt_urls:
+    #                             if ut1 == ut2:
+    #                                 if (user1_rt, user1_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt][
+    #                                         "urls"] += edge_label
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt, user1_rt_qt]["tweets"] += [
+    #                                         (tweet1_rt.get_id(), tweet1_rt_qt.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_url_network.add_edge(user1_rt, user1_rt_qt, weight=1, urls=ut1,
+    #                                                                          tweets=[(tweet1_rt.get_id(),
+    #                                                                                   tweet1_rt_qt.get_id())])
+    #
+    #         if tweet1_quote_condition:
+    #             tweet1_qt = tweet1.get_quote()
+    #             user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #             tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #             if (user1, user1_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                 if (tweet1.get_id(), tweet1_qt.get_id()) not in self.user_level_cooccurrence_url_network.edges[user1, user1_qt][
+    #                     "tweets"] and (tweet1_qt.get_id(), tweet1.get_id()) not in \
+    #                         self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["tweets"]:
+    #                     for ut1 in tweet1_urls:
+    #                         for ut2 in tweet1_qt_urls:
+    #                             if ut1 == ut2:
+    #                                 # if (user1, user1_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["weight"] += 1
+    #                                 edge_label = "-" + ut1
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["urls"] += edge_label
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["tweets"] += [
+    #                                     (tweet1.get_id(), tweet1_qt.get_id())]
+    #             else:
+    #                 for ut1 in tweet1_urls:
+    #                     for ut2 in tweet1_qt_urls:
+    #                         if ut1 == ut2:
+    #                             if (user1, user1_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["weight"] += 1
+    #                                 edge_label = "-" + ut1
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["urls"] += edge_label
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user1_qt]["tweets"] += [
+    #                                     (tweet1.get_id(), tweet1_qt.get_id())]
+    #                             else:
+    #                                 self.user_level_cooccurrence_url_network.add_edge(user1, user1_qt, weight=1, urls=ut1,
+    #                                                                      tweets=[(tweet1.get_id(), tweet1_qt.get_id())])
+    #
+    #         while j != len(tweets_keys):
+    #             tweet2 = self.tweets[tweets_keys[j]]
+    #             user2 = tweet2.get_twitter().get_screen_name()
+    #             tweet2_urls = tweet2.get_tweet_urls(return_format="expanded_url")
+    #
+    #             tweet2_retweet_condition = tweet2.is_retweeted()
+    #             tweet2_quote_condition = tweet2.is_quote_available()
+    #
+    #             if tweet2_retweet_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #
+    #                 if tweet1.get_id() != tweet2_rt.get_id():
+    #                     if (user1, user2_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                         if (tweet1.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user2_rt][
+    #                                     "tweets"]:
+    #                             for ut1 in tweet1_urls:
+    #                                 for ut2 in tweet2_urls:
+    #                                     if ut1 == ut2:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for ut1 in tweet1_urls:
+    #                             for ut2 in tweet2_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (user1, user2_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_rt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_url_network.add_edge(user1, user2_rt, weight=1, urls=ut1,
+    #                                                                              tweets=[
+    #                                                                                  (tweet1.get_id(),
+    #                                                                                   tweet2_rt.get_id())])
+    #
+    #                     tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                     if tweet2_inner_quote_condition:
+    #                         tweet2_rt_qt = tweet2_rt.get_quote()
+    #                         user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                         tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                         if tweet1.get_id() != tweet2_rt_qt.get_id():
+    #                             if (user1, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                 if (tweet1.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["tweets"] and (
+    #                                         tweet2_rt_qt.get_id(), tweet1.get_id()) not in \
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["tweets"]:
+    #                                     for ut1 in tweet1_urls:
+    #                                         for ut2 in tweet2_rt_qt_urls:
+    #                                             if ut1 == ut2:
+    #                                                 # if (user1, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["weight"] += 1
+    #                                                 edge_label = "-" + ut1
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt][
+    #                                                     "urls"] += edge_label
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["tweets"] += [
+    #                                                     (tweet1.get_id(), tweet2_rt_qt.get_id())]
+    #                             else:
+    #                                 for ut1 in tweet1_urls:
+    #                                     for ut2 in tweet2_rt_qt_urls:
+    #                                         if ut1 == ut2:
+    #                                             if (user1, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["weight"] += 1
+    #                                                 edge_label = "-" + ut1
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt][
+    #                                                     "urls"] += edge_label
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1, user2_rt_qt]["tweets"] += [
+    #                                                     (tweet1.get_id(), tweet2_rt_qt.get_id())]
+    #                                             else:
+    #                                                 self.user_level_cooccurrence_url_network.add_edge(user1, user2_rt_qt, weight=1,
+    #                                                                                      urls=ut1, tweets=[
+    #                                                         (tweet1.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #             if tweet2_quote_condition:
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1.get_id() != tweet2_qt.get_id():
+    #                     if (user1, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                         if (tweet1.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1, user2_qt][
+    #                                     "tweets"]:
+    #                             for ut1 in tweet1_urls:
+    #                                 for ut2 in tweet2_qt_urls:
+    #                                     if ut1 == ut2:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for ut1 in tweet1_urls:
+    #                             for ut2 in tweet2_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (user1, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1, user2_qt]["tweets"] += [
+    #                                             (tweet1.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_url_network.add_edge(user1, user2_qt, weight=1, urls=ut1,
+    #                                                                              tweets=[
+    #                                                                                  (tweet1.get_id(),
+    #                                                                                   tweet2_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition and tweet2_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #                 tweet2_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_rt.get_id() != tweet2_rt.get_id():
+    #                     if (user1_rt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["tweets"]:
+    #                             for ut1 in tweet1_rt_urls:
+    #                                 for ut2 in tweet2_rt_urls:
+    #                                     if ut1 == ut2:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for ut1 in tweet1_rt_urls:
+    #                             for ut2 in tweet2_rt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (user1_rt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_url_network.add_edge(user1_rt, user2_rt, weight=1, urls=ut1,
+    #                                                                              tweets=[(tweet1_rt.get_id(),
+    #                                                                                       tweet2_rt.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_rt.get_id():
+    #                         if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_rt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["tweets"] and (
+    #                                     tweet2_rt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["tweets"]:
+    #                                 for ut1 in tweet1_rt_qt_urls:
+    #                                     for ut2 in tweet2_rt_urls:
+    #                                         if ut1 == ut2:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
+    #                         else:
+    #                             for ut1 in tweet1_rt_qt_urls:
+    #                                 for ut2 in tweet2_rt_urls:
+    #                                     if ut1 == ut2:
+    #                                         if (user1_rt_qt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_rt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_url_network.add_edge(user1_rt_qt, user2_rt, weight=1,
+    #                                                                                  urls=ut1, tweets=[
+    #                                                     (tweet1_rt_qt.get_id(), tweet2_rt.get_id())])
+    #
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                             if (tweet1_rt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_rt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["tweets"]:
+    #                                 for ut1 in tweet1_rt_urls:
+    #                                     for ut2 in tweet2_rt_qt_urls:
+    #                                         if ut1 == ut2:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["tweets"] += [
+    #                                                 (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             for ut1 in tweet1_rt_urls:
+    #                                 for ut2 in tweet2_rt_qt_urls:
+    #                                     if ut1 == ut2:
+    #                                         if (user1_rt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["tweets"] += [
+    #                                                 (tweet1_rt.get_id(), tweet2_rt_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_url_network.add_edge(user1_rt, user2_rt_qt, weight=1,
+    #                                                                                  urls=ut1, tweets=[
+    #                                                     (tweet1_rt.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #                 if tweet1_inner_quote_condition and tweet2_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     tweet2_rt_qt = tweet2.get_retweeted().get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt]["tweets"]:
+    #                                 for ut1 in tweet1_rt_qt_urls:
+    #                                     for ut2 in tweet2_rt_qt_urls:
+    #                                         if ut1 == ut2:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                 "tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                 for ut1 in tweet1_rt_qt_urls:
+    #                                     for ut2 in tweet2_rt_qt_urls:
+    #                                         if ut1 == ut2:
+    #                                             if (user1_rt_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1_rt, user2_rt_qt][
+    #                                                     "weight"] += 1
+    #                                                 edge_label = "-" + ut1
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                     "urls"] += edge_label
+    #                                                 self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_rt_qt][
+    #                                                     "tweets"] += [(tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                                             else:
+    #                                                 self.user_level_cooccurrence_url_network.add_edge(user1_rt_qt, user2_rt_qt,
+    #                                                                                      weight=1,
+    #                                                                                      urls=ut1, tweets=[
+    #                                                         (tweet1_rt_qt.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #             if tweet1_quote_condition and tweet2_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_qt.get_id() != tweet2_qt.get_id():
+    #                     if (user1_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["tweets"]:
+    #                             for ut1 in tweet1_qt_urls:
+    #                                 for ut2 in tweet2_qt_urls:
+    #                                     if ut1 == ut2:
+    #                                         # if (user1_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for ut1 in tweet1_qt_urls:
+    #                             for ut2 in tweet2_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (user1_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_qt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_url_network.add_edge(user1_qt, user2_qt, weight=1, urls=ut1,
+    #                                                                              tweets=[
+    #                                                                                  (tweet1_qt.get_id(),
+    #                                                                                   tweet2_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition and tweet2_quote_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 tweet2_qt = tweet2.get_quote()
+    #                 user2_qt = tweet2_qt.get_twitter().get_screen_name()
+    #                 tweet2_qt_urls = tweet2_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_rt.get_id() != tweet2_qt.get_id():
+    #                     if (user1_rt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["tweets"] and (
+    #                                 tweet2_qt.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["tweets"]:
+    #                             for ut1 in tweet1_rt_urls:
+    #                                 for ut2 in tweet2_qt_urls:
+    #                                     if ut1 == ut2:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_qt.get_id())]
+    #                     else:
+    #                         for ut1 in tweet1_rt_urls:
+    #                             for ut2 in tweet2_qt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (user1_rt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2_qt]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2_qt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_url_network.add_edge(user1_rt, user2_qt, weight=1, urls=ut1,
+    #                                                                              tweets=[(tweet1_rt.get_id(),
+    #                                                                                       tweet2_qt.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1.get_retweeted().get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2_qt.get_id():
+    #                         if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["tweets"] and (
+    #                                     tweet2_qt.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["tweets"]:
+    #                                 for ut1 in tweet1_rt_qt_urls:
+    #                                     for ut2 in tweet2_qt_urls:
+    #                                         if ut1 == ut2:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
+    #                         else:
+    #                             for ut1 in tweet1_rt_qt_urls:
+    #                                 for ut2 in tweet2_qt_urls:
+    #                                     if ut1 == ut2:
+    #                                         if (user1_rt_qt, user2_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2_qt]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_url_network.add_edge(user1_rt_qt, user2_qt, weight=1,
+    #                                                                                  urls=ut1,
+    #                                                                                  tweets=[(tweet1_rt_qt.get_id(),
+    #                                                                                           tweet2_qt.get_id())])
+    #
+    #             if tweet2_retweet_condition and tweet1_quote_condition:
+    #                 tweet2_rt = tweet2.get_retweeted()
+    #                 user2_rt = tweet2_rt.get_twitter().get_screen_name()
+    #                 tweet2_rt_urls = tweet2_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_qt.get_id() != tweet2_rt.get_id():
+    #                     if (user1_qt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["tweets"] and (
+    #                                 tweet2_rt.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["tweets"]:
+    #                             for ut1 in tweet1_qt_urls:
+    #                                 for ut2 in tweet2_rt_urls:
+    #                                     if ut1 == ut2:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_rt.get_id())]
+    #                     else:
+    #                         for ut1 in tweet1_qt_urls:
+    #                             for ut2 in tweet2_rt_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (user1_qt, user2_rt) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2_rt.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_url_network.add_edge(user1_qt, user2_rt, weight=1, urls=ut1,
+    #                                                                              tweets=[(tweet1_qt.get_id(),
+    #                                                                                       tweet2_rt.get_id())])
+    #
+    #                 tweet2_inner_quote_condition = tweet2_rt.is_quote_available()
+    #                 if tweet2_inner_quote_condition:
+    #                     tweet2_rt_qt = tweet2_rt.get_quote()
+    #                     user2_rt_qt = tweet2_rt_qt.get_twitter().get_screen_name()
+    #                     tweet2_rt_qt_urls = tweet2_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_qt.get_id() != tweet2_rt_qt.get_id():
+    #                         if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                             if (tweet1_qt.get_id(), tweet2_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["tweets"] and (
+    #                                     tweet2_rt_qt.get_id(), tweet1_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["tweets"]:
+    #                                 for ut1 in tweet1_qt_urls:
+    #                                     for ut2 in tweet2_rt_qt_urls:
+    #                                         if ut1 == ut2:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["tweets"] += [
+    #                                                 (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                         else:
+    #                             for ut1 in tweet1_qt_urls:
+    #                                 for ut2 in tweet2_rt_qt_urls:
+    #                                     if ut1 == ut2:
+    #                                         if (user1_qt, user2_rt_qt) in self.user_level_cooccurrence_url_network.edges:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_qt, user2_rt_qt]["tweets"] += [
+    #                                                 (tweet1_qt.get_id(), tweet2_rt_qt.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_url_network.add_edge(user1_qt, user2_rt_qt, weight=1,
+    #                                                                                  urls=ut1, tweets=[
+    #                                                     (tweet1_qt.get_id(), tweet2_rt_qt.get_id())])
+    #
+    #             if tweet1_retweet_condition:
+    #                 tweet1_rt = tweet1.get_retweeted()
+    #                 user1_rt = tweet1_rt.get_twitter().get_screen_name()
+    #                 tweet1_rt_urls = tweet1_rt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_rt.get_id() != tweet2.get_id():
+    #                     if (user1_rt, user2) in self.user_level_cooccurrence_url_network.edges:
+    #                         if (tweet1_rt.get_id(), tweet2.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["tweets"] and (
+    #                                 tweet2.get_id(), tweet1_rt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_rt, user2][
+    #                                     "tweets"]:
+    #                             for ut1 in tweet1_rt_urls:
+    #                                 for ut2 in tweet2_urls:
+    #                                     if ut1 == ut2:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2.get_id())]
+    #                     else:
+    #                         for ut1 in tweet1_rt_urls:
+    #                             for ut2 in tweet2_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (user1_rt, user2) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_rt, user2]["tweets"] += [
+    #                                             (tweet1_rt.get_id(), tweet2.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_url_network.add_edge(user1_rt, user2, weight=1, urls=ut1,
+    #                                                                              tweets=[
+    #                                                                                  (tweet1_rt.get_id(),
+    #                                                                                   tweet2.get_id())])
+    #
+    #                 tweet1_inner_quote_condition = tweet1_rt.is_quote_available()
+    #                 if tweet1_inner_quote_condition:
+    #                     tweet1_rt_qt = tweet1_rt.get_quote()
+    #                     user1_rt_qt = tweet1_rt_qt.get_twitter().get_screen_name()
+    #                     tweet1_rt_qt_urls = tweet1_rt_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                     if tweet1_rt_qt.get_id() != tweet2.get_id():
+    #                         if (user1_rt_qt, user2) in self.user_level_cooccurrence_url_network.edges:
+    #                             if (tweet1_rt_qt.get_id(), tweet2.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["tweets"] and (
+    #                                     tweet2.get_id(), tweet1_rt_qt.get_id()) not in \
+    #                                     self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["tweets"]:
+    #                                 for ut1 in tweet1_rt_qt_urls:
+    #                                     for ut2 in tweet2_urls:
+    #                                         if ut1 == ut2:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2.get_id())]
+    #                         else:
+    #                             for ut1 in tweet1_rt_qt_urls:
+    #                                 for ut2 in tweet2_urls:
+    #                                     if ut1 == ut2:
+    #                                         if (user1_rt_qt, user2) in self.user_level_cooccurrence_url_network.edges:
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["weight"] += 1
+    #                                             edge_label = "-" + ut1
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2][
+    #                                                 "urls"] += edge_label
+    #                                             self.user_level_cooccurrence_url_network.edges[user1_rt_qt, user2]["tweets"] += [
+    #                                                 (tweet1_rt_qt.get_id(), tweet2.get_id())]
+    #                                         else:
+    #                                             self.user_level_cooccurrence_url_network.add_edge(user1_rt_qt, user2, weight=1,
+    #                                                                                  urls=ut1,
+    #                                                                                  tweets=[(tweet1_rt_qt.get_id(),
+    #                                                                                           tweet2.get_id())])
+    #
+    #             if tweet1_quote_condition:
+    #                 tweet1_qt = tweet1.get_quote()
+    #                 user1_qt = tweet1_qt.get_twitter().get_screen_name()
+    #                 tweet1_qt_urls = tweet1_qt.get_tweet_urls(return_format="expanded_url")
+    #
+    #                 if tweet1_qt.get_id() != tweet2.get_id():
+    #                     if (user1_qt, user2) in self.user_level_cooccurrence_url_network.edges:
+    #                         if (tweet1_qt.get_id(), tweet2.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["tweets"] and (
+    #                                 tweet2.get_id(), tweet1_qt.get_id()) not in \
+    #                                 self.user_level_cooccurrence_url_network.edges[user1_qt, user2][
+    #                                     "tweets"]:
+    #                             for ut1 in tweet1_qt_urls:
+    #                                 for ut2 in tweet2_urls:
+    #                                     if ut1 == ut2:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2.get_id())]
+    #                     else:
+    #                         for ut1 in tweet1_qt_urls:
+    #                             for ut2 in tweet2_urls:
+    #                                 if ut1 == ut2:
+    #                                     if (user1_qt, user2) in self.user_level_cooccurrence_url_network.edges:
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["weight"] += 1
+    #                                         edge_label = "-" + ut1
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["urls"] += edge_label
+    #                                         self.user_level_cooccurrence_url_network.edges[user1_qt, user2]["tweets"] += [
+    #                                             (tweet1_qt.get_id(), tweet2.get_id())]
+    #                                     else:
+    #                                         self.user_level_cooccurrence_url_network.add_edge(user1_qt, user2, weight=1, urls=ut1,
+    #                                                                              tweets=[
+    #                                                                                  (tweet1_qt.get_id(),
+    #                                                                                   tweet2.get_id())])
+    #
+    #             if tweet1.get_id() != tweet2.get_id():
+    #                 if (user1, user2) in self.user_level_cooccurrence_url_network.edges:
+    #                     if (tweet1.get_id(), tweet2.get_id()) not in self.user_level_cooccurrence_url_network.edges[user1, user2][
+    #                         "tweets"] and (tweet2.get_id(), tweet1.get_id()) not in \
+    #                             self.user_level_cooccurrence_url_network.edges[user1, user2]["tweets"]:
+    #                         for ut1 in tweet1_urls:
+    #                             for ut2 in tweet2_urls:
+    #                                 if ut1 == ut2:
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user2]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user2]["urls"] += edge_label
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user2]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet2.get_id())]
+    #                 else:
+    #                     for ut1 in tweet1_urls:
+    #                         for ut2 in tweet2_urls:
+    #                             if ut1 == ut2:
+    #                                 if (user1, user2) in self.user_level_cooccurrence_url_network.edges:
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user2]["weight"] += 1
+    #                                     edge_label = "-" + ut1
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user2]["urls"] += edge_label
+    #                                     self.user_level_cooccurrence_url_network.edges[user1, user2]["tweets"] += [
+    #                                         (tweet1.get_id(), tweet2.get_id())]
+    #                                 else:
+    #                                     self.user_level_cooccurrence_url_network.add_edge(user1, user2, weight=1, urls=ut1,
+    #                                                                          tweets=[
+    #                                                                              (tweet1.get_id(), tweet2.get_id())])
+    #             j += 1
+    #
+    #     for edge in self.user_level_cooccurrence_url_network.edges:
+    #         del self.user_level_cooccurrence_url_network.edges[edge]["tweets"]
+    #
+    # # bipartite version of user-level hashtag/mention/url networks
+    # def user_hashtag_bipartite_network_building(self):
+    #     self.network_repository.append("user_hashtag_bipartite_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         source = tweet.get_twitter().get_screen_name()
+    #         hashtag_list = tweet.get_hashtags()
+    #
+    #         for hashtag in hashtag_list:
+    #             if self.user_hashtag_bipartite_network.has_edge(source, hashtag):
+    #                 self.user_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
+    #                 self.user_hashtag_bipartite_network.edges[source, hashtag]["shared_content"] += tweet.get_text()
+    #             else:
+    #                 self.user_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+    #                                                    shared_content=tweet.get_text())
+    #
+    #         if tweet.is_retweeted():
+    #             source = tweet.get_retweeted().get_twitter().get_screen_name()
+    #             hashtag_list = tweet.get_hashtags()
+    #             for hashtag in hashtag_list:
+    #
+    #                 if self.user_hashtag_bipartite_network.has_edge(source, hashtag):
+    #                     self.user_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
+    #                     self.user_hashtag_bipartite_network.edges[source, hashtag][
+    #                         "shared_content"] += tweet.get_retweeted().get_text()
+    #                 else:
+    #                     self.user_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+    #                                                        shared_content=tweet.get_retweeted().get_text())
+    #             if tweet.get_retweeted().is_quote_available():
+    #                 source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                 hashtag_list = tweet.get_retweeted().get_quote().get_hashtags()
+    #                 for hashtag in hashtag_list:
+    #
+    #                     if self.user_hashtag_bipartite_network.has_edge(source, hashtag):
+    #                         self.user_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
+    #                         self.user_hashtag_bipartite_network.edges[source, hashtag][
+    #                             "shared_content"] += tweet.get_retweeted().get_quote().get_text()
+    #                     else:
+    #                         self.user_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+    #                                                            shared_content=tweet.get_retweeted().get_quote().get_text())
+    #         elif tweet.is_quote_available():
+    #             source = tweet.get_quote().get_twitter().get_screen_name()
+    #             hashtag_list = tweet.get_quote().get_hashtags()
+    #             for hashtag in hashtag_list:
+    #
+    #                 if self.user_hashtag_bipartite_network.has_edge(source, hashtag):
+    #                     self.user_hashtag_bipartite_network.edges[source, hashtag]["weight"] += 1
+    #                     self.user_hashtag_bipartite_network.edges[source, hashtag][
+    #                         "shared_content"] += tweet.get_quote().get_text()
+    #                 else:
+    #                     self.user_hashtag_bipartite_network.add_edge(source, hashtag, kind="hashtag", weight=1,
+    #                                                        shared_content=tweet.get_quote().get_text())
+    #
+    # def user_mention_bipartite_network_building(self):
+    #     self.network_repository.append("user_mention_bipartite_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         source = tweet.get_twitter().get_screen_name()
+    #         mention_list = tweet.get_mentions()
+    #
+    #         for mention in mention_list:
+    #             if self.user_mention_bipartite_network.has_edge(source, mention):
+    #                 self.user_mention_bipartite_network.edges[source, mention]["weight"] += 1
+    #                 self.user_mention_bipartite_network.edges[source, mention]["shared_content"] += tweet.get_text()
+    #             else:
+    #                 self.user_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1, shared_content=tweet.get_text())
+    #
+    #         if tweet.is_retweeted():
+    #             source = tweet.get_retweeted().get_twitter().get_screen_name()
+    #             mention_list = tweet.get_mentions()
+    #             for mention in mention_list:
+    #
+    #                 if self.user_mention_bipartite_network.has_edge(source, mention):
+    #                     self.user_mention_bipartite_network.edges[source, mention]["weight"] += 1
+    #                     self.user_mention_bipartite_network.edges[source, mention]["shared_content"] += tweet.get_retweeted().get_text()
+    #                 else:
+    #                     self.user_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
+    #                                                         shared_content=tweet.get_retweeted().get_text())
+    #             if tweet.get_retweeted().is_quote_available():
+    #                 source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                 mention_list = tweet.get_retweeted().get_quote().get_mentions()
+    #                 for mention in mention_list:
+    #
+    #                     if self.user_mention_bipartite_network.has_edge(source, mention):
+    #                         self.user_mention_bipartite_network.edges[source, mention]["weight"] += 1
+    #                         self.user_mention_bipartite_network.edges[source, mention][
+    #                             "shared_content"] += tweet.get_retweeted().get_quote().get_text()
+    #                     else:
+    #                         self.user_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
+    #                                                            shared_content=tweet.get_retweeted().get_quote().get_text())
+    #         elif tweet.is_quote_available():
+    #             source = tweet.get_quote().get_twitter().get_screen_name()
+    #             mention_list = tweet.get_quote().get_mentions()
+    #             for mention in mention_list:
+    #
+    #                 if self.user_mention_bipartite_network.has_edge(source, mention):
+    #                     self.user_mention_bipartite_network.edges[source, mention]["weight"] += 1
+    #                     self.user_mention_bipartite_network.edges[source, mention][
+    #                         "shared_content"] += tweet.get_quote().get_text()
+    #                 else:
+    #                     self.user_mention_bipartite_network.add_edge(source, mention, kind="mention", weight=1,
+    #                                                        shared_content=tweet.get_quote().get_text())
+    #
+    # def user_url_bipartite_network_building(self):
+    #     self.network_repository.append("user_url_bipartite_network")
+    #     for tweet_id, tweet in self.tweets.items():
+    #         source = tweet.get_twitter().get_screen_name()
+    #         url_list = tweet.get_tweet_urls(return_format="expanded_url")
+    #
+    #         for url in url_list:
+    #             if self.user_url_bipartite_network.has_edge(source, url):
+    #                 self.user_url_bipartite_network.edges[source, url]["weight"] += 1
+    #                 self.user_url_bipartite_network.edges[source, url]["shared_content"] += tweet.get_text()
+    #             else:
+    #                 self.user_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
+    #                                                shared_content=tweet.get_text())
+    #
+    #         if tweet.is_retweeted():
+    #             source = tweet.get_retweeted().get_twitter().get_screen_name()
+    #             url_list = tweet.get_tweet_urls(return_format="expanded_url")
+    #             for url in url_list:
+    #
+    #                 if self.user_url_bipartite_network.has_edge(source, url):
+    #                     self.user_url_bipartite_network.edges[source, url]["weight"] += 1
+    #                     self.user_url_bipartite_network.edges[source, url]["shared_content"] += tweet.get_retweeted().get_text()
+    #                 else:
+    #                     self.user_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
+    #                                                    shared_content=tweet.get_retweeted().get_text())
+    #             if tweet.get_retweeted().is_quote_available():
+    #                 source = tweet.get_retweeted().get_quote().get_twitter().get_screen_name()
+    #                 url_list = tweet.get_retweeted().get_quote().get_tweet_urls(return_format="expanded_url")
+    #                 for url in url_list:
+    #
+    #                     if self.user_url_bipartite_network.has_edge(source, url):
+    #                         self.user_url_bipartite_network.edges[source, url]["weight"] += 1
+    #                         self.user_url_bipartite_network.edges[source, url][
+    #                             "shared_content"] += tweet.get_retweeted().get_quote().get_text()
+    #                     else:
+    #                         self.user_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
+    #                                                        shared_content=tweet.get_retweeted().get_quote().get_text())
+    #         elif tweet.is_quote_available():
+    #             source = tweet.get_quote().get_twitter().get_screen_name()
+    #             url_list = tweet.get_quote().get_tweet_urls(return_format="expanded_url")
+    #             for url in url_list:
+    #
+    #                 if self.user_url_bipartite_network.has_edge(source, url):
+    #                     self.user_url_bipartite_network.edges[source, url]["weight"] += 1
+    #                     self.user_url_bipartite_network.edges[source, url][
+    #                         "shared_content"] += tweet.get_quote().get_text()
+    #                 else:
+    #                     self.user_url_bipartite_network.add_edge(source, url, kind="url", weight=1,
+    #                                                    shared_content=tweet.get_quote().get_text())
+
+    def network_building(self, requested_network="tweet_level_retweet_network"):
+        if requested_network == "tweet_level_retweet_network":
+            return self.tweet_level_retweet_network_building()
+        elif requested_network == "tweet_level_quote_network":
+            return self.tweet_level_quote_network_building()
+        elif requested_network == "tweet_level_reply_network":
+            return self.tweet_level_reply_network_building()
+        elif requested_network == "tweet_level_quote_reply_network":
+            return self.tweet_level_quote_reply_network_building()
+        elif requested_network == "tweet_level_retweet_reply_network":
+            return self.tweet_level_retweet_reply_network_building()
+        elif requested_network == "tweet_level_retweet_quote_network":
+            return self.tweet_level_retweet_quote_network_building()
+        elif requested_network == "tweet_level_retweet_quote_reply_network":
+            return self.tweet_level_retweet_quote_reply_network_building()
+        elif requested_network == "tweet_level_cooccurrence_hashtag_network":
+            return self.tweet_level_cooccurrence_hashtag_network_building()
+        elif requested_network == "tweet_level_cooccurrence_mention_network":
+            return self.tweet_level_cooccurrence_mention_network_building()
+        elif requested_network == "tweet_level_cooccurrence_url_network":
+            return self.tweet_level_cooccurrence_url_network_building()
+        elif requested_network == "tweet_hashtag_bipartite_network":
+            return self.tweet_hashtag_bipartite_network_building()
+        elif requested_network == "tweet_mention_bipartite_network":
+            return self.tweet_mention_bipartite_network_building()
+        elif requested_network == "tweet_url_bipartite_network":
+            return self.tweet_url_bipartite_network_building()
+        elif requested_network == "user_level_retweet_network":
+            return self.user_level_retweet_network_building()
+        elif requested_network == "user_level_quote_network":
+            return self.user_level_quote_network_building()
+        elif requested_network == "user_level_reply_network":
+            return self.user_level_reply_network_building()
+        elif requested_network == "user_level_quote_reply_network":
+            return self.user_level_quote_reply_network_building()
+        elif requested_network == "user_level_retweet_reply_network":
+            return self.user_level_retweet_reply_network_building()
+        elif requested_network == "user_level_retweet_quote_network":
+            return self.user_level_retweet_quote_network_building()
+        elif requested_network == "user_level_retweet_quote_reply_network":
+            return self.user_level_retweet_quote_reply_network_building()
+        elif requested_network == "user_level_cooccurrence_hashtag_network":
+            return self.user_level_cooccurrence_hashtag_network_building()
+        elif requested_network == "user_level_cooccurrence_mention_network":
+            return self.user_level_cooccurrence_mention_network_building()
+        elif requested_network == "user_level_cooccurrence_url_network":
+            return self.user_level_cooccurrence_url_network_building()
+        elif requested_network == "user_hashtag_bipartite_network":
+            return self.user_hashtag_bipartite_network_building()
+        elif requested_network == "user_mention_bipartite_network":
+            return self.user_mention_bipartite_network_building()
+        elif requested_network == "user_url_bipartite_network":
+            return self.user_url_bipartite_network_building()
 
     def get_network(self, requested_network="tweet_level_retweet_network"):
         if requested_network in self.network_repository:
@@ -7976,30 +8091,6 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
     # def readability_layer(self):
     #     pass
 
-    def __init__(self, tweets):
-        super().__init__(tweets)
-        self.tweets_quotes_retweets = {}
-        for tweet_id, tweet in self.tweets.items():
-            self.tweets_quotes_retweets[tweet_id] = {}
-            self.tweets_quotes_retweets[tweet_id]["type"] = "twt"
-            self.tweets_quotes_retweets[tweet_id]["object"] = tweet
-            if tweet.is_retweeted():
-                retweeted_tweet = tweet.get_retweeted()
-                self.tweets_quotes_retweets[retweeted_tweet.get_id()] = {}
-                self.tweets_quotes_retweets[retweeted_tweet.get_id()]["type"] = "rt"
-                self.tweets_quotes_retweets[retweeted_tweet.get_id()]["object"] = retweeted_tweet
-
-                if retweeted_tweet.is_quoted():
-                    quoted_tweet = tweet.get_retweeted().get_quote()
-                    self.tweets_quotes_retweets[quoted_tweet.get_id()] = {}
-                    self.tweets_quotes_retweets[quoted_tweet.get_id()]["type"] = "rt_qt"
-                    self.tweets_quotes_retweets[quoted_tweet.get_id()]["object"] = quoted_tweet
-
-            if tweet.is_quote_available():
-                quoted_tweet = tweet.get_quote()
-                self.tweets_quotes_retweets[quoted_tweet.get_id()] = {}
-                self.tweets_quotes_retweets[quoted_tweet.get_id()]["type"] = "qt"
-                self.tweets_quotes_retweets[quoted_tweet.get_id()]["object"] = quoted_tweet
 
     def tweet_length_layer(self, length_unit="word", network_type=None): #In this function, I do not include quote if it is part of the tweet
         """
@@ -8085,245 +8176,179 @@ class TimeIndependentLocationIndependentTweetNetworkFeatures (Network):
 class TimeIndependentLocationIndependentUserNetworkFeatures (Network):
 
     def user_followers_count_layer(self, network_type=None):
-        if network_type in self.network_type_list:
+        if network_type in self.network_repository:
             unit = "followers_count"
-            network = self.get_network(network_type=network_type)
+            network = self.get_network(requested_network=network_type)
 
-            for tweet_id, tweet in self.tweets.items():
-                if network_type == "retweet":
-                    retweet_status = tweet.is_retweeted()
-                    if retweet_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
-                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
-                            tweet.get_retweeted().get_twitter().get_followers_count()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
-                elif network_type == "quote":
-                    quote_status = tweet.is_quoted()
-                    if quote_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
-                        network.nodes[tweet.get_quote().get_id()][unit] = \
-                            tweet.get_quote().get_twitter().get_followers_count()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
-                elif network_type == "reply":
-                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_followers_count()
+            for tweet_id in network.nodes:
+                if tweet_id in self.tweets_quotes_retweets:
+                    network.nodes[tweet_id][unit] = self.tweets_quotes_retweets[tweet_id]["object"].get_twitter().get_followers_count()
+                else:
+                 # Instead of None I put -1 here, since if we set to None then networkx cannot save it as a gexf file and even if we save it as "None" (the string version) then gephi cannot properly parse it
+                    network.nodes[tweet_id][unit] = -1
         else:
-            print("The network type you indicated has not been created yet.")
+            print(f"The {network_type} has not been created yet.")
 
     def user_friends_count_layer(self, network_type=None):
-        if network_type in self.network_type_list:
+        if network_type in self.network_repository:
             unit = "friends_count"
-            network = self.get_network(network_type=network_type)
+            network = self.get_network(requested_network=network_type)
 
-            for tweet_id, tweet in self.tweets.items():
-                if network_type == "retweet":
-                    retweet_status = tweet.is_retweeted()
-                    if retweet_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
-                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
-                            tweet.get_retweeted().get_twitter().get_friends_count()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
-                elif network_type == "quote":
-                    quote_status = tweet.is_quoted()
-                    if quote_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
-                        network.nodes[tweet.get_quote().get_id()][unit] = \
-                            tweet.get_quote().get_twitter().get_friends_count()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
-                elif network_type == "reply":
-                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_friends_count()
-                    # reply_status = tweet.is_this_a_reply()
-                    # if reply_status:
-                    #     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
-                    #     if tweet.get_reply_to_id() in self.tweets.keys():
-                    #         self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = \
-                    #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_friends_count()
-                    #     else:
-                    #         self.network.nodes[tweet.get_reply_to_id()]["friends_count"] = np.nan
-                    # else:
-                    #     self.network.nodes[tweet_id]["friends_count"] = tweet.get_twitter().get_friends_count()
+            for tweet_id in network.nodes:
+                if tweet_id in self.tweets_quotes_retweets:
+                    network.nodes[tweet_id][unit] = self.tweets_quotes_retweets[tweet_id][
+                        "object"].get_twitter().get_friends_count()
+                else:
+                    # Instead of None I put -1 here, since if we set to None then networkx cannot save it as a gexf file and even if we save it as "None" (the string version) then gephi cannot properly parse it
+                    network.nodes[tweet_id][unit] = -1
         else:
-            print("The network type you indicated has not been created yet.")
+            print(f"The {network_type} has not been created yet.")
 
     def user_role_count_layer(self, network_type=None):
-        if network_type in self.network_type_list:
+        if network_type in self.network_repository:
             unit = "user_role"
-            network = self.get_network(network_type=network_type)
+            network = self.get_network(requested_network=network_type)
 
-            for tweet_id, tweet in self.tweets.items():
-                if network_type == "retweet":
-                    retweet_status = tweet.is_retweeted()
-                    if retweet_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
-                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
-                            tweet.get_retweeted().get_twitter().get_user_role()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
-                elif network_type == "quote":
-                    quote_status = tweet.is_quoted()
-                    if quote_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
-                        network.nodes[tweet.get_quote().get_id()][unit] = \
-                            tweet.get_quote().get_twitter().get_user_role()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
-                elif network_type == "reply":
-                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_role()
-                    # reply_status = tweet.is_this_a_reply()
-                    # if reply_status:
-                    #     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
-                    #     if tweet.get_reply_to_id() in self.tweets.keys():
-                    #         self.network.nodes[tweet.get_reply_to_id()]["user_role"] = \
-                    #             self.tweets[tweet.get_reply_to_id()].get_twitter().get_user_role()
-                    #     else:
-                    #         self.network.nodes[tweet.get_reply_to_id()]["user_role"] = np.nan
-                    # else:
-                    #     self.network.nodes[tweet_id]["user_role"] = tweet.get_twitter().get_user_role()
+            for tweet_id in network.nodes:
+                if tweet_id in self.tweets_quotes_retweets:
+                    network.nodes[tweet_id][unit] = self.tweets_quotes_retweets[tweet_id][
+                        "object"].get_twitter().get_user_role()
+                else:
+                    # Instead of None I put -1 here, since if we set to None then networkx cannot save it as a gexf file and even if we save it as "None" (the string version) then gephi cannot properly parse it
+                    network.nodes[tweet_id][unit] = -1
         else:
-            print("The network type you indicated has not been created yet.")
+            print(f"The {network_type} has not been created yet.")
 
     def users_with_verification_layer(self, network_type=None):
-        if network_type in self.network_type_list:
+        if network_type in self.network_repository:
             unit = "verified"
-            network = self.get_network(network_type=network_type)
+            network = self.get_network(requested_network=network_type)
 
-            for tweet_id, tweet in self.tweets.items():
-                if network_type == "retweet":
-                    retweet_status = tweet.is_retweeted()
-                    if retweet_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
-                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
-                            tweet.get_retweeted().get_twitter().get_user_verification_status()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
-                elif network_type == "quote":
-                    quote_status = tweet.is_quoted()
-                    if quote_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
-                        network.nodes[tweet.get_quote().get_id()][unit] = \
-                            tweet.get_quote().get_twitter().get_user_verification_status()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
-                elif network_type == "reply":
-                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_verification_status()
+            for tweet_id in network.nodes:
+                if tweet_id in self.tweets_quotes_retweets:
+                    network.nodes[tweet_id][unit] = self.tweets_quotes_retweets[tweet_id][
+                        "object"].get_twitter().get_user_verification_status()
+                else:
+                    # Instead of None I put -1 here, since if we set to None then networkx cannot save it as a gexf file and even if we save it as "None" (the string version) then gephi cannot properly parse it
+                    network.nodes[tweet_id][unit] = -1
         else:
-            print("The network type you indicated has not been created yet.")
+            print(f"The {network_type} has not been created yet.")
 
     def users_status_count_layer(self, network_type=None):
-        if network_type in self.network_type_list:
+        if network_type in self.network_repository:
             unit = "status_count"
-            network = self.get_network(network_type=network_type)
+            network = self.get_network(requested_network=network_type)
 
-            for tweet_id, tweet in self.tweets.items():
-                if network_type == "retweet":
-                    retweet_status = tweet.is_retweeted()
-                    if retweet_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
-                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
-                            tweet.get_retweeted().get_twitter().get_statusses_count()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
-                elif network_type == "quote":
-                    quote_status = tweet.is_quoted()
-                    if quote_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
-                        network.nodes[tweet.get_quote().get_id()][unit] = \
-                            tweet.get_quote().get_twitter().get_statusses_count()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
-                elif network_type == "reply":
-                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_statusses_count()
+            for tweet_id in network.nodes:
+                if tweet_id in self.tweets_quotes_retweets:
+                    network.nodes[tweet_id][unit] = self.tweets_quotes_retweets[tweet_id][
+                        "object"].get_twitter().get_statusses_count()
+                else:
+                    # Instead of None I put -1 here, since if we set to None then networkx cannot save it as a gexf file and even if we save it as "None" (the string version) then gephi cannot properly parse it
+                    network.nodes[tweet_id][unit] = -1
         else:
-            print("The network type you indicated has not been created yet.")
+            print(f"The {network_type} has not been created yet.")
 
     def users_total_likes_count_layer(self, network_type=None):
-        if network_type in self.network_type_list:
+        if network_type in self.network_repository:
             unit = "total_likes_count"
-            network = self.get_network(network_type=network_type)
-            for tweet_id, tweet in self.tweets.items():
-                if network_type == "retweet":
-                    retweet_status = tweet.is_retweeted()
-                    if retweet_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
-                        network.nodes[tweet.get_retweeted().get_id()][unit] = \
-                            tweet.get_retweeted().get_twitter().get_user_total_likes_count()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
-                elif network_type == "quote":
-                    quote_status = tweet.is_quoted()
-                    if quote_status:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
-                        network.nodes[tweet.get_quote().get_id()][unit] = \
-                            tweet.get_quote().get_twitter().get_user_total_likes_count()
-                    else:
-                        network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
-                elif network_type == "reply":
-                    network.nodes[tweet_id][unit] = tweet.get_twitter().get_user_total_likes_count()
+            network = self.get_network(requested_network=network_type)
+
+            for tweet_id in network.nodes:
+                if tweet_id in self.tweets_quotes_retweets:
+                    network.nodes[tweet_id][unit] = self.tweets_quotes_retweets[tweet_id][
+                        "object"].get_twitter().get_user_total_likes_count()
+                else:
+                    # Instead of None I put -1 here, since if we set to None then networkx cannot save it as a gexf file and even if we save it as "None" (the string version) then gephi cannot properly parse it
+                    network.nodes[tweet_id][unit] = -1
         else:
-            print("The network type you indicated has not been created yet.")
+            print(f"The {network_type} has not been created yet.")
 
 
-############################################# network features #############################################
+class TimeDependentLocationIndependentTweetNetworkFeatures:
+    def __init__(self, tweets):
+        """
+        :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object
+        """
+        self.tweets = tweets
+        self.temporal_networks = {}
+        self.temporal_network_objects = {}
+        self.temporal_tweets = {}
+        self.tweets_retweets_retweetedquotes_quotes_timeframes = {}
 
-#### => 8 classes based on 4 above classes
+    def network_building_in_each_timeframe(self, tweets_in_periods=None, network_type="tweet_level_retweet_quote_reply_network", resolution="year", frequency=1):
+        if tweets_in_periods is None:
+            temporal_features_object = TemporalFeatures(tweets=self.tweets)
+            self.temporal_tweets = temporal_features_object.tweets_in_periods(resolution=resolution, frequency=frequency)
+        else:
+            self.temporal_tweets = tweets_in_periods
 
+        for timeframe, tweets in self.temporal_tweets.items():
+            self.tweets_retweets_retweetedquotes_quotes_timeframes[timeframe] = TwifexUtility.tweets_retweets_retweetedquotes_quotes(TwifexUtility.collective_tweets_to_dictionary(tweets))
+            network_obj = Network(tweets=TwifexUtility.collective_tweets_to_dictionary(tweets))
+            network_obj.network_building(requested_network=network_type)
+            network = network_obj.get_network(requested_network=network_type)
+            self.temporal_network_objects[timeframe] = network_obj
+            self.temporal_networks[timeframe] = network
 
-# class TweetTopologyFeatures:
-#     def __init__(self, tweets):
-#         """
-#         This is a constructor for tweetNetwork class
-#         :param tweets: a dictionary that maps every tweet_id to its corresponding SingleTweet object.
-#         """
-#         self.tweets = tweets
+    def tweet_complexity_layer(self, complexity_unit="word"):
+        """
+        :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
+        the timestamps and all the tweets that are posted within every timestamp.
+        :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
+        :return: a dictionary that represents the change of the tweet complexity across the timespan of the dataset
+        due to selected unit of analysis. The key-value pair in this dictionary corresponds to
+        the timestamps and the statistical metrics of the tweet complexity scores in all the tweets that are posted
+        within every timestamp.
+        """
+
+        assert (complexity_unit in ["word", "sentence",
+                         "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
+
+        unit = complexity_unit + "_complexity"
+        networks_in_timeframes = {}
+        for timeframe, network in self.temporal_networks.items():
+            for tweet_id in network.nodes:
+                if tweet_id in self.tweets_retweets_retweetedquotes_quotes_timeframes[timeframe]:
+                    tweet_complexity = self.tweets_retweets_retweetedquotes_quotes_timeframes[timeframe][tweet_id]["object"].text_complexity(
+                        complexity_unit=complexity_unit)
+                    network.nodes[tweet_id][unit] = tweet_complexity
+                else:
+                    # Instead of None I put -1 here, since if we set to None then networkx cannot save it as a gexf file and even if we save it as "None" (the string version) then gephi cannot properly parse it
+                    network.nodes[tweet_id][unit] = -1
+            networks_in_timeframes[timeframe] = network
+
+        return networks_in_timeframes
+
+    def tweet_length_layer(self, length_unit="word"):
+
+        unit = length_unit + "_count"
+        networks_in_timeframes = {}
+        for timeframe, network in self.temporal_networks.items():
+            for tweet_id in network.nodes:
+                if tweet_id in self.tweets_retweets_retweetedquotes_quotes_timeframes[timeframe]:
+                    tweet_length = self.tweets_retweets_retweetedquotes_quotes_timeframes[timeframe][tweet_id]["object"].text_length(length_unit=length_unit)
+                    network.nodes[tweet_id][unit] = tweet_length
+                else:
+                    # Instead of None I put -1 here, since if we set to None then networkx cannot save it as a gexf file and even if we save it as "None" (the string version) then gephi cannot properly parse it
+                    network.nodes[tweet_id][unit] = -1
+            networks_in_timeframes[timeframe] = network
+
+        return networks_in_timeframes
+
+# class TimeDependentLocationIndependentUserNetworkFeatures(TemporalFeatures, Network):
 #
-#     def retweet_network(self):
-#         """
-#         This function creates the network of retweets from the dataset.
-#         :return: a retweetNetwork object.
-#         """
-#         return RetweetNetwork(self.tweets)
 #
-#     def quote_network(self):
-#         """
-#         This function creates the network of quotes from the dataset.
-#         :return: a quoteNetwork object.
-#         """
-#         return QuoteNetwork(self.tweets)
+# class TimeIndependentLocationDependentTweetNetworkFeatures(PlaceFeatures, Network):
 #
-#     def reply_network(self):  # not yet deployed
-#         """
-#         This function creates the network of replies from the dataset.
-#         :return: a replyNetwork object.
-#         """
-#         return ReplyNetwork(self.tweets)
-#     # def retweet_quote_network(self):
-#     #     """
-#     #     This function creates the network of retweet-quote from the dataset.
-#     #     :return: a retweetQuoteNetwork object.
-#     #     """
-#     #     return retweetQuoteNetwork(self.tweets)
-#     # def retweet_reply_network(self):  # Not yet deplyed
-#     #     """
-#     #     This function creates the network of retweet-reply from the dataset.
-#     #     :return: a retweetReplyNetwork object.
-#     #     """
-#     #     return retweetReplyNetwork(self.tweets)
-#     # def quote_reply_network(self):  # not yet deployed
-#     #     """
-#     #     This function creates the network of quote-reply from the dataset.
-#     #     :return: a quoteReplyNetwork object.
-#     #     """
-#     #     return quoteReplyNetwork(self.tweets)
-#     # def retweet_quote_reply_network(self):  # not yet deployed
-#     #     """
-#     #     This function creates the network of retweet_quote_reply from the dataset.
-#     #     :return: a retweetQuoteReplyNetwork object.
-#     #     """
-#     #     return retweetQuoteReplyNetwork(self.tweets)
-
+#
+# class TimeIndependentLocationDependentUserNetworkFeatures(PlaceFeatures, Network):
+#
+#
+# class TimeDependentLocationDependentTweetNetworkFeatures(PlaceFeatures, Network):
+#
+#
+# class TimeDependentLocationDependentUserNetworkFeatures(PlaceFeatures, Network):
 
 class UserTopologyFeatures:
     def __init__(self, tweets):
@@ -8862,7 +8887,7 @@ class UserTopologyFeatures:
 #                 self.network.node[tweet.get_id()]["readability"] = eval(
 #                     f'textstat.{readability_metric}(\"{tweet.text_preprocessing()}\")')
 
-
+#TRANSFERRED
 class user:
     def __init__(self, user_object):
         """
@@ -9083,1459 +9108,1459 @@ class user:
                 "screen_name_length": len(self.get_screen_name())
                 }
 
-
-class SingleTweet: #Update docstring and assertions
-    def __init__(self, param):
-        """
-        This is the constructor of SingleTweet.
-        :param tweet_path: an individual tweet path.
-        :param param: a dictionary of necessary objects and modules.
-        """
-        self.tweet = None
-        self.parameters = param
-        self.text = ""
-
-#entities
-    def tweet_loader(self, tweet_path):
-        self.tweet = json.load(open(tweet_path))
-        return self
-
-    def get_entities(self): #There is an assumption here and that is the "truncated" variable is always False
-        """
-        This function extracts the full tweet entities including hashtags, mentions, urls, photos, videos, gifs, and symbols
-         from a tweet object.
-        :return: a dictionary containing all the entities.
-        """
-        tweet_entities = None
-        if self.is_retweeted():
-            tweet_entities = self.tweet["retweeted_status"]["entities"]
-            if "extended_entities" in self.tweet["retweeted_status"].keys():
-                tweet_entities["media"] = self.tweet["retweeted_status"]["extended_entities"]["media"]
-        elif not self.is_retweeted():
-            tweet_entities = self.tweet["entities"]
-            if "extended_entities" in self.tweet.keys():
-                tweet_entities["media"] = self.tweet["extended_entities"]["media"]
-        return tweet_entities
-
-        # if not self.is_retweeted():
-        #     if self.tweet["truncated"]:
-        #         tweet_entities = self.tweet["extended_tweet"]["entities"]
-        #         if "extended_entities" in self.tweet["extended_tweet"].keys():
-        #             tweet_entities["media"] = self.tweet["extended_tweet"]["extended_entities"]["media"]
-        #     else:
-        #         tweet_entities = self.tweet["entities"]
-        #         if "extended_entities" in self.tweet.keys():
-        #             tweet_entities["media"] = self.tweet["extended_entities"]["media"]
-        # elif self.is_retweeted():
-        #     if self.tweet["retweeted_status"]["truncated"]:
-        #         tweet_entities = self.tweet["retweeted_status"]["extended_tweet"]["entities"]
-        #         if "extended_entities" in self.tweet["retweeted_status"]["extended_tweet"].keys():
-        #             tweet_entities["media"] = self.tweet["retweeted_status"]["extended_tweet"]["extended_entities"][
-        #                 "media"]
-        #     else:
-        #         tweet_entities = self.tweet["retweeted_status"]["entities"]
-        #         if "extended_entities" in self.tweet["retweeted_status"].keys():
-        #             tweet_entities["media"] = self.tweet["retweeted_status"]["extended_entities"]["media"]
-        # return tweet_entities
-
-    def get_tweet(self):
-        """
-        :return: the tweet as a json file
-        """
-        return self.tweet
-
-    def get_url(self):
-        """
-        this function builds the tweet url.
-        :return: a string of tweet url.
-        """
-        return "https://twitter.com/" + self.get_twitter().get_screen_name() + "/status/" + \
-               self.get_id(return_format="string")
-
-    def get_inner_quote_screen_name(self): #no docstring
-        return re.findall("status.*", self.tweet["quoted_status_permalink"]["expanded"])[0].replace("status/","")
-
-    def get_in_reply_to_screen_name(self):
-        return self.tweet["in_reply_to_screen_name"]
-
-    def get_twitter(self):
-        """
-        :return: the user object embedded in the tweet object.
-        """
-        return user(self.tweet["user"])
-
-    def get_creation_time(self, output="object"):
-        """
-        It shows the creation time and date of a tweet.
-        :param output: it can be either "object", "original_string", or "improved_string". By choosing the original_string
-        the created_at field of tweet object is returned. By choosing object, a datetime object of the tweet creation time
-        including year, month, day, hour, minute and second is returned. "improved_string" returns the string version of
-        the datetime object.
-        :return: a string or datetime object of the tweet creation time.
-        """
-
-        assert (output in ["object", "original_string",
-                           "improved_string"]), "the output has to be object or original_string, or" \
-                                                "improved_string"
-
-        if output == "object":
-            return datetime.datetime.strptime(datetime.datetime.strftime(
-                datetime.datetime.strptime(self.tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"), "%Y %m %d %H %M %S"),
-                "%Y %m %d %H %M %S")
-        elif output == "original_string":
-            return self.tweet["created_at"]
-        elif output == "improved_string":
-            return datetime.datetime.strftime(
-                datetime.datetime.strptime(self.tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"), "%Y %m %d %H %M %S")
-
-    def get_source(self, return_format='raw'):
-        """
-        :return: a string showing th utility used to post the Tweet.
-        """
-        if return_format == "raw":
-            return self.tweet["source"]
-        elif return_format == "processed":
-            # return re.findall(">.*<", f1[10]["source"])[0].replace("<", "").replace(">", "")
-            soup = BeautifulSoup(self.get_source(), "html.parser")
-            client = soup.text
-            return client
-
-    def get_likes_count(self):
-        """
-        :return: an integer which indicates approximately how many times this Tweet has been liked by Twitter users
-        """
-        return self.tweet["favorite_count"]
-
-    def get_retweet_count(self):
-        """
-        :return: an integer which indicates how many times this tweet has been retweeted.
-        """
-        return self.tweet["retweet_count"]
-
-    def get_language(self):
-        """
-        :return: a string showing the language of the tweet.
-        """
-        return self.tweet["lang"]
-
-    def get_place(self): #You should be more specific about this field, not returning bunch of fields
-        """
-        When present, indicates that the tweet is associated (but not necessarily originating from) a Place.
-        :return: a place object.
-        """
-        return self.tweet["place"]
-
-    def get_coordinates(self):#You should be more specific about this field, not returning bunch of fields
-        """
-        Represents the geographic location of this Tweet as reported by the user or client application.
-        :return: a coordinate object
-        """
-        return self.tweet["coordinates"]
-
-    def get_tweet_urls(self, return_format="url"):
-        """
-        :return: a list of urls in this tweet.
-        """
-
-        urls = self.get_entities()["urls"]
-        if return_format == "url":
-            return [element['url'] for element in urls]
-        elif return_format == "expanded_url":
-            return [element['expanded_url'] for element in urls]
-        elif return_format == "display_url":
-            return [element['display_url'] for element in urls]
-
-    def get_hashtags(self, case_sensitivity="small", hashtag_sign=True): #make it more neat! don't return the entire array of nonesense
-        #https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
-        """
-        :param case_sensitivity: By setting this parameter to small hashtags will be returned in small format. If you set it to original, the hashtags will be returned the same as it written in the tweet..
-        :param hashtag_sign: It indicated whether the # character comes before hashtags or not.
-        :return: a list of hashtags in this tweet.
-        """
-        assert (case_sensitivity in ["small", "original"]), "the case_sensitivity has to be small or original"
-        assert (hashtag_sign in [True, False]), "the hashtag_sign has to be True or False"
-
-        entities = self.get_entities()
-        if "hashtags" in entities:
-            if case_sensitivity == "small":
-                if hashtag_sign:
-                    return ["#"+element['text'].lower() for element in entities["hashtags"]]
-                else:
-                    return [element['text'].lower() for element in entities["hashtags"]]
-            elif case_sensitivity == "original":
-                if hashtag_sign:
-                    return ["#"+element['text'] for element in entities["hashtags"]]
-                else:
-                    return [element['text'] for element in entities["hashtags"]]
-            # return entities["hashtags"]
-        else:
-            return []
-
-    def get_mentions(self, return_format="screen_name", at_sign=True):
-
-        """
-        :param return_format: It indicates in what format tweet mentions should be returned.
-        :param at_sign: It indicated whether the @ character comes before mentions or not.
-        :return: a list of mentions in this tweet.
-        """
-
-        assert (return_format in ["screen_name", "name", "id", "id_str", "entire_object"]), "the return_format has to be screen_name, name, id, id_str, or entire_object"
-        assert (at_sign in [True, False]), "the at_sign has to be True or False"
-
-        entities = self.get_entities()
-        if "user_mentions" in entities:
-            if at_sign:
-                if return_format == "screen_name":
-                    return ["@"+element['screen_name'] for element in entities["user_mentions"]]
-                elif return_format == "name":
-                    return ["@"+element['name'] for element in entities["user_mentions"]]
-                elif return_format == "id":
-                    return [element['id'] for element in entities["user_mentions"]]
-                elif return_format == "id_str":
-                    return ["@"+element['id_str'] for element in entities["user_mentions"]]
-                elif return_format == "entire_object":
-                    return entities["user_mentions"]
-            else:
-                if return_format == "screen_name":
-                    return [element['screen_name'] for element in entities["user_mentions"]]
-                elif return_format == "name":
-                    return [element['name'] for element in entities["user_mentions"]]
-                elif return_format == "id":
-                    return [element['id'] for element in entities["user_mentions"]]
-                elif return_format == "id_str":
-                    return [element['id_str'] for element in entities["user_mentions"]]
-                elif return_format == "entire_object":
-                    return entities["user_mentions"]
-        else:
-            return []
-
-    def get_symbols(self):#make it more neat! don't return the entire array of nonesense
-                # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
-        """
-        :return: a list of symbols in this tweet.
-        """
-        entities = self.get_entities()
-        if "symbols" in entities:
-            return entities["symbols"]
-        else:
-            return []
-
-    def get_media(self):#make it more neat! don't return the entire array of nonesense
-        # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
-        """
-        :return: it returns the photo(s), video, and animated-gif attached to this tweet as a list.
-        """
-        entities = self.get_entities()
-        if "media" in entities:
-            return entities["media"]
-        else:
-            return []
-
-    def get_photo(self):#make it more neat! don't return the entire array of nonesense
-        """
-        :return: it returns the photo(s) attached to this tweet as a list.
-        """
-        media = self.get_media()
-        photos = []
-        for medium in media:
-            if medium["type"] == "photo":
-                photos.append(medium)
-        return photos
-
-    def get_video(self):#make it more neat! don't return the entire array of nonesense
-        """
-        :return: it returns the video attached to this tweet in a list.
-        """
-        media = self.get_media()
-        videos = []
-        for medium in media:
-            if medium["type"] == "video":
-                videos.append(medium)
-        return videos
-
-    def get_gif(self):#make it more neat! don't return the entire array of nonesense
-        """
-        :return: it returns the animated-gif attached to this tweet as a list.
-        """
-        media = self.get_media()
-        gifs = []
-        for medium in media:
-            if medium["type"] == "animated_gif":
-                gifs.append(medium)
-        return gifs
-
-### Don't forget adding poll object
-
-    def get_text(self):  ## Maybe you need to check this function for retweet and quote class
-        """
-        :return: a string showing the full text of this tweet
-        """
-        tweet_text = None
-        if self.is_retweeted():
-            tweet_text = self.tweet["retweeted_status"]["full_text"]
-        elif not self.is_retweeted():
-            tweet_text = self.tweet["full_text"]
-        return tweet_text
-
-        # elif self.is_quoted():
-        #     tweet_text = self.tweet["full_text"]
-        # elif (not self.is_retweeted()) and (not self.is_quoted()):
-        #     tweet_text = self.tweet["full_text"]
-        # return tweet_text
-
-
-        # if self.text != "":
-        #     return self.text
-        # else:
-        #     if not self.is_retweeted():
-        #         if self.tweet["truncated"]:
-        #             tweet_text = self.tweet["extended_tweet"]["full_text"]
-        #         else:
-        #             if "full_text" in self.tweet:
-        #                 tweet_text = self.tweet["full_text"]
-        #             else:
-        #                 tweet_text = self.tweet["text"]
-        #     elif self.is_retweeted():
-        #         if self.tweet["retweeted_status"]["truncated"]:
-        #             tweet_text = self.tweet["retweeted_status"]["extended_tweet"]["full_text"]
-        #         else:
-        #             tweet_text = self.tweet["retweeted_status"]["text"]
-        #     return tweet_text
-
-    def get_id(self, return_format='int'):
-        """
-        :return: an integer showing the unique id of this tweet.
-        """
-        if return_format == "int":
-            return self.tweet["id"]
-        elif return_format == "string":
-            return self.tweet["id_str"]
-
-    def is_this_a_reply(self):
-        """
-        :return: a boolean shows whether this tweet is a reply tweet or not.
-        """
-        return False if self.tweet["in_reply_to_status_id"] is None else True
-
-    def get_reply_to_id(self, return_format='int'):
-        """
-        :return: an integer showing the unique id of the tweet that this one is a reply to that.
-        """
-        if return_format == "int":
-            return self.tweet["in_reply_to_status_id"]
-        elif return_format == "string":
-            return self.tweet["in_reply_to_status_id_str"]
-
-    def is_retweeted(self):
-        """
-        :return: a boolean shows whether this tweet is retweeted or not.
-        """
-        return True if "retweeted_status" in self.tweet.keys() else False
-
-    def is_quoted(self):
-        """
-        :return: a boolean showing whether this is a quoted tweet or not..
-        """
-        # return True if "quoted_status" in self.tweet.keys() else False
-        return self.tweet["is_quote_status"]
-
-    def is_quote_available(self):
-        return True if "quoted_status" in self.tweet.keys() else False
-
-    def get_quote(self): #go to the buttom of this
-        """
-        :return: it returns the quoted part of the this tweet..
-        """
-        if self.is_quote_available():
-            return QuoteClass(self.tweet["quoted_status"], self.parameters)
-        else:
-            print("This tweet does not contain a quote status object")
-
-        # return QuoteClass(self.tweet["quoted_status"], self.parameters) if self.is_quoted() else None
-
-    def get_retweeted(self): #go to the buttom of this
-        """
-        :return: it returns the retweeted part of this tweet.
-        """
-        if self.is_retweeted():
-            return RetweetedClass(self.tweet["retweeted_status"], self.parameters)
-        else:
-            print("This tweet does not contain a retweet status object")
-
-    def get_quote_status_id(self, return_format='int'):
-        if self.is_quoted():
-            if return_format == "int":
-                return self.tweet["quoted_status_id"]
-            elif return_format == "string":
-                return self.tweet["quoted_status_id_str"]
-        else:
-            print("This tweet does not contain a quote status")
-
-    def tweet_source_status(self): #Where do these official sources come from?
-        """
-        :return: a boolean that shows whether this tweet is posted by an official source or not.
-        """
-        official_clients = ["Twitter for iPhone", "Twitter for Android", "Twitter Web Client", "Twitter for iPad",
-                            "Mobile Web (M5)", "TweetDeck", "Facebook", "Twitter for Windows", "Mobile Web (M2)",
-                            "Twitter for Windows Phone", "Mobile Web", "Google", "Twitter for BlackBerry",
-                            "Twitter for Android Tablets", "Twitter for Mac", "iOS", "Twitter for BlackBerry®"]
-
-        return True if self.get_source(return_format="processed") in official_clients else False
-
-    def tweet_stemming(self, input_text=None, inplace=False):
-        """
-        This function performs the stemming operation using Porter algorithm.
-        :param input_text: if this parameter is None, then stemming is applied on the text field of the caller object, otherwise
-        and in case of a string as an input for this parameter, the stemming is applied on the input text.
-        :param inplace: if inplace is True, the change is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after stemming.
-        :return: when the implace parameter is equal to True, the function changes the caller object text field permanently and
-        returns the whole object, in contrast when it is equal to False the function only returns the text field after
-        the stemming without changing the text field.
-        """
-
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text is None:
-            text = self.get_text()
-        else:
-            text = input_text
-        stemmed = PorterStemmer().stem(text)
-        if inplace:
-            self.text = stemmed
-            return self
-        else:
-            return stemmed
-
-    def hashtag_splitter(self, input_text=None, inplace=False):
-        """
-        This function slices up hashtags as in most of the times, hashtags are made up of concatanation of meaningful words.
-        :param input_text: if this parameter is None, then slicing is applied on the hashtags of the caller object, otherwise
-        and in case of a string as an input for this parameter, the slicing is applied on the input text.
-        :param inplace: if inplace is True, the change is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after slicing up the hashtags.
-        :return: when the implace parameter is equal to True, the function changes the caller object text field permanently
-        by splitting the hashtags and returning the whole object, in contrast when it is equal to False the function only
-        returns the text field after slicing up the hashtags without changing the text field.
-        """
-
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text is None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        hashtags = self.get_hashtags()
-
-        if len(hashtags) > 0:
-            for hashtag in hashtags:
-                hashtag_text = hashtag["text"]
-                if text.isupper():
-                    pat = r'[A-Z0-9]+[a-z0-9]*'
-                    replacement = " ".join(re.findall(pat, hashtag_text))
-                    text = text.replace(hashtag_text, replacement)
-                else:
-                    replacement = " ".join(wordninja.split(hashtag_text))
-                    text = text.replace(hashtag_text, replacement)
-
-        if inplace:
-            self.text = text
-            return self
-        else:
-            return text
-
-    def mention_replacement(self, input_text=None, inplace=False):
-        """
-        This function replaces Twitter account mentions by the accounts' screen name.
-        :param input_text: if this parameter is None, then the replacement is applied on the mention of the caller object,
-        otherwise and in case of a string as an input for this parameter, the replacement is applied on the input text.
-        :param inplace: if inplace is True, the change is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after replacing the mentions.
-        :return: when the implace parameter is equal to True, the function changes the caller object text field permanently
-        by replacing the mentions with the accounts screen names and returning the whole object, in contrast when it is equal
-        to False the function only returns the text field after replacing the mentions without changing the text field.
-        """
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        mentions = self.get_mentions()
-        for mention in mentions:
-            text = text.replace(mention["screen_name"], mention["name"])
-
-        if inplace:
-            self.text = text
-            return self
-        else:
-            return text
-
-    def url_removal(self, input_text=None, inplace=False):
-        """
-        This function removes the urls from the tweet text.
-        :param input_text: if this parameter is None, then the urls are removed from the caller object text, otherwise
-        and in case of a string as an input for this parameter, the urls are removed from the input text.
-        :param inplace: if inplace is True, the url removal is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after removing the urls.
-        :return: when the implace parameter is equal to True, the function changes the caller object text field permanently
-        by removing the urls and returning the whole object, in contrast when it is equal to False the function only
-        returns the text field after url removal.
-        """
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        extractor = URLExtract()
-        urls = extractor.find_urls(text)
-        for url in urls:
-            text = text.replace(url, "")
-        if inplace:
-            self.text = text
-            return self
-        else:
-            return text
-
-    def hashtags_removal(self, input_text=None, mode=2, inplace=False):
-        """
-        This function removes hashtags from tweet text according to different modes.
-        :param input_text: if this parameter is None, then the hashtag removal is applied on the caller object,
-        otherwise and in case of a string as an input for this parameter, the hashtag removal is applied to the input text.
-        :param mode: there are three modes for hashtags removal. In mode 1, the text remains intact, in Mode 2, only the
-        hashtag characters (#) are removed, and in mode 3, the whole hashtags consisting the hashtag character and the terms
-        after the hashtags are removed.
-        :param inplace: if inplace is True, the hashtag removal is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after removing the hashtags.
-        :return: when the implace parameter is equal to True, the function removes the hashtags permanently and returns
-        the whole object, in contrast when it is equal to False the function only returns the text field after removing the
-         hashtags from the text.
-        """
-
-        assert (mode in [1, 2, 3]), "The mode can be 1, 2, or 3"
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if mode == 1:
-            pass
-        elif mode == 2:
-            text = text.replace("#", "")
-        elif mode == 3:
-            for h in self.get_hashtags():
-                text = text.replace("#" + h["text"], "")
-        if inplace:
-            self.text = text
-            return self
-        else:
-            return text
-
-    def mentions_removal(self, input_text=None, mode=2, inplace=False):
-        """
-        This function removes mentions from tweet text according to different modes.
-        :param input_text: if this parameter is None, then the mention removal is applied on the caller object,
-        otherwise and in case of a string as an input for this parameter, the mention removal is applied to the input text.
-        :param mode: there are three modes for mention removal. In mode 1, the text remains intact, in Mode 2, only the
-        mention characters (@) are removed, and in mode 3, the whole mention consisting the mention character and the terms
-        after the mentions are removed.
-        :param inplace: if inplace is True, the mention removal is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after removing the mention.
-        :return: when the implace parameter is equal to True, the function removes the mentions permanently and returns
-        the whole object, in contrast when it is equal to False the function only returns the text field after removing the
-         mentions from the text.
-        """
-
-        assert (mode in [1, 2, 3]), "The mode can be 1, 2, or 3"
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if mode == 1:
-            pass
-        elif mode == 2:
-            text = text.replace("@", "")
-        elif mode == 3:
-            for m in self.get_mentions():
-                text = text.replace("@" + m["screen_name"], "")
-        if inplace:
-            self.text = text
-            return self
-        else:
-            return text
-
-    def control_characters_removal(self, input_text=None, inplace=False):
-        """
-        This functions removes common control characters carriage return (\r), line feed (\n), horizontal tab (\t).
-        :param input_text: if this parameter is None, then the control characters are removed from the caller object text field,
-        otherwise and in case of a string as an input for this parameter, the control characters are removed from the input text.
-        :param inplace: if inplace is True, the control characters removal is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after removing the control characters.
-        :return: when the implace parameter is equal to True, the function removes the control characters permanently and returns
-        the whole object, in contrast when it is equal to False the function only returns the text field after removing the
-         control characters from the text.
-        """
-
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        pattern = re.compile(r'[\r\t\n]')
-        text = pattern.sub(" ", text)
-        if inplace:
-            self.text = text
-            return self
-        else:
-            return text
-
-    def stopwords_removal(self, input_text=None, stopword_corpus="stone", inplace=False):
-        """
-        This function removes stopwords from the tweet according to chosen stopword corpus.
-        :param input_text: if this parameter is None, then the stopwords are removed from the caller object text field,
-        otherwise and in case of a string as an input for this parameter, the stopwords are removed from the input text.
-        :param stopword_corpus: The stopword corpus can be "stone", "nltk", "corenlp", or "glascow". Almost every text mining
-         framework uses one of these corpuses for removing the stopwords.
-        :param inplace: if inplace is True, the stopwords removal is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after removing the stopwords.
-        :return: when the implace parameter is equal to True, the function removes the stopwords permanently and returns
-        the whole object, in contrast when it is equal to False the function only returns the text field after removing the
-        stopwords from the text.
-        """
-
-        assert (stopword_corpus in ["stone", "nltk", "corenlp",
-                                    "glascow"]), "stopword_orpus can be stone, nltk, corenlp, and glascow"
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        words = self.tweet_splitter(text)
-        if stopword_corpus == "stone":
-            processed_text = " ".join(
-                [word for word in words if word.lower() not in self.parameters["stopwords"]["stone"]])
-        elif stopword_corpus == "nltk":
-            processed_text = " ".join(
-                [word for word in words if word.lower() not in self.parameters["stopwords"]["nltk"]])
-        elif stopword_corpus == "corenlp":
-            processed_text = " ".join(
-                [word for word in words if word.lower() not in self.parameters["stopwords"]["corenlp"]])
-        elif stopword_corpus == "glascow":
-            processed_text = " ".join(
-                [word for word in words if word.lower() not in self.parameters["stopwords"]["glascow"]])
-
-        if inplace:
-            self.text = processed_text
-            return self
-        else:
-            return processed_text
-
-    def whitespace_removal(self, input_text=None, inplace=False):
-        """
-        This functions removes whitespaces from the text.
-        :param input_text: if this parameter is None, then the whitespaces are removed from the caller object text field,
-        otherwise and in case of a string as an input for this parameter, the whitespaces are removed from the input text.
-        :param inplace: if inplace is True, the whitespace removal is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after removing the whitespaces.
-        :return: when the implace parameter is equal to True, the function removes the whitespaces permanently and returns
-        the whole object, in contrast when it is equal to False the function only returns the text field after removing the
-         whitespaces from the text.
-        """
-
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        text = text.strip()
-        while (text.count("  ") > 0):
-            text = text.replace("  ", " ")
-        if inplace:
-            self.text = text
-            return self
-        else:
-            return text
-
-    def punctuation_removal(self, input_text=None, inplace=False):
-        """
-        This functions removes punctuation characters from the text.
-        :param input_text: if this parameter is None, then the punctuations are removed from the caller object text field,
-        otherwise and in case of a string as an input for this parameter, the punctuations are removed from the input text.
-        :param inplace: if inplace is True, the punctuations removal is permanently applied on the caller object text field, otherwise
-        the caller object text field remains intact and the function returns the text after removing the punctuations.
-        :return: when the implace parameter is equal to True, the function removes the punctuations permanently and returns
-        the whole object, in contrast when it is equal to False the function only returns the text field after removing the
-         punctuations from the text.
-        """
-
-        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        punctuation_free = textstat.remove_punctuation(text).replace(".", "").replace("\"", "").replace("“",
-                                                                                                        "").replace("”",
-                                                                                                                    "").strip()
-        if inplace:
-            self.text = punctuation_free
-            return self
-        else:
-            return punctuation_free
-
-    def text_preprocessing(self, input_text=None, url=True, case=True, punctuation=True, hashtag=2, mention=2,
-                           whitespace=True, control_characters=True, stop="stone", hashtag_split=True,
-                           mention_replacement=True):
-        """
-        This function preprocess the tweet text.
-        :param input_text: if this parameter is None, then preprocessing is performed on the caller object text field,
-        otherwise and in case of a string as an input for this parameter, the preprocessing is applied on the input text.
-        :param url: by setting this boolean parameter True, the tweet urls are removed.
-        :param case: setting this boolean parameter True, turns the tweet text to lower case.
-        :param punctuation: by setting this boolean parameter True, the tweet punctuations are removed.
-        :param hashtag: this integer parameter represents the hashtag removal mode. There are three modes for
-        hashtags removal. In mode 1, the text remains intact, in Mode 2, only the hashtag characters (#) are removed,
-        and in mode 3, the whole hashtags consisting the hashtag character and the terms after the hashtags are removed.
-        :param mention: this integer parameter represents the mention removal mode. There are three modes for
-        mention removal. In mode 1, the text remains intact, in Mode 2, only the mention characters (@) are removed,
-        and in mode 3, the whole mention consisting the hashtag character and the terms after the hashtags are removed.
-        :param whitespace: by setting this boolean parameter True, the tweet whitespaces are removed.
-        :param control_characters: by setting this boolean parameter True, the common control characters (carriage return(\r),
-        line feed(\n), and horizontal tab(\t)) are removed.
-        :param stop: this string parameter represents the stopwords corpus for stopword removal. The stopword corpus can
-        be "stone", "nltk", "corenlp", or "glascow". Almost every text mining framework uses one of these corpuses for
-        removing the stopwords. In order to seactivates stopwords removal, this parameter has to be set to False.
-        :param hashtag_split: by setting this parameter to True, the hashtags are splitted and replaced in the text.
-        :param mention_replacement: by setting this parameter to True, the mentions are replaced by their corresponding screen names.
-        :return: when the implace parameter is equal to True, the function applies the preprocessing permanently and returns
-        the whole object, in contrast when it is equal to False the function only returns the text field after preprocessing.
-        """
-
-        assert (url in [True, False]), "url parameter can be True or False"
-        assert (case in [True, False]), "case parameter can be True or False"
-        assert (punctuation in [True, False]), "punctuation parameter can be True or False"
-        assert (hashtag in [1, 2, 3]), "hashtag parameter can be 1, 2, 3"
-        assert (mention in [1, 2, 3]), "mention parameter can be 1, 2, 3"
-        assert (whitespace in [True, False]), "whitespace parameter can be True or False"
-        assert (control_characters in [True, False]), "control_characters parameter can be True or False"
-        assert (stop in ["stone", "nltk", "corenlp", "glascow",
-                         False]), "stop parameter can be stone, nltk, corenlp, glascow, or False"
-        assert (hashtag_split in [True, False]), "hashtag_split parameter can be True or False"
-        assert (mention_replacement in [True, False]), "mention_replacement parameter can be True or False"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if control_characters == True:
-            text = self.control_characters_removal(input_text=text)
-
-        if url == True:
-            text = self.url_removal(input_text=text)
-
-        if mention_replacement == True:
-            text = self.mention_replacement(input_text=text)
-
-        if hashtag == 1:
-            pass
-        elif hashtag == 2:
-            text = self.hashtags_removal(input_text=text, mode=2)
-        elif hashtag == 3:
-            text = self.hashtags_removal(input_text=text, mode=3)
-
-        if hashtag_split == True:
-            text = self.hashtag_splitter(input_text=text)
-
-        if mention == 1:
-            pass
-        elif mention == 2:
-            text = self.mentions_removal(input_text=text)
-        elif mention == 3:
-            text = self.mentions_removal(input_text=text)
-
-        if case == True:
-            text = text.lower()
-
-        if stop != False:
-            text = self.stopwords_removal(input_text=text, stopword_corpus=stop)
-
-        if punctuation == True:
-            text = self.punctuation_removal(input_text=text)
-
-        if whitespace == True:
-            text = self.whitespace_removal(input_text=text)
-
-        #         if contraction == True
-
-        return text
-
-    def tweet_pos(self, input_text=None):
-        """
-        This function replaces every word in the tweet by its corresponding Part-of-Speech (POS) tag.
-        :param input_text: if this parameter is None, then the Part-of-Speech (POS) tagging is performed on the caller object text field,
-        otherwise and in case of a string as an input for this parameter, the Part-of-Speech tagging is performed on the input text.
-        :return: this function returns the POS tagged version of the tweet.
-        """
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-        text = self.text_preprocessing(input_text=text)
-        pos_text = ""
-        spacy_text = self.parameters["spacy"](text)
-        for token in spacy_text:
-            pos_text = pos_text + " " + token.pos_
-        return pos_text.strip()
-
-    def tweet_ner(self, input_text=None):
-        """
-        This function replaces every word in the tweet by its corresponding Named-Entity-Recognition (NER) tag.
-        :param input_text: if this parameter is None, then the Named-Entity-Recognition (NER) tagging is performed on the
-        caller object text field, otherwise and in case of a string as an input for this parameter, the
-        NER tagging is performed on the input text.
-        :return: this function returns the Named-Entity-Recognition (NER) tagged version of the tweet.
-        """
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-        text = self.text_preprocessing(input_text=text)
-
-        ner_text = ""
-        spacy_text = self.parameters["spacy"](text)
-        for token in spacy_text.ents:
-            ner_text = ner_text + " " + token.label_
-
-        return ner_text.strip()
-
-    def tweet_lemmatization(self, input_text=None):
-        """
-        This function replaces every word in the tweet by its corresponding lemma.
-        :param input_text: if this parameter is None, then the lemmatization is performed on the
-        caller object text field, otherwise and in case of a string as an input for this parameter, the
-        lemmatization is performed on the input text.
-        :return: this function returns the lemmatized version of the tweet.
-        """
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-        text = self.text_preprocessing(input_text=text)
-
-        tweet_lemmas = ""
-        spacy_text = self.parameters["spacy"](text)
-        for token in spacy_text:
-            tweet_lemmas = tweet_lemmas + " " + token.lemma_
-
-        return tweet_lemmas.strip()
-
-    def tweet_tokens(self, preprocessing=True, lemmatization=True, input_text=None):
-        """
-        This function tokenises the tweet text field. If any customized preprocessing is required, the preprocessing can
-        be set to False and text_preprocessing function with arbitrary settings is called and feed to input_text parameter.
-        :param preprocessing: if this parameter is set to True, the default preprocessing is perfomed on tweet text.
-        :param lemmatization: if this parameter is set to True, the lemmatization is performed on the tweet text.
-        :param input_text: if this parameter is None, then the tokenisation is performed on the
-        caller object text field, otherwise and in case of a string as an input for this parameter, the
-        tokenisation is performed on the input text.
-        :return: a list of tokens.
-        """
-
-        assert (preprocessing in [True, False]), "preprocessing is a boolean parameter, so it can be True or False"
-        assert (lemmatization in [True, False]), "lemmatization is a boolean parameter, so it can be True or False"
-
-        if input_text == None:
-            if preprocessing and lemmatization:
-                return self.tweet_splitter(self.tweet_lemmatization(self.text_preprocessing(self.get_text())))
-            elif preprocessing and lemmatization == False:
-                return self.tweet_splitter(self.text_preprocessing(self.get_text()))
-            elif preprocessing == False and lemmatization:
-                return self.tweet_splitter(self.tweet_lemmatization(self.get_text()))
-            elif preprocessing == False and lemmatization == False:
-                return self.tweet_splitter(self.get_text())
-        else:
-            if preprocessing and lemmatization:
-                return self.tweet_splitter(self.tweet_lemmatization(self.text_preprocessing(input_text=input_text)))
-            elif preprocessing and lemmatization == False:
-                return self.tweet_splitter(self.text_preprocessing(input_text=input_text))
-            elif preprocessing == False and lemmatization:
-                return self.tweet_splitter(self.tweet_lemmatization(input_text=input_text))
-            elif preprocessing == False and lemmatization == False:
-                return self.tweet_splitter(input_text=input_text)
-
-    def get_emojis(self, count=True, emoji_list=True, input_text=None):
-        """
-        This function collects the emojis from tweet text.
-        :param count: if this is set to True, the function counts the number of emojis in the tweet.
-        :param emoji_list: if this is set to True, the function collects the emojis in the tweet.
-        :param input_text: if this parameter is None, then the emojis are extracted from the
-        caller object text field, otherwise and in case of a string as an input for this parameter, the
-        emojis are extracted from the input text.
-        :return: if both parameters are set to True, then the function returns a dictionary containing the list of emojis and
-        their number. if only count is set to True, the number of emojis is returned and if emoji_list is set to True, the
-        list of emojis is returned.
-        """
-        assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
-        assert (emoji_list in [True, False]), "emoji_list is a boolean parameter, so it can be True or False"
-        assert (count or emoji_list), "at least one of the count and emoji_list parameters " \
-                                      "has to be set to True"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        emojis = emoji.emoji_lis(text)
-        if emoji_list == True and count == True:
-            return {"emoji_count": len(emojis), "emoji_list": emojis}
-        elif emoji_list == True and count == False:
-            return emojis
-        elif emoji_list == False and count == True:
-            return len(emojis)
-
-            # Emoticon analysos <= doesn't work properly
-
-    def get_emoticon(self, count=True, emoticon_list=True, input_text=None):
-        """
-        This function collects the emoticons from tweet text.
-        :param count: if this is set to True, the function counts the number of emoticons in the tweet.
-        :param emoji_list: if this is set to True, the function collects the emoticons in the tweet.
-        :param input_text: if this parameter is None, then the emoticons are extracted from the
-        caller object text field, otherwise and in case of a string as an input for this parameter, the
-        emoticons are extracted from the input text.
-        :return: if both parameters are set to True, then the function returns a dictionary containing the list of emoticons and
-        their number. if only count is set to True, the number of emoticons is returned and if emoticons_list is set to True, the
-        list of emoticons is returned.
-        """
-        assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
-        assert (emoticon_list in [True, False]), "emoticon_list is a boolean parameter, so it can be True or False"
-        assert (count or emoticon_list), "at least one of the count and emoticon_list parameters " \
-                                         "has to be set to True"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        words = self.tweet_splitter(text)
-        emoticons = [word for word in words if word in self.parameters["emoticons"]]
-
-        if emoticon_list == True and count == True:
-            return {"emoticons_count": len(emoticons), "emoticon_list": emoticons}
-        elif emoticon_list == True and count == False:
-            return emoticons
-        elif emoticon_list == False and count == True:
-            return len(emoticons)
-
-    def tweet_splitter(self, input_text=None, split_unit="word"):
-        """
-        this function splits the tweet text field according to chosen splitting unit.
-        :param input_text: if this parameter is None, then the caller object text field is splitted, otherwise
-        and in case of a string as an input for this parameter, the input text is splitted up.
-        :param split_unit: the splitting unit can be "word", or "sentence".
-        :return: a list containing the splitting units.
-        """
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if split_unit == "word":
-            return re.findall(r'\S+', text)
-        elif split_unit == "sentence":
-            return [i for i in re.split(r'[.?!]+', text) if i != '']
-
-    def text_length(self, input_text=None, length_unit="word"):
-        """
-        this function measures the length of the tweet based on the selected length unit.
-        :param input_text: if this parameter is None, then the length of caller object text field is measured, otherwise
-        and in case of a string as an input for this parameter, the length of input text is measured.
-        :param length_unit: the length unit can be "character", "word", or "sentence".
-        :return: an integer showing the length of the tweet text field.
-        """
-
-        assert (length_unit in ["character", "word", "sentence"]), "the unit can be character, word, or sentence"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if length_unit == "character":
-            return len(text)
-        elif length_unit == "word":
-            return len(self.tweet_splitter(split_unit="word", input_text=text))
-        elif length_unit == "sentence":
-            return len(self.tweet_splitter(split_unit="sentence", input_text=text))
-
-    def text_complexity(self, input_text=None, complexity_unit="word"):
-        """
-        this function measures the complexity of a tweet text based on the selected complexity unit.
-        :param input_text: if this parameter is None, then the complexity of caller object text field is measured, otherwise
-        and in case of a string as an input for this parameter, the complexity of input text is measured.
-        :param complexity_unit: the complexity unit can be "word", "sentence", or "syllables".
-        :return: an float showing the complexity of the tweet text.
-        """
-
-        assert (complexity_unit in ["word", "sentence", "syllables"]), "unit parameter can be word, sentence, or syllables"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if complexity_unit == "word":
-            return np.average([len(word) for word in self.tweet_splitter(split_unit="word", input_text=text)])
-        elif complexity_unit == "sentence":
-            return np.average([len(self.tweet_splitter(split_unit="word", input_text=sentence)) for sentence in
-                               self.tweet_splitter(split_unit="sentence", input_text=text)])
-        elif complexity_unit == "syllables":
-            return np.average(
-                [textstat.syllable_count(i, lang='en_US') for i in self.tweet_splitter(split_unit="word", input_text=text)])
-
-    def text_pronoun_count(self, input_text=None, pronoun="third_singular"):
-        """
-        This function counts the number of pronouns in the tweet text according to selected pronoun for counting.
-        :param input_text: if this parameter is None, then the number of chosen pronoun in the caller object text field
-        is counted, otherwise and in case of a string as an input for this parameter, the number of chosen pronoun in the
-        input_text is counted.
-        :param pronoun: the pronoun can be "first_singular", "first_plural", "second_singular", "second_plural", "third_singular", or
-        "third_plural".
-        :return: an integer showing the number of chosen pronoun in the tweet text.
-        """
-
-        assert (pronoun in ["first_singular", "first_plural", "second_singular", "second_plural", "third_singular",
-                            "third_plural"]), "the pronoun parameter can be first_singular, first_plural, second_singular, second_plural, " \
-                                              "third_singular, or third_plural"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        words = [i.lower() for i in self.tweet_splitter(split_unit="word", input_text=text)]
-        if pronoun == "first_singular":
-            return words.count("i") + words.count("my") + words.count("mine") + words.count("me") + words.count(
-                "myself") + words.count("i'm") + words.count("i've") + words.count("i'd") + words.count("i'll")
-        elif pronoun == "first_plural":
-            return words.count("we") + words.count("our") + words.count("ours") + words.count("us") + words.count(
-                "ourselves") + words.count("we're") + words.count("we've") + words.count("we'd") + words.count("we'll")
-        elif pronoun == "second_singular":
-            return words.count("you") + words.count("your") + words.count("yours") + words.count(
-                "yourself") + words.count("you're") + words.count("you've") + words.count("you'd") + words.count(
-                "you'll")
-        elif pronoun == "second_plural":
-            return words.count("you") + words.count("your") + words.count("yours") + words.count(
-                "yourselves") + words.count("you're") + words.count("you've") + words.count("you'd") + words.count(
-                "you'll")
-        elif pronoun == "third_singular":
-            return words.count("he") + words.count("she") + words.count("it") + words.count("his") + words.count(
-                "her") + words.count("its") + words.count("him") + words.count("hers") + words.count(
-                "he's") + words.count("she's") + words.count("it's") + words.count("he'll") + words.count(
-                "she'll") + words.count("it'll") + + words.count("he'd") + words.count("she'd") + words.count("it'd")
-        elif pronoun == "third_plural":
-            return words.count("they") + words.count("them") + words.count("their") + words.count(
-                "theirs") + words.count("themselves") + words.count("they're") + words.count("they've") + words.count(
-                "they'd") + words.count("they'll")
-
-    def case_analysis(self, count=True, frac=True, unit_of_analysis="character",
-                      input_text=None):  #### THINK ABOUT DIVISION BY ZERO ERROR ####
-        """
-        This function analyses the count and fraction of upper and lower letters or capital and small words in the tweet text
-        depending on the selected unit of analysis.
-        :param count: if this is set to True, the function count the number of upper and lower letters or capital and small words
-        in the tweet text.
-        :param frac: if this is set to True, the function measures the fraction of  upper and lower letters or capital and small words
-        in the tweet text.
-        :param unit_of_analysis: the unit parameter can be word or character.
-        :param input_text: if this parameter is None, then the case analysis is performed on the caller object text field
-        , otherwise and in case of a string as an input for this parameter, the case analysis is performed on the input_text.
-        :return: it returns a dictionary which its content depends on the parameters value. If the unit of analysis is
-        set to character, depending on the value of count and frac parameters, the dictionary contains
-        either the number of lowercase and uppercase characters, or ratio of lowercase and uppercase characters to all characters,
-        or both. If the unit of analysis is set to word, then depending on the value of count and frac parameters,
-        the dictionary contains either the number of capital and small words, or ratio of capital and small words to
-        all words, or both.
-        """
-
-        assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
-        assert (frac in [True, False]), "frac is a boolean parameter, so it can be True or False"
-        assert (unit_of_analysis in ["character", "word"]), "unit can be character or word"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if unit_of_analysis == "character":
-            uppercase_character_count = sum(1 for i in text if i.isupper())
-            lowercase_character_count = sum(1 for i in text if i.islower())
-            character_count = self.text_length(length_unit="character", input_text=text)
-            if count == True and frac == True:  ######### THINK ABOUT DIVISION BY ZERO ERROR ###
-                try:
-                    return {"uppercase_character_count": uppercase_character_count,
-                            "lowercase_character_count": lowercase_character_count,
-                            "uppercase_to_lowercase": uppercase_character_count / lowercase_character_count,
-                            "lowercase_to_all_characters": lowercase_character_count / character_count,
-                            "uppercase_to_all_characters": uppercase_character_count / character_count}
-                except ZeroDivisionError:
-                    if character_count == 0:
-                        print(
-                            "the number of characters is zero, consequently the number of lowercase character is zero")
-                    elif lowercase_character_count == 0:
-                        print("the number of lowercase characters is zero")
-
-            elif count == True and frac == False:
-                return {"uppercase_character_count": uppercase_character_count,
-                        "lowercase_character_count": lowercase_character_count}
-            elif count == False and frac == True:
-                try:
-                    return {"uppercase_to_lowercase": uppercase_character_count / lowercase_character_count,
-                            "lowercase_to_all_characters": lowercase_character_count / character_count,
-                            "uppercase_to_all_characters": uppercase_character_count / character_count}
-                except ZeroDivisionError:
-                    if character_count == 0:
-                        print(
-                            "the number of characters is zero, consequently the number of lowercase characters is zero")
-                    elif lowercase_character_count == 0:
-                        print("the number of lowercase characters is zero")
-
-        elif unit_of_analysis == "word":
-            words = self.tweet_splitter(split_unit="word", input_text=text)
-            capital_words_count = len([b for b in words if b.isupper()])
-            small_words_count = len([b for b in words if b.islower()])
-            words_count = len(words)
-            if count == True and frac == True:
-                try:
-                    return {"capital_words_count": capital_words_count, "small_words_count": small_words_count,
-                            "capital_to_small": capital_words_count / small_words_count,
-                            "capital_to_all_words": capital_words_count / words_count,
-                            "small_to_all_words": small_words_count / words_count}
-                except ZeroDivisionError:
-                    if words_count == 0:
-                        print("the number of words is zero, consequently the number of snall words is zero")
-                    elif small_words_count == 0:
-                        print("the number of small words is zero")
-
-            elif count == True and frac == False:
-                return {"capital_words_count": capital_words_count, "small_words_count": small_words_count}
-            elif count == False and frac == True:
-                try:
-                    return {"capital_to_small": capital_words_count / small_words_count,
-                            "capital_to_all_words": capital_words_count / words_count,
-                            "small_to_all_words": small_words_count / words_count}
-                except ZeroDivisionError:
-                    if words_count == 0:
-                        print("the number of words is zero, consequently the number of snall words is zero")
-                    elif small_words_count == 0:
-                        print("the number of small words is zero")
-
-    def exclamation_mark_count(self, input_text=None):
-        """
-        This function counts the number of exclamation mark in  the tweet text field.
-        :param input_text: if this parameter is None, then the number of exclamation mark in the caller object text field
-        is counted, otherwise and in case of a string as an input for this parameter, the number of exclamation mark in the
-         input_text is counted.
-        :return: an integer showing the number of exclamation mark in the tweet text.
-        """
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-        return text.count("!")
-
-    def question_mark_count(self, input_text=None):
-        """
-        This function counts the number of question marks in the tweet text field.
-        :param input_text: if this parameter is None, then the number of question marks in the caller object text field
-        is counted, otherwise and in case of a string as an input for this parameter, the number of question marks in the
-         input_text is counted.
-        :return: an integer showing the number of question marks in the tweet text.
-        """
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-        return text.count("?")
-
-    def abbreviations(self, input_text=None):
-        """
-        This function finds the abbreviations used in tweet text.
-        :param input_text: if this parameter is None, then the function finds the abbreviations used in the caller object text field
-        , otherwise and in case of a string as an input for this parameter, the function finds the abbreviations in the
-        input_text.
-        :return: a list of abbreviations used in the tweet text.
-        """
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        words = self.tweet_splitter(split_unit="word", input_text=text)
-        return [i for i in words if i in self.parameters["abbr"]]
-
-    def vulgar_words(self, input_text=None):
-        """
-         This function finds the vulgar terms used in tweet text.
-         :param input_text: if this parameter is None, then the function finds the vulgar terms used in the caller object text field
-         , otherwise and in case of a string as an input for this parameter, the function finds the vulgar terms in the
-         input_text.
-         :return: a list of vulgar terms used in the tweet text.
-         """
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        words = self.tweet_splitter(split_unit="word", input_text=text)
-        return [i for i in words if i in self.parameters["vulgar"]]
-
-    def sentiment_analysis(self, sentiment_engine="vader", input_text=None):
-        """
-        This function performs sentiment analysis over tweet text field using various sentiment analysis engines
-        :param sentiment_engine: sentiment_engine can be "textblob", "vader", "nrc", "hate_speech", or "vad".
-        :param input_text: if this parameter is None, then the function measure the sentiment of the caller object text field
-         , otherwise and in case of a string as an input for this parameter, the function measures the sentiment of the
-         input_text.
-        :return: it returns a dictionary containing various sentiment scores depending on the chosen sentiment_engine. If
-        it is textblob, the sentiment scores are polarity and subjectivity. If it vader, the scores are positivity, negativity,
-        neutrality, and composite score. If the sentiment_engine is nrc, then the sentiment scores are anger, disgust, sadness,
-        anticipation, fear, surprise, joy, and trust. If the hate_speech engine is chosen, the scores  woud be hate_speech,
-        offensive language, and neither. And finally, if the sentiment engine is vad, the scores would be valence, arousal,
-        and dominance.
-        """
-
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
-                                     "vad"]), "the sentiment_engine has to be" \
-                                              "textblob, vader, nrc, hate_speech, or vad"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if sentiment_engine == "textblob":
-            return {"subjectivity": TextBlob(text).sentiment.subjectivity,
-                    "polarity": TextBlob(text).sentiment.polarity}
-        elif sentiment_engine == "vader":
-            return {"positivity_score": self.parameters["vader"].polarity_scores(text)["pos"],
-                    "negativity_score": self.parameters["vader"].polarity_scores(text)["neg"],
-                    "neutrality_score": self.parameters["vader"].polarity_scores(text)["neu"],
-                    "composite_score": self.parameters["vader"].polarity_scores(text)["compound"]}
-        elif sentiment_engine == "nrc":
-            nrc_text_list = self.tweet_splitter(split_unit="word", input_text=text)
-            anger_score = 0
-            for term in nrc_text_list:
-                if term in self.parameters["nrc"]:
-                    anger_score += self.parameters["nrc"][term]["anger"]
-            anticipation_score = 0
-            for term in nrc_text_list:
-                if term in self.parameters["nrc"]:
-                    anticipation_score += self.parameters["nrc"][term]["anticipation"]
-            disgust_score = 0
-            for term in nrc_text_list:
-                if term in self.parameters["nrc"]:
-                    disgust_score += self.parameters["nrc"][term]["disgust"]
-            fear_score = 0
-            for term in nrc_text_list:
-                if term in self.parameters["nrc"]:
-                    fear_score += self.parameters["nrc"][term]["fear"]
-            joy_score = 0
-            for term in nrc_text_list:
-                if term in self.parameters["nrc"]:
-                    joy_score += self.parameters["nrc"][term]["joy"]
-            sadness_score = 0
-            for term in nrc_text_list:
-                if term in self.parameters["nrc"]:
-                    sadness_score += self.parameters["nrc"][term]["sadness"]
-            surprise_score = 0
-            for term in nrc_text_list:
-                if term in self.parameters["nrc"]:
-                    surprise_score += self.parameters["nrc"][term]["surprise"]
-            trust_score = 0
-            for term in nrc_text_list:
-                if term in self.parameters["nrc"]:
-                    trust_score += self.parameters["nrc"][term]["trust"]
-            return {"anger_score": anger_score, "anticipation_score": anticipation_score,
-                    "disgust_score": disgust_score, "fear_score": fear_score, "joy_score": joy_score,
-                    "sadness_score": sadness_score, "surprise_score": surprise_score, "trust_score": trust_score}
-        elif sentiment_engine == "hate_speech":
-            sonar2 = self.parameters["sonar"].ping(text)
-            return {"hate_speech": sonar2["classes"][0]["confidence"],
-                    "offensive_language": sonar2["classes"][1]["confidence"],
-                    "neither": sonar2["classes"][2]["confidence"]}
-        elif sentiment_engine == "vad":
-            word_list = self.tweet_splitter(split_unit="word", input_text=text)
-
-            valence_score = 0
-            for term in word_list:
-                if term in self.parameters["vad"]:
-                    valence_score += self.parameters["vad"][term]["valence"]
-
-            arousal_score = 0
-            for term in word_list:
-                if term in self.parameters["vad"]:
-                    arousal_score += self.parameters["vad"][term]["arousal"]
-
-            dominance_score = 0
-            for term in word_list:
-                if term in self.parameters["vad"]:
-                    dominance_score += self.parameters["vad"][term]["dominance"]
-
-            return {"valence_score": valence_score, "arousal_score": arousal_score, "dominance_score": dominance_score}
-
-    def readability(self, readability_metric="flesch_kincaid_grade", input_text=None):
-        """
-        This function measures the readability of the tweet text according to the chosen readbility metric.
-        :param readability_metric: the readability metrics can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
-        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score"
-        :param input_text: if this parameter is None, then the function measures the readability of the caller object text field
-         , otherwise and in case of a string as an input for this parameter, the function measures the readability of the
-         input_text.
-        :return:
-        """
-
-        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
-                           "coleman_liau_index", "linsear_write_formula",
-                           "dale_chall_readability_score"]), "The metric " \
-                                                             "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
-                                                             "automated_readability_index, coleman_liau_index, linsear_write_formula," \
-                                                             "or dale_chall_readability_score."
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        if readability_metric == "flesch_reading_ease":
-            return textstat.flesch_reading_ease(text)
-        elif readability_metric == "flesch_kincaid_grade":
-            return textstat.flesch_kincaid_grade(text)
-        elif readability_metric == "gunning_fog":
-            return textstat.gunning_fog(text)
-        elif readability_metric == "smog_index":
-            return textstat.smog_index(text)
-        elif readability_metric == "automated_readability_index":
-            return textstat.automated_readability_index(text)
-        elif readability_metric == "coleman_liau_index":
-            return textstat.coleman_liau_index(text)
-        elif readability_metric == "linsear_write_formula":
-            return textstat.linsear_write_formula(text)
-        elif readability_metric == "dale_chall_readability_score":
-            return textstat.dale_chall_readability_score(text)
-
-    def long_words_count(self, threshold=6, input_text=None):
-        """
-        This function counts the number of words that are longer than a particular threshold.
-        :param threshold: an integer showing the threshhold of long words.
-        :param input_text: if this parameter is None, then the function counts the long words in the caller object text field
-         , otherwise and in case of a string as an input for this parameter, the function counts the number of long words in the
-         input_text.
-        :return: an integer number showing the number of words which are longer than a particular threshhold.
-        """
-
-        assert (isinstance(threshold, int) and threshold > 0), "threshhold has to be a positive integer"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        words = self.tweet_splitter(split_unit="word", input_text=text)
-        return len([i for i in words if len(i) > threshold])
-
-    def multiple_syllables_count(self, threshold=2, input_text=None):
-        """
-        This function counts the number of words that their syllables number is more than a particular threshold.
-        :param threshold: an integer showing the threshhold of syllables.
-        :param input_text: if this parameter is None, then the function counts the number of syllables in the caller object text field
-         , otherwise and in case of a string as an input for this parameter, the function counts the number of syllables in the
-         input_text.
-        :return: an integer number showing the number of wordsthat that their syllables number is higher than a particular threshold.
-        """
-
-        assert (isinstance(threshold, int) and threshold > 0), "threshhold has to be a positive integer"
-
-        if input_text == None:
-            text = self.get_text()
-        else:
-            text = input_text
-
-        words = self.tweet_splitter(split_unit="word", input_text=text)
-        return len([i for i in words if textstat.syllable_count(i, lang='en_US') > threshold])
-
-    def get_tweet_photos(self, saving_address):
-        photos = self.get_photo()
-        for photo in photos:
-            url = photo["media_url"]
-            local_filename = url.split('/')[-1]
-            response = requests.get(url, stream=True)
-            if response.status_code == 200:
-                with open(saving_address + local_filename, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-            elif response.status_code == 404:
-                print("the photo in the specified address is not found")
-            else:
-                return ("the error code: ", response.status_code)
-
-    def get_tweet_videos(self, saving_address):
-        videos = self.get_video()  # So far, there is only possibility of uploading one single video in every tweet
-        for video in videos:
-            urls = video["video_info"]["variants"]
-            for variant in urls:
-                if variant['content_type'] == 'video/mp4':
-                    url = variant["url"]
-                    break
-            response = requests.get(url, stream=True)
-            if response.status_code == 200:
-                local_filename = url.split('/')[-1]
-                reg = re.search(r'^.*\?', local_filename)
-                file_name = local_filename[reg.start():reg.end()].replace("?", "")
-                with open(saving_address + file_name, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-            elif response.status_code == 404:
-                print("the video in the specified address is not found")
-            else:
-                return ("the error code: ", response.status_code)
-
-    def get_tweet_gifs(self, saving_address):
-        gifs = self.get_gif()  # So far, there is only possibility of uploading one single gif in every tweet
-        for gif in gifs:
-            url = gif["video_info"]["variants"][0]["url"]
-            response = requests.get(url, stream=True)
-            if response.status_code == 200:
-                file_name = url.split('/')[-1]
-                # reg = re.search(r'^.*\?', local_filename)
-                # file_name = local_filename[reg.start():reg.end()].replace("?","")
-                with open(saving_address + file_name, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-            elif response.status_code == 404:
-                print("the gif in the specified address is not found")
-            else:
-                return ("the error code: ", response.status_code)
+# #TRANSFERRED
+# class SingleTweet: #Update docstring and assertions
+#     def __init__(self, param):
+#         """
+#         This is the constructor of SingleTweet.
+#         :param tweet_path: an individual tweet path.
+#         :param param: a dictionary of necessary objects and modules.
+#         """
+#         self.tweet = None
+#         self.parameters = param
+#         self.text = ""
+#
+# #entities
+#     def tweet_loader(self, tweet_path):
+#         self.tweet = json.load(open(tweet_path))
+#         return self
+#
+#     def get_entities(self): #There is an assumption here and that is the "truncated" variable is always False
+#         """
+#         This function extracts the full tweet entities including hashtags, mentions, urls, photos, videos, gifs, and symbols
+#          from a tweet object.
+#         :return: a dictionary containing all the entities.
+#         """
+#         tweet_entities = None
+#         if self.is_retweeted():
+#             tweet_entities = self.tweet["retweeted_status"]["entities"]
+#             if "extended_entities" in self.tweet["retweeted_status"].keys():
+#                 tweet_entities["media"] = self.tweet["retweeted_status"]["extended_entities"]["media"]
+#         elif not self.is_retweeted():
+#             tweet_entities = self.tweet["entities"]
+#             if "extended_entities" in self.tweet.keys():
+#                 tweet_entities["media"] = self.tweet["extended_entities"]["media"]
+#         return tweet_entities
+#
+#         # if not self.is_retweeted():
+#         #     if self.tweet["truncated"]:
+#         #         tweet_entities = self.tweet["extended_tweet"]["entities"]
+#         #         if "extended_entities" in self.tweet["extended_tweet"].keys():
+#         #             tweet_entities["media"] = self.tweet["extended_tweet"]["extended_entities"]["media"]
+#         #     else:
+#         #         tweet_entities = self.tweet["entities"]
+#         #         if "extended_entities" in self.tweet.keys():
+#         #             tweet_entities["media"] = self.tweet["extended_entities"]["media"]
+#         # elif self.is_retweeted():
+#         #     if self.tweet["retweeted_status"]["truncated"]:
+#         #         tweet_entities = self.tweet["retweeted_status"]["extended_tweet"]["entities"]
+#         #         if "extended_entities" in self.tweet["retweeted_status"]["extended_tweet"].keys():
+#         #             tweet_entities["media"] = self.tweet["retweeted_status"]["extended_tweet"]["extended_entities"][
+#         #                 "media"]
+#         #     else:
+#         #         tweet_entities = self.tweet["retweeted_status"]["entities"]
+#         #         if "extended_entities" in self.tweet["retweeted_status"].keys():
+#         #             tweet_entities["media"] = self.tweet["retweeted_status"]["extended_entities"]["media"]
+#         # return tweet_entities
+#
+#     def get_tweet(self):
+#         """
+#         :return: the tweet as a json file
+#         """
+#         return self.tweet
+#
+#     def get_url(self):
+#         """
+#         this function builds the tweet url.
+#         :return: a string of tweet url.
+#         """
+#         return "https://twitter.com/" + self.get_twitter().get_screen_name() + "/status/" + \
+#                self.get_id(return_format="string")
+#
+#     def get_inner_quote_screen_name(self): #no docstring
+#         return re.findall("status.*", self.tweet["quoted_status_permalink"]["expanded"])[0].replace("status/","")
+#
+#     def get_in_reply_to_screen_name(self):
+#         return self.tweet["in_reply_to_screen_name"]
+#
+#     def get_twitter(self):
+#         """
+#         :return: the user object embedded in the tweet object.
+#         """
+#         return user(self.tweet["user"])
+#
+#     def get_creation_time(self, output="object"):
+#         """
+#         It shows the creation time and date of a tweet.
+#         :param output: it can be either "object", "original_string", or "improved_string". By choosing the original_string
+#         the created_at field of tweet object is returned. By choosing object, a datetime object of the tweet creation time
+#         including year, month, day, hour, minute and second is returned. "improved_string" returns the string version of
+#         the datetime object.
+#         :return: a string or datetime object of the tweet creation time.
+#         """
+#
+#         assert (output in ["object", "original_string",
+#                            "improved_string"]), "the output has to be object or original_string, or" \
+#                                                 "improved_string"
+#
+#         if output == "object":
+#             return datetime.datetime.strptime(datetime.datetime.strftime(
+#                 datetime.datetime.strptime(self.tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"), "%Y %m %d %H %M %S"),
+#                 "%Y %m %d %H %M %S")
+#         elif output == "original_string":
+#             return self.tweet["created_at"]
+#         elif output == "improved_string":
+#             return datetime.datetime.strftime(
+#                 datetime.datetime.strptime(self.tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"), "%Y %m %d %H %M %S")
+#
+#     def get_source(self, return_format='raw'):
+#         """
+#         :return: a string showing th utility used to post the Tweet.
+#         """
+#         if return_format == "raw":
+#             return self.tweet["source"]
+#         elif return_format == "processed":
+#             # return re.findall(">.*<", f1[10]["source"])[0].replace("<", "").replace(">", "")
+#             soup = BeautifulSoup(self.get_source(), "html.parser")
+#             client = soup.text
+#             return client
+#
+#     def get_likes_count(self):
+#         """
+#         :return: an integer which indicates approximately how many times this Tweet has been liked by Twitter users
+#         """
+#         return self.tweet["favorite_count"]
+#
+#     def get_retweet_count(self):
+#         """
+#         :return: an integer which indicates how many times this tweet has been retweeted.
+#         """
+#         return self.tweet["retweet_count"]
+#
+#     def get_language(self):
+#         """
+#         :return: a string showing the language of the tweet.
+#         """
+#         return self.tweet["lang"]
+#
+#     def get_place(self): #You should be more specific about this field, not returning bunch of fields
+#         """
+#         When present, indicates that the tweet is associated (but not necessarily originating from) a Place.
+#         :return: a place object.
+#         """
+#         return self.tweet["place"]
+#
+#     def get_coordinates(self):#You should be more specific about this field, not returning bunch of fields
+#         """
+#         Represents the geographic location of this Tweet as reported by the user or client application.
+#         :return: a coordinate object
+#         """
+#         return self.tweet["coordinates"]
+#
+#     def get_tweet_urls(self, return_format="url"):
+#         """
+#         :return: a list of urls in this tweet.
+#         """
+#
+#         urls = self.get_entities()["urls"]
+#         if return_format == "url":
+#             return [element['url'] for element in urls]
+#         elif return_format == "expanded_url":
+#             return [element['expanded_url'] for element in urls]
+#         elif return_format == "display_url":
+#             return [element['display_url'] for element in urls]
+#
+#     def get_hashtags(self, case_sensitivity="small", hashtag_sign=True): #make it more neat! don't return the entire array of nonesense
+#         #https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
+#         """
+#         :param case_sensitivity: By setting this parameter to small hashtags will be returned in small format. If you set it to original, the hashtags will be returned the same as it written in the tweet..
+#         :param hashtag_sign: It indicated whether the # character comes before hashtags or not.
+#         :return: a list of hashtags in this tweet.
+#         """
+#         assert (case_sensitivity in ["small", "original"]), "the case_sensitivity has to be small or original"
+#         assert (hashtag_sign in [True, False]), "the hashtag_sign has to be True or False"
+#
+#         entities = self.get_entities()
+#         if "hashtags" in entities:
+#             if case_sensitivity == "small":
+#                 if hashtag_sign:
+#                     return ["#"+element['text'].lower() for element in entities["hashtags"]]
+#                 else:
+#                     return [element['text'].lower() for element in entities["hashtags"]]
+#             elif case_sensitivity == "original":
+#                 if hashtag_sign:
+#                     return ["#"+element['text'] for element in entities["hashtags"]]
+#                 else:
+#                     return [element['text'] for element in entities["hashtags"]]
+#             # return entities["hashtags"]
+#         else:
+#             return []
+#
+#     def get_mentions(self, return_format="screen_name", at_sign=True):
+#
+#         """
+#         :param return_format: It indicates in what format tweet mentions should be returned.
+#         :param at_sign: It indicated whether the @ character comes before mentions or not.
+#         :return: a list of mentions in this tweet.
+#         """
+#
+#         assert (return_format in ["screen_name", "name", "id", "id_str", "entire_object"]), "the return_format has to be screen_name, name, id, id_str, or entire_object"
+#         assert (at_sign in [True, False]), "the at_sign has to be True or False"
+#
+#         entities = self.get_entities()
+#         if "user_mentions" in entities:
+#             if at_sign:
+#                 if return_format == "screen_name":
+#                     return ["@"+element['screen_name'] for element in entities["user_mentions"]]
+#                 elif return_format == "name":
+#                     return ["@"+element['name'] for element in entities["user_mentions"]]
+#                 elif return_format == "id":
+#                     return [element['id'] for element in entities["user_mentions"]]
+#                 elif return_format == "id_str":
+#                     return ["@"+element['id_str'] for element in entities["user_mentions"]]
+#                 elif return_format == "entire_object":
+#                     return entities["user_mentions"]
+#             else:
+#                 if return_format == "screen_name":
+#                     return [element['screen_name'] for element in entities["user_mentions"]]
+#                 elif return_format == "name":
+#                     return [element['name'] for element in entities["user_mentions"]]
+#                 elif return_format == "id":
+#                     return [element['id'] for element in entities["user_mentions"]]
+#                 elif return_format == "id_str":
+#                     return [element['id_str'] for element in entities["user_mentions"]]
+#                 elif return_format == "entire_object":
+#                     return entities["user_mentions"]
+#         else:
+#             return []
+#
+#     def get_symbols(self):#make it more neat! don't return the entire array of nonesense
+#                 # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
+#         """
+#         :return: a list of symbols in this tweet.
+#         """
+#         entities = self.get_entities()
+#         if "symbols" in entities:
+#             return entities["symbols"]
+#         else:
+#             return []
+#
+#     def get_media(self):#make it more neat! don't return the entire array of nonesense
+#         # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
+#         """
+#         :return: it returns the photo(s), video, and animated-gif attached to this tweet as a list.
+#         """
+#         entities = self.get_entities()
+#         if "media" in entities:
+#             return entities["media"]
+#         else:
+#             return []
+#
+#     def get_photo(self):#make it more neat! don't return the entire array of nonesense
+#         """
+#         :return: it returns the photo(s) attached to this tweet as a list.
+#         """
+#         media = self.get_media()
+#         photos = []
+#         for medium in media:
+#             if medium["type"] == "photo":
+#                 photos.append(medium)
+#         return photos
+#
+#     def get_video(self):#make it more neat! don't return the entire array of nonesense
+#         """
+#         :return: it returns the video attached to this tweet in a list.
+#         """
+#         media = self.get_media()
+#         videos = []
+#         for medium in media:
+#             if medium["type"] == "video":
+#                 videos.append(medium)
+#         return videos
+#
+#     def get_gif(self):#make it more neat! don't return the entire array of nonesense
+#         """
+#         :return: it returns the animated-gif attached to this tweet as a list.
+#         """
+#         media = self.get_media()
+#         gifs = []
+#         for medium in media:
+#             if medium["type"] == "animated_gif":
+#                 gifs.append(medium)
+#         return gifs
+#
+# ### Don't forget adding poll object
+#
+#     def get_text(self):  ## Maybe you need to check this function for retweet and quote class
+#         """
+#         :return: a string showing the full text of this tweet
+#         """
+#         tweet_text = None
+#         if self.is_retweeted():
+#             tweet_text = self.tweet["retweeted_status"]["full_text"]
+#         elif not self.is_retweeted():
+#             tweet_text = self.tweet["full_text"]
+#         return tweet_text
+#
+#         # elif self.is_quoted():
+#         #     tweet_text = self.tweet["full_text"]
+#         # elif (not self.is_retweeted()) and (not self.is_quoted()):
+#         #     tweet_text = self.tweet["full_text"]
+#         # return tweet_text
+#
+#         ####Noted in the new version
+#         # if self.text != "":
+#         #     return self.text
+#         # else:
+#         #     if not self.is_retweeted():
+#         #         if self.tweet["truncated"]:
+#         #             tweet_text = self.tweet["extended_tweet"]["full_text"]
+#         #         else:
+#         #             if "full_text" in self.tweet:
+#         #                 tweet_text = self.tweet["full_text"]
+#         #             else:
+#         #                 tweet_text = self.tweet["text"]
+#         #     elif self.is_retweeted():
+#         #         if self.tweet["retweeted_status"]["truncated"]:
+#         #             tweet_text = self.tweet["retweeted_status"]["extended_tweet"]["full_text"]
+#         #         else:
+#         #             tweet_text = self.tweet["retweeted_status"]["text"]
+#         #     return tweet_text
+#
+#     def get_id(self, return_format='int'):
+#         """
+#         :return: an integer showing the unique id of this tweet.
+#         """
+#         if return_format == "int":
+#             return self.tweet["id"]
+#         elif return_format == "string":
+#             return self.tweet["id_str"]
+#
+#     def is_this_a_reply(self):
+#         """
+#         :return: a boolean shows whether this tweet is a reply tweet or not.
+#         """
+#         return False if self.tweet["in_reply_to_status_id"] is None else True
+#
+#     def get_reply_to_id(self, return_format='int'):
+#         """
+#         :return: an integer showing the unique id of the tweet that this one is a reply to that.
+#         """
+#         if return_format == "int":
+#             return self.tweet["in_reply_to_status_id"]
+#         elif return_format == "string":
+#             return self.tweet["in_reply_to_status_id_str"]
+#
+#     def is_retweeted(self):
+#         """
+#         :return: a boolean shows whether this tweet is retweeted or not.
+#         """
+#         return True if "retweeted_status" in self.tweet.keys() else False
+#
+#     def is_quoted(self):
+#         """
+#         :return: a boolean showing whether this is a quoted tweet or not..
+#         """
+#         # return True if "quoted_status" in self.tweet.keys() else False
+#         return self.tweet["is_quote_status"]
+#
+#     def is_quote_available(self):
+#         return True if "quoted_status" in self.tweet.keys() else False
+#
+#     def get_quote(self): #go to the buttom of this
+#         """
+#         :return: it returns the quoted part of the this tweet..
+#         """
+#         if self.is_quote_available():
+#             return QuoteClass(self.tweet["quoted_status"], self.parameters)
+#         else:
+#             print("This tweet does not contain a quote status object")
+#
+#         # return QuoteClass(self.tweet["quoted_status"], self.parameters) if self.is_quoted() else None
+#
+#     def get_retweeted(self): #go to the buttom of this
+#         """
+#         :return: it returns the retweeted part of this tweet.
+#         """
+#         if self.is_retweeted():
+#             return RetweetedClass(self.tweet["retweeted_status"], self.parameters)
+#         else:
+#             print("This tweet does not contain a retweet status object")
+#
+#     def get_quote_status_id(self, return_format='int'):
+#         if self.is_quoted():
+#             if return_format == "int":
+#                 return self.tweet["quoted_status_id"]
+#             elif return_format == "string":
+#                 return self.tweet["quoted_status_id_str"]
+#         else:
+#             print("This tweet does not contain a quote status")
+#
+#     def tweet_source_status(self): #Where do these official sources come from?
+#         """
+#         :return: a boolean that shows whether this tweet is posted by an official source or not.
+#         """
+#         official_clients = ["Twitter for iPhone", "Twitter for Android", "Twitter Web Client", "Twitter for iPad",
+#                             "Mobile Web (M5)", "TweetDeck", "Facebook", "Twitter for Windows", "Mobile Web (M2)",
+#                             "Twitter for Windows Phone", "Mobile Web", "Google", "Twitter for BlackBerry",
+#                             "Twitter for Android Tablets", "Twitter for Mac", "iOS", "Twitter for BlackBerry®"]
+#
+#         return True if self.get_source(return_format="processed") in official_clients else False
+#
+#     def tweet_stemming(self, input_text=None, inplace=False):
+#         """
+#         This function performs the stemming operation using Porter algorithm.
+#         :param input_text: if this parameter is None, then stemming is applied on the text field of the caller object, otherwise
+#         and in case of a string as an input for this parameter, the stemming is applied on the input text.
+#         :param inplace: if inplace is True, the change is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after stemming.
+#         :return: when the implace parameter is equal to True, the function changes the caller object text field permanently and
+#         returns the whole object, in contrast when it is equal to False the function only returns the text field after
+#         the stemming without changing the text field.
+#         """
+#
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text is None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#         stemmed = PorterStemmer().stem(text)
+#         if inplace:
+#             self.text = stemmed
+#             return self
+#         else:
+#             return stemmed
+#
+#     def hashtag_splitter(self, input_text=None, inplace=False):
+#         """
+#         This function slices up hashtags as in most of the times, hashtags are made up of concatanation of meaningful words.
+#         :param input_text: if this parameter is None, then slicing is applied on the hashtags of the caller object, otherwise
+#         and in case of a string as an input for this parameter, the slicing is applied on the input text.
+#         :param inplace: if inplace is True, the change is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after slicing up the hashtags.
+#         :return: when the implace parameter is equal to True, the function changes the caller object text field permanently
+#         by splitting the hashtags and returning the whole object, in contrast when it is equal to False the function only
+#         returns the text field after slicing up the hashtags without changing the text field.
+#         """
+#
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text is None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         hashtags = self.get_hashtags()
+#
+#         if len(hashtags) > 0:
+#             for hashtag in hashtags:
+#                 hashtag_text = hashtag["text"]
+#                 if text.isupper():
+#                     pat = r'[A-Z0-9]+[a-z0-9]*'
+#                     replacement = " ".join(re.findall(pat, hashtag_text))
+#                     text = text.replace(hashtag_text, replacement)
+#                 else:
+#                     replacement = " ".join(wordninja.split(hashtag_text))
+#                     text = text.replace(hashtag_text, replacement)
+#
+#         if inplace:
+#             self.text = text
+#             return self
+#         else:
+#             return text
+#
+#     def mention_replacement(self, input_text=None, inplace=False):
+#         """
+#         This function replaces Twitter account mentions by the accounts' screen name.
+#         :param input_text: if this parameter is None, then the replacement is applied on the mention of the caller object,
+#         otherwise and in case of a string as an input for this parameter, the replacement is applied on the input text.
+#         :param inplace: if inplace is True, the change is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after replacing the mentions.
+#         :return: when the implace parameter is equal to True, the function changes the caller object text field permanently
+#         by replacing the mentions with the accounts screen names and returning the whole object, in contrast when it is equal
+#         to False the function only returns the text field after replacing the mentions without changing the text field.
+#         """
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         mentions = self.get_mentions()
+#         for mention in mentions:
+#             text = text.replace(mention["screen_name"], mention["name"])
+#
+#         if inplace:
+#             self.text = text
+#             return self
+#         else:
+#             return text
+#
+#     def url_removal(self, input_text=None, inplace=False):
+#         """
+#         This function removes the urls from the tweet text.
+#         :param input_text: if this parameter is None, then the urls are removed from the caller object text, otherwise
+#         and in case of a string as an input for this parameter, the urls are removed from the input text.
+#         :param inplace: if inplace is True, the url removal is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after removing the urls.
+#         :return: when the implace parameter is equal to True, the function changes the caller object text field permanently
+#         by removing the urls and returning the whole object, in contrast when it is equal to False the function only
+#         returns the text field after url removal.
+#         """
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         extractor = URLExtract()
+#         urls = extractor.find_urls(text)
+#         for url in urls:
+#             text = text.replace(url, "")
+#         if inplace:
+#             self.text = text
+#             return self
+#         else:
+#             return text
+#
+#     def hashtags_removal(self, input_text=None, mode=2, inplace=False):
+#         """
+#         This function removes hashtags from tweet text according to different modes.
+#         :param input_text: if this parameter is None, then the hashtag removal is applied on the caller object,
+#         otherwise and in case of a string as an input for this parameter, the hashtag removal is applied to the input text.
+#         :param mode: there are three modes for hashtags removal. In mode 1, the text remains intact, in Mode 2, only the
+#         hashtag characters (#) are removed, and in mode 3, the whole hashtags consisting the hashtag character and the terms
+#         after the hashtags are removed.
+#         :param inplace: if inplace is True, the hashtag removal is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after removing the hashtags.
+#         :return: when the implace parameter is equal to True, the function removes the hashtags permanently and returns
+#         the whole object, in contrast when it is equal to False the function only returns the text field after removing the
+#          hashtags from the text.
+#         """
+#
+#         assert (mode in [1, 2, 3]), "The mode can be 1, 2, or 3"
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if mode == 1:
+#             pass
+#         elif mode == 2:
+#             text = text.replace("#", "")
+#         elif mode == 3:
+#             for h in self.get_hashtags():
+#                 text = text.replace("#" + h["text"], "")
+#         if inplace:
+#             self.text = text
+#             return self
+#         else:
+#             return text
+#
+#     def mentions_removal(self, input_text=None, mode=2, inplace=False):
+#         """
+#         This function removes mentions from tweet text according to different modes.
+#         :param input_text: if this parameter is None, then the mention removal is applied on the caller object,
+#         otherwise and in case of a string as an input for this parameter, the mention removal is applied to the input text.
+#         :param mode: there are three modes for mention removal. In mode 1, the text remains intact, in Mode 2, only the
+#         mention characters (@) are removed, and in mode 3, the whole mention consisting the mention character and the terms
+#         after the mentions are removed.
+#         :param inplace: if inplace is True, the mention removal is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after removing the mention.
+#         :return: when the implace parameter is equal to True, the function removes the mentions permanently and returns
+#         the whole object, in contrast when it is equal to False the function only returns the text field after removing the
+#          mentions from the text.
+#         """
+#
+#         assert (mode in [1, 2, 3]), "The mode can be 1, 2, or 3"
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if mode == 1:
+#             pass
+#         elif mode == 2:
+#             text = text.replace("@", "")
+#         elif mode == 3:
+#             for m in self.get_mentions():
+#                 text = text.replace("@" + m["screen_name"], "")
+#         if inplace:
+#             self.text = text
+#             return self
+#         else:
+#             return text
+#
+#     def control_characters_removal(self, input_text=None, inplace=False):
+#         """
+#         This functions removes common control characters carriage return (\r), line feed (\n), horizontal tab (\t).
+#         :param input_text: if this parameter is None, then the control characters are removed from the caller object text field,
+#         otherwise and in case of a string as an input for this parameter, the control characters are removed from the input text.
+#         :param inplace: if inplace is True, the control characters removal is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after removing the control characters.
+#         :return: when the implace parameter is equal to True, the function removes the control characters permanently and returns
+#         the whole object, in contrast when it is equal to False the function only returns the text field after removing the
+#          control characters from the text.
+#         """
+#
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         pattern = re.compile(r'[\r\t\n]')
+#         text = pattern.sub(" ", text)
+#         if inplace:
+#             self.text = text
+#             return self
+#         else:
+#             return text
+#
+#     def stopwords_removal(self, input_text=None, stopword_corpus="stone", inplace=False):
+#         """
+#         This function removes stopwords from the tweet according to chosen stopword corpus.
+#         :param input_text: if this parameter is None, then the stopwords are removed from the caller object text field,
+#         otherwise and in case of a string as an input for this parameter, the stopwords are removed from the input text.
+#         :param stopword_corpus: The stopword corpus can be "stone", "nltk", "corenlp", or "glascow". Almost every text mining
+#          framework uses one of these corpuses for removing the stopwords.
+#         :param inplace: if inplace is True, the stopwords removal is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after removing the stopwords.
+#         :return: when the implace parameter is equal to True, the function removes the stopwords permanently and returns
+#         the whole object, in contrast when it is equal to False the function only returns the text field after removing the
+#         stopwords from the text.
+#         """
+#
+#         assert (stopword_corpus in ["stone", "nltk", "corenlp",
+#                                     "glascow"]), "stopword_orpus can be stone, nltk, corenlp, and glascow"
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         words = self.tweet_splitter(text)
+#         if stopword_corpus == "stone":
+#             processed_text = " ".join(
+#                 [word for word in words if word.lower() not in self.parameters["stopwords"]["stone"]])
+#         elif stopword_corpus == "nltk":
+#             processed_text = " ".join(
+#                 [word for word in words if word.lower() not in self.parameters["stopwords"]["nltk"]])
+#         elif stopword_corpus == "corenlp":
+#             processed_text = " ".join(
+#                 [word for word in words if word.lower() not in self.parameters["stopwords"]["corenlp"]])
+#         elif stopword_corpus == "glascow":
+#             processed_text = " ".join(
+#                 [word for word in words if word.lower() not in self.parameters["stopwords"]["glascow"]])
+#
+#         if inplace:
+#             self.text = processed_text
+#             return self
+#         else:
+#             return processed_text
+#
+#     def whitespace_removal(self, input_text=None, inplace=False):
+#         """
+#         This functions removes whitespaces from the text.
+#         :param input_text: if this parameter is None, then the whitespaces are removed from the caller object text field,
+#         otherwise and in case of a string as an input for this parameter, the whitespaces are removed from the input text.
+#         :param inplace: if inplace is True, the whitespace removal is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after removing the whitespaces.
+#         :return: when the implace parameter is equal to True, the function removes the whitespaces permanently and returns
+#         the whole object, in contrast when it is equal to False the function only returns the text field after removing the
+#          whitespaces from the text.
+#         """
+#
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         text = text.strip()
+#         while (text.count("  ") > 0):
+#             text = text.replace("  ", " ")
+#         if inplace:
+#             self.text = text
+#             return self
+#         else:
+#             return text
+#
+#     def punctuation_removal(self, input_text=None, inplace=False):
+#         """
+#         This functions removes punctuation characters from the text.
+#         :param input_text: if this parameter is None, then the punctuations are removed from the caller object text field,
+#         otherwise and in case of a string as an input for this parameter, the punctuations are removed from the input text.
+#         :param inplace: if inplace is True, the punctuations removal is permanently applied on the caller object text field, otherwise
+#         the caller object text field remains intact and the function returns the text after removing the punctuations.
+#         :return: when the implace parameter is equal to True, the function removes the punctuations permanently and returns
+#         the whole object, in contrast when it is equal to False the function only returns the text field after removing the
+#          punctuations from the text.
+#         """
+#
+#         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         punctuation_free = textstat.remove_punctuation(text).replace(".", "").replace("\"", "").replace("“",
+#                                                                                                         "").replace("”",
+#                                                                                                                     "").strip()
+#         if inplace:
+#             self.text = punctuation_free
+#             return self
+#         else:
+#             return punctuation_free
+#
+#     def text_preprocessing(self, input_text=None, url=True, case=True, punctuation=True, hashtag=2, mention=2,
+#                            whitespace=True, control_characters=True, stop="stone", hashtag_split=True,
+#                            mention_replacement=True):
+#         """
+#         This function preprocess the tweet text.
+#         :param input_text: if this parameter is None, then preprocessing is performed on the caller object text field,
+#         otherwise and in case of a string as an input for this parameter, the preprocessing is applied on the input text.
+#         :param url: by setting this boolean parameter True, the tweet urls are removed.
+#         :param case: setting this boolean parameter True, turns the tweet text to lower case.
+#         :param punctuation: by setting this boolean parameter True, the tweet punctuations are removed.
+#         :param hashtag: this integer parameter represents the hashtag removal mode. There are three modes for
+#         hashtags removal. In mode 1, the text remains intact, in Mode 2, only the hashtag characters (#) are removed,
+#         and in mode 3, the whole hashtags consisting the hashtag character and the terms after the hashtags are removed.
+#         :param mention: this integer parameter represents the mention removal mode. There are three modes for
+#         mention removal. In mode 1, the text remains intact, in Mode 2, only the mention characters (@) are removed,
+#         and in mode 3, the whole mention consisting the hashtag character and the terms after the hashtags are removed.
+#         :param whitespace: by setting this boolean parameter True, the tweet whitespaces are removed.
+#         :param control_characters: by setting this boolean parameter True, the common control characters (carriage return(\r),
+#         line feed(\n), and horizontal tab(\t)) are removed.
+#         :param stop: this string parameter represents the stopwords corpus for stopword removal. The stopword corpus can
+#         be "stone", "nltk", "corenlp", or "glascow". Almost every text mining framework uses one of these corpuses for
+#         removing the stopwords. In order to seactivates stopwords removal, this parameter has to be set to False.
+#         :param hashtag_split: by setting this parameter to True, the hashtags are splitted and replaced in the text.
+#         :param mention_replacement: by setting this parameter to True, the mentions are replaced by their corresponding screen names.
+#         :return: when the implace parameter is equal to True, the function applies the preprocessing permanently and returns
+#         the whole object, in contrast when it is equal to False the function only returns the text field after preprocessing.
+#         """
+#
+#         assert (url in [True, False]), "url parameter can be True or False"
+#         assert (case in [True, False]), "case parameter can be True or False"
+#         assert (punctuation in [True, False]), "punctuation parameter can be True or False"
+#         assert (hashtag in [1, 2, 3]), "hashtag parameter can be 1, 2, 3"
+#         assert (mention in [1, 2, 3]), "mention parameter can be 1, 2, 3"
+#         assert (whitespace in [True, False]), "whitespace parameter can be True or False"
+#         assert (control_characters in [True, False]), "control_characters parameter can be True or False"
+#         assert (stop in ["stone", "nltk", "corenlp", "glascow",
+#                          False]), "stop parameter can be stone, nltk, corenlp, glascow, or False"
+#         assert (hashtag_split in [True, False]), "hashtag_split parameter can be True or False"
+#         assert (mention_replacement in [True, False]), "mention_replacement parameter can be True or False"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if control_characters == True:
+#             text = self.control_characters_removal(input_text=text)
+#
+#         if url == True:
+#             text = self.url_removal(input_text=text)
+#
+#         if mention_replacement == True:
+#             text = self.mention_replacement(input_text=text)
+#
+#         if hashtag == 1:
+#             pass
+#         elif hashtag == 2:
+#             text = self.hashtags_removal(input_text=text, mode=2)
+#         elif hashtag == 3:
+#             text = self.hashtags_removal(input_text=text, mode=3)
+#
+#         if hashtag_split == True:
+#             text = self.hashtag_splitter(input_text=text)
+#
+#         if mention == 1:
+#             pass
+#         elif mention == 2:
+#             text = self.mentions_removal(input_text=text)
+#         elif mention == 3:
+#             text = self.mentions_removal(input_text=text)
+#
+#         if case == True:
+#             text = text.lower()
+#
+#         if stop != False:
+#             text = self.stopwords_removal(input_text=text, stopword_corpus=stop)
+#
+#         if punctuation == True:
+#             text = self.punctuation_removal(input_text=text)
+#
+#         if whitespace == True:
+#             text = self.whitespace_removal(input_text=text)
+#
+#         #         if contraction == True
+#
+#         return text
+#
+#     def tweet_pos(self, input_text=None):
+#         """
+#         This function replaces every word in the tweet by its corresponding Part-of-Speech (POS) tag.
+#         :param input_text: if this parameter is None, then the Part-of-Speech (POS) tagging is performed on the caller object text field,
+#         otherwise and in case of a string as an input for this parameter, the Part-of-Speech tagging is performed on the input text.
+#         :return: this function returns the POS tagged version of the tweet.
+#         """
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#         text = self.text_preprocessing(input_text=text)
+#         pos_text = ""
+#         spacy_text = self.parameters["spacy"](text)
+#         for token in spacy_text:
+#             pos_text = pos_text + " " + token.pos_
+#         return pos_text.strip()
+#
+#     def tweet_ner(self, input_text=None):
+#         """
+#         This function replaces every word in the tweet by its corresponding Named-Entity-Recognition (NER) tag.
+#         :param input_text: if this parameter is None, then the Named-Entity-Recognition (NER) tagging is performed on the
+#         caller object text field, otherwise and in case of a string as an input for this parameter, the
+#         NER tagging is performed on the input text.
+#         :return: this function returns the Named-Entity-Recognition (NER) tagged version of the tweet.
+#         """
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#         text = self.text_preprocessing(input_text=text)
+#
+#         ner_text = ""
+#         spacy_text = self.parameters["spacy"](text)
+#         for token in spacy_text.ents:
+#             ner_text = ner_text + " " + token.label_
+#
+#         return ner_text.strip()
+#
+#     def tweet_lemmatization(self, input_text=None):
+#         """
+#         This function replaces every word in the tweet by its corresponding lemma.
+#         :param input_text: if this parameter is None, then the lemmatization is performed on the
+#         caller object text field, otherwise and in case of a string as an input for this parameter, the
+#         lemmatization is performed on the input text.
+#         :return: this function returns the lemmatized version of the tweet.
+#         """
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#         text = self.text_preprocessing(input_text=text)
+#
+#         tweet_lemmas = ""
+#         spacy_text = self.parameters["spacy"](text)
+#         for token in spacy_text:
+#             tweet_lemmas = tweet_lemmas + " " + token.lemma_
+#
+#         return tweet_lemmas.strip()
+#
+#     def tweet_tokens(self, preprocessing=True, lemmatization=True, input_text=None):
+#         """
+#         This function tokenises the tweet text field. If any customized preprocessing is required, the preprocessing can
+#         be set to False and text_preprocessing function with arbitrary settings is called and feed to input_text parameter.
+#         :param preprocessing: if this parameter is set to True, the default preprocessing is perfomed on tweet text.
+#         :param lemmatization: if this parameter is set to True, the lemmatization is performed on the tweet text.
+#         :param input_text: if this parameter is None, then the tokenisation is performed on the
+#         caller object text field, otherwise and in case of a string as an input for this parameter, the
+#         tokenisation is performed on the input text.
+#         :return: a list of tokens.
+#         """
+#
+#         assert (preprocessing in [True, False]), "preprocessing is a boolean parameter, so it can be True or False"
+#         assert (lemmatization in [True, False]), "lemmatization is a boolean parameter, so it can be True or False"
+#
+#         if input_text == None:
+#             if preprocessing and lemmatization:
+#                 return self.tweet_splitter(self.tweet_lemmatization(self.text_preprocessing(self.get_text())))
+#             elif preprocessing and lemmatization == False:
+#                 return self.tweet_splitter(self.text_preprocessing(self.get_text()))
+#             elif preprocessing == False and lemmatization:
+#                 return self.tweet_splitter(self.tweet_lemmatization(self.get_text()))
+#             elif preprocessing == False and lemmatization == False:
+#                 return self.tweet_splitter(self.get_text())
+#         else:
+#             if preprocessing and lemmatization:
+#                 return self.tweet_splitter(self.tweet_lemmatization(self.text_preprocessing(input_text=input_text)))
+#             elif preprocessing and lemmatization == False:
+#                 return self.tweet_splitter(self.text_preprocessing(input_text=input_text))
+#             elif preprocessing == False and lemmatization:
+#                 return self.tweet_splitter(self.tweet_lemmatization(input_text=input_text))
+#             elif preprocessing == False and lemmatization == False:
+#                 return self.tweet_splitter(input_text=input_text)
+#
+#     def get_emojis(self, count=True, emoji_list=True, input_text=None):
+#         """
+#         This function collects the emojis from tweet text.
+#         :param count: if this is set to True, the function counts the number of emojis in the tweet.
+#         :param emoji_list: if this is set to True, the function collects the emojis in the tweet.
+#         :param input_text: if this parameter is None, then the emojis are extracted from the
+#         caller object text field, otherwise and in case of a string as an input for this parameter, the
+#         emojis are extracted from the input text.
+#         :return: if both parameters are set to True, then the function returns a dictionary containing the list of emojis and
+#         their number. if only count is set to True, the number of emojis is returned and if emoji_list is set to True, the
+#         list of emojis is returned.
+#         """
+#         assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
+#         assert (emoji_list in [True, False]), "emoji_list is a boolean parameter, so it can be True or False"
+#         assert (count or emoji_list), "at least one of the count and emoji_list parameters " \
+#                                       "has to be set to True"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         emojis = emoji.emoji_lis(text)
+#         if emoji_list == True and count == True:
+#             return {"emoji_count": len(emojis), "emoji_list": emojis}
+#         elif emoji_list == True and count == False:
+#             return emojis
+#         elif emoji_list == False and count == True:
+#             return len(emojis)
+#
+#             # Emoticon analysos <= doesn't work properly
+#
+#     def get_emoticon(self, count=True, emoticon_list=True, input_text=None):
+#         """
+#         This function collects the emoticons from tweet text.
+#         :param count: if this is set to True, the function counts the number of emoticons in the tweet.
+#         :param emoji_list: if this is set to True, the function collects the emoticons in the tweet.
+#         :param input_text: if this parameter is None, then the emoticons are extracted from the
+#         caller object text field, otherwise and in case of a string as an input for this parameter, the
+#         emoticons are extracted from the input text.
+#         :return: if both parameters are set to True, then the function returns a dictionary containing the list of emoticons and
+#         their number. if only count is set to True, the number of emoticons is returned and if emoticons_list is set to True, the
+#         list of emoticons is returned.
+#         """
+#         assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
+#         assert (emoticon_list in [True, False]), "emoticon_list is a boolean parameter, so it can be True or False"
+#         assert (count or emoticon_list), "at least one of the count and emoticon_list parameters " \
+#                                          "has to be set to True"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         words = self.tweet_splitter(text)
+#         emoticons = [word for word in words if word in self.parameters["emoticons"]]
+#
+#         if emoticon_list == True and count == True:
+#             return {"emoticons_count": len(emoticons), "emoticon_list": emoticons}
+#         elif emoticon_list == True and count == False:
+#             return emoticons
+#         elif emoticon_list == False and count == True:
+#             return len(emoticons)
+#
+#     def tweet_splitter(self, input_text=None, split_unit="word"):
+#         """
+#         this function splits the tweet text field according to chosen splitting unit.
+#         :param input_text: if this parameter is None, then the caller object text field is splitted, otherwise
+#         and in case of a string as an input for this parameter, the input text is splitted up.
+#         :param split_unit: the splitting unit can be "word", or "sentence".
+#         :return: a list containing the splitting units.
+#         """
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if split_unit == "word":
+#             return re.findall(r'\S+', text)
+#         elif split_unit == "sentence":
+#             return [i for i in re.split(r'[.?!]+', text) if i != '']
+#
+#     def text_length(self, input_text=None, length_unit="word"):
+#         """
+#         this function measures the length of the tweet based on the selected length unit.
+#         :param input_text: if this parameter is None, then the length of caller object text field is measured, otherwise
+#         and in case of a string as an input for this parameter, the length of input text is measured.
+#         :param length_unit: the length unit can be "character", "word", or "sentence".
+#         :return: an integer showing the length of the tweet text field.
+#         """
+#
+#         assert (length_unit in ["character", "word", "sentence"]), "the unit can be character, word, or sentence"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if length_unit == "character":
+#             return len(text)
+#         elif length_unit == "word":
+#             return len(self.tweet_splitter(split_unit="word", input_text=text))
+#         elif length_unit == "sentence":
+#             return len(self.tweet_splitter(split_unit="sentence", input_text=text))
+#
+#     def text_complexity(self, input_text=None, complexity_unit="word"):
+#         """
+#         this function measures the complexity of a tweet text based on the selected complexity unit.
+#         :param input_text: if this parameter is None, then the complexity of caller object text field is measured, otherwise
+#         and in case of a string as an input for this parameter, the complexity of input text is measured.
+#         :param complexity_unit: the complexity unit can be "word", "sentence", or "syllables".
+#         :return: an float showing the complexity of the tweet text.
+#         """
+#
+#         assert (complexity_unit in ["word", "sentence", "syllables"]), "unit parameter can be word, sentence, or syllables"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if complexity_unit == "word":
+#             return np.average([len(word) for word in self.tweet_splitter(split_unit="word", input_text=text)])
+#         elif complexity_unit == "sentence":
+#             return np.average([len(self.tweet_splitter(split_unit="word", input_text=sentence)) for sentence in
+#                                self.tweet_splitter(split_unit="sentence", input_text=text)])
+#         elif complexity_unit == "syllables":
+#             return np.average(
+#                 [textstat.syllable_count(i, lang='en_US') for i in self.tweet_splitter(split_unit="word", input_text=text)])
+#
+#     def text_pronoun_count(self, input_text=None, pronoun="third_singular"):
+#         """
+#         This function counts the number of pronouns in the tweet text according to selected pronoun for counting.
+#         :param input_text: if this parameter is None, then the number of chosen pronoun in the caller object text field
+#         is counted, otherwise and in case of a string as an input for this parameter, the number of chosen pronoun in the
+#         input_text is counted.
+#         :param pronoun: the pronoun can be "first_singular", "first_plural", "second_singular", "second_plural", "third_singular", or
+#         "third_plural".
+#         :return: an integer showing the number of chosen pronoun in the tweet text.
+#         """
+#
+#         assert (pronoun in ["first_singular", "first_plural", "second_singular", "second_plural", "third_singular",
+#                             "third_plural"]), "the pronoun parameter can be first_singular, first_plural, second_singular, second_plural, " \
+#                                               "third_singular, or third_plural"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         words = [i.lower() for i in self.tweet_splitter(split_unit="word", input_text=text)]
+#         if pronoun == "first_singular":
+#             return words.count("i") + words.count("my") + words.count("mine") + words.count("me") + words.count(
+#                 "myself") + words.count("i'm") + words.count("i've") + words.count("i'd") + words.count("i'll")
+#         elif pronoun == "first_plural":
+#             return words.count("we") + words.count("our") + words.count("ours") + words.count("us") + words.count(
+#                 "ourselves") + words.count("we're") + words.count("we've") + words.count("we'd") + words.count("we'll")
+#         elif pronoun == "second_singular":
+#             return words.count("you") + words.count("your") + words.count("yours") + words.count(
+#                 "yourself") + words.count("you're") + words.count("you've") + words.count("you'd") + words.count(
+#                 "you'll")
+#         elif pronoun == "second_plural":
+#             return words.count("you") + words.count("your") + words.count("yours") + words.count(
+#                 "yourselves") + words.count("you're") + words.count("you've") + words.count("you'd") + words.count(
+#                 "you'll")
+#         elif pronoun == "third_singular":
+#             return words.count("he") + words.count("she") + words.count("it") + words.count("his") + words.count(
+#                 "her") + words.count("its") + words.count("him") + words.count("hers") + words.count(
+#                 "he's") + words.count("she's") + words.count("it's") + words.count("he'll") + words.count(
+#                 "she'll") + words.count("it'll") + + words.count("he'd") + words.count("she'd") + words.count("it'd")
+#         elif pronoun == "third_plural":
+#             return words.count("they") + words.count("them") + words.count("their") + words.count(
+#                 "theirs") + words.count("themselves") + words.count("they're") + words.count("they've") + words.count(
+#                 "they'd") + words.count("they'll")
+#
+#     def case_analysis(self, count=True, frac=True, unit_of_analysis="character",
+#                       input_text=None):  #### THINK ABOUT DIVISION BY ZERO ERROR ####
+#         """
+#         This function analyses the count and fraction of upper and lower letters or capital and small words in the tweet text
+#         depending on the selected unit of analysis.
+#         :param count: if this is set to True, the function count the number of upper and lower letters or capital and small words
+#         in the tweet text.
+#         :param frac: if this is set to True, the function measures the fraction of  upper and lower letters or capital and small words
+#         in the tweet text.
+#         :param unit_of_analysis: the unit parameter can be word or character.
+#         :param input_text: if this parameter is None, then the case analysis is performed on the caller object text field
+#         , otherwise and in case of a string as an input for this parameter, the case analysis is performed on the input_text.
+#         :return: it returns a dictionary which its content depends on the parameters value. If the unit of analysis is
+#         set to character, depending on the value of count and frac parameters, the dictionary contains
+#         either the number of lowercase and uppercase characters, or ratio of lowercase and uppercase characters to all characters,
+#         or both. If the unit of analysis is set to word, then depending on the value of count and frac parameters,
+#         the dictionary contains either the number of capital and small words, or ratio of capital and small words to
+#         all words, or both.
+#         """
+#
+#         assert (count in [True, False]), "count is a boolean parameter, so it can be True or False"
+#         assert (frac in [True, False]), "frac is a boolean parameter, so it can be True or False"
+#         assert (unit_of_analysis in ["character", "word"]), "unit can be character or word"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if unit_of_analysis == "character":
+#             uppercase_character_count = sum(1 for i in text if i.isupper())
+#             lowercase_character_count = sum(1 for i in text if i.islower())
+#             character_count = self.text_length(length_unit="character", input_text=text)
+#             if count == True and frac == True:  ######### THINK ABOUT DIVISION BY ZERO ERROR ###
+#                 try:
+#                     return {"uppercase_character_count": uppercase_character_count,
+#                             "lowercase_character_count": lowercase_character_count,
+#                             "uppercase_to_lowercase": uppercase_character_count / lowercase_character_count,
+#                             "lowercase_to_all_characters": lowercase_character_count / character_count,
+#                             "uppercase_to_all_characters": uppercase_character_count / character_count}
+#                 except ZeroDivisionError:
+#                     if character_count == 0:
+#                         print(
+#                             "the number of characters is zero, consequently the number of lowercase character is zero")
+#                     elif lowercase_character_count == 0:
+#                         print("the number of lowercase characters is zero")
+#
+#             elif count == True and frac == False:
+#                 return {"uppercase_character_count": uppercase_character_count,
+#                         "lowercase_character_count": lowercase_character_count}
+#             elif count == False and frac == True:
+#                 try:
+#                     return {"uppercase_to_lowercase": uppercase_character_count / lowercase_character_count,
+#                             "lowercase_to_all_characters": lowercase_character_count / character_count,
+#                             "uppercase_to_all_characters": uppercase_character_count / character_count}
+#                 except ZeroDivisionError:
+#                     if character_count == 0:
+#                         print(
+#                             "the number of characters is zero, consequently the number of lowercase characters is zero")
+#                     elif lowercase_character_count == 0:
+#                         print("the number of lowercase characters is zero")
+#
+#         elif unit_of_analysis == "word":
+#             words = self.tweet_splitter(split_unit="word", input_text=text)
+#             capital_words_count = len([b for b in words if b.isupper()])
+#             small_words_count = len([b for b in words if b.islower()])
+#             words_count = len(words)
+#             if count == True and frac == True:
+#                 try:
+#                     return {"capital_words_count": capital_words_count, "small_words_count": small_words_count,
+#                             "capital_to_small": capital_words_count / small_words_count,
+#                             "capital_to_all_words": capital_words_count / words_count,
+#                             "small_to_all_words": small_words_count / words_count}
+#                 except ZeroDivisionError:
+#                     if words_count == 0:
+#                         print("the number of words is zero, consequently the number of snall words is zero")
+#                     elif small_words_count == 0:
+#                         print("the number of small words is zero")
+#
+#             elif count == True and frac == False:
+#                 return {"capital_words_count": capital_words_count, "small_words_count": small_words_count}
+#             elif count == False and frac == True:
+#                 try:
+#                     return {"capital_to_small": capital_words_count / small_words_count,
+#                             "capital_to_all_words": capital_words_count / words_count,
+#                             "small_to_all_words": small_words_count / words_count}
+#                 except ZeroDivisionError:
+#                     if words_count == 0:
+#                         print("the number of words is zero, consequently the number of snall words is zero")
+#                     elif small_words_count == 0:
+#                         print("the number of small words is zero")
+#
+#     def exclamation_mark_count(self, input_text=None):
+#         """
+#         This function counts the number of exclamation mark in  the tweet text field.
+#         :param input_text: if this parameter is None, then the number of exclamation mark in the caller object text field
+#         is counted, otherwise and in case of a string as an input for this parameter, the number of exclamation mark in the
+#          input_text is counted.
+#         :return: an integer showing the number of exclamation mark in the tweet text.
+#         """
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#         return text.count("!")
+#
+#     def question_mark_count(self, input_text=None):
+#         """
+#         This function counts the number of question marks in the tweet text field.
+#         :param input_text: if this parameter is None, then the number of question marks in the caller object text field
+#         is counted, otherwise and in case of a string as an input for this parameter, the number of question marks in the
+#          input_text is counted.
+#         :return: an integer showing the number of question marks in the tweet text.
+#         """
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#         return text.count("?")
+#
+#     def abbreviations(self, input_text=None):
+#         """
+#         This function finds the abbreviations used in tweet text.
+#         :param input_text: if this parameter is None, then the function finds the abbreviations used in the caller object text field
+#         , otherwise and in case of a string as an input for this parameter, the function finds the abbreviations in the
+#         input_text.
+#         :return: a list of abbreviations used in the tweet text.
+#         """
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         words = self.tweet_splitter(split_unit="word", input_text=text)
+#         return [i for i in words if i in self.parameters["abbr"]]
+#
+#     def vulgar_words(self, input_text=None):
+#         """
+#          This function finds the vulgar terms used in tweet text.
+#          :param input_text: if this parameter is None, then the function finds the vulgar terms used in the caller object text field
+#          , otherwise and in case of a string as an input for this parameter, the function finds the vulgar terms in the
+#          input_text.
+#          :return: a list of vulgar terms used in the tweet text.
+#          """
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         words = self.tweet_splitter(split_unit="word", input_text=text)
+#         return [i for i in words if i in self.parameters["vulgar"]]
+#
+#     def sentiment_analysis(self, sentiment_engine="vader", input_text=None):
+#         """
+#         This function performs sentiment analysis over tweet text field using various sentiment analysis engines
+#         :param sentiment_engine: sentiment_engine can be "textblob", "vader", "nrc", "hate_speech", or "vad".
+#         :param input_text: if this parameter is None, then the function measure the sentiment of the caller object text field
+#          , otherwise and in case of a string as an input for this parameter, the function measures the sentiment of the
+#          input_text.
+#         :return: it returns a dictionary containing various sentiment scores depending on the chosen sentiment_engine. If
+#         it is textblob, the sentiment scores are polarity and subjectivity. If it vader, the scores are positivity, negativity,
+#         neutrality, and composite score. If the sentiment_engine is nrc, then the sentiment scores are anger, disgust, sadness,
+#         anticipation, fear, surprise, joy, and trust. If the hate_speech engine is chosen, the scores  woud be hate_speech,
+#         offensive language, and neither. And finally, if the sentiment engine is vad, the scores would be valence, arousal,
+#         and dominance.
+#         """
+#
+#         assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+#                                      "vad"]), "the sentiment_engine has to be" \
+#                                               "textblob, vader, nrc, hate_speech, or vad"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if sentiment_engine == "textblob":
+#             return {"subjectivity": TextBlob(text).sentiment.subjectivity,
+#                     "polarity": TextBlob(text).sentiment.polarity}
+#         elif sentiment_engine == "vader":
+#             return {"positivity_score": self.parameters["vader"].polarity_scores(text)["pos"],
+#                     "negativity_score": self.parameters["vader"].polarity_scores(text)["neg"],
+#                     "neutrality_score": self.parameters["vader"].polarity_scores(text)["neu"],
+#                     "composite_score": self.parameters["vader"].polarity_scores(text)["compound"]}
+#         elif sentiment_engine == "nrc":
+#             nrc_text_list = self.tweet_splitter(split_unit="word", input_text=text)
+#             anger_score = 0
+#             for term in nrc_text_list:
+#                 if term in self.parameters["nrc"]:
+#                     anger_score += self.parameters["nrc"][term]["anger"]
+#             anticipation_score = 0
+#             for term in nrc_text_list:
+#                 if term in self.parameters["nrc"]:
+#                     anticipation_score += self.parameters["nrc"][term]["anticipation"]
+#             disgust_score = 0
+#             for term in nrc_text_list:
+#                 if term in self.parameters["nrc"]:
+#                     disgust_score += self.parameters["nrc"][term]["disgust"]
+#             fear_score = 0
+#             for term in nrc_text_list:
+#                 if term in self.parameters["nrc"]:
+#                     fear_score += self.parameters["nrc"][term]["fear"]
+#             joy_score = 0
+#             for term in nrc_text_list:
+#                 if term in self.parameters["nrc"]:
+#                     joy_score += self.parameters["nrc"][term]["joy"]
+#             sadness_score = 0
+#             for term in nrc_text_list:
+#                 if term in self.parameters["nrc"]:
+#                     sadness_score += self.parameters["nrc"][term]["sadness"]
+#             surprise_score = 0
+#             for term in nrc_text_list:
+#                 if term in self.parameters["nrc"]:
+#                     surprise_score += self.parameters["nrc"][term]["surprise"]
+#             trust_score = 0
+#             for term in nrc_text_list:
+#                 if term in self.parameters["nrc"]:
+#                     trust_score += self.parameters["nrc"][term]["trust"]
+#             return {"anger_score": anger_score, "anticipation_score": anticipation_score,
+#                     "disgust_score": disgust_score, "fear_score": fear_score, "joy_score": joy_score,
+#                     "sadness_score": sadness_score, "surprise_score": surprise_score, "trust_score": trust_score}
+#         elif sentiment_engine == "hate_speech":
+#             sonar2 = self.parameters["sonar"].ping(text)
+#             return {"hate_speech": sonar2["classes"][0]["confidence"],
+#                     "offensive_language": sonar2["classes"][1]["confidence"],
+#                     "neither": sonar2["classes"][2]["confidence"]}
+#         elif sentiment_engine == "vad":
+#             word_list = self.tweet_splitter(split_unit="word", input_text=text)
+#
+#             valence_score = 0
+#             for term in word_list:
+#                 if term in self.parameters["vad"]:
+#                     valence_score += self.parameters["vad"][term]["valence"]
+#
+#             arousal_score = 0
+#             for term in word_list:
+#                 if term in self.parameters["vad"]:
+#                     arousal_score += self.parameters["vad"][term]["arousal"]
+#
+#             dominance_score = 0
+#             for term in word_list:
+#                 if term in self.parameters["vad"]:
+#                     dominance_score += self.parameters["vad"][term]["dominance"]
+#
+#             return {"valence_score": valence_score, "arousal_score": arousal_score, "dominance_score": dominance_score}
+#
+#     def readability(self, readability_metric="flesch_kincaid_grade", input_text=None):
+#         """
+#         This function measures the readability of the tweet text according to the chosen readbility metric.
+#         :param readability_metric: the readability metrics can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+#         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score"
+#         :param input_text: if this parameter is None, then the function measures the readability of the caller object text field
+#          , otherwise and in case of a string as an input for this parameter, the function measures the readability of the
+#          input_text.
+#         :return:
+#         """
+#
+#         assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+#                            "coleman_liau_index", "linsear_write_formula",
+#                            "dale_chall_readability_score"]), "The metric " \
+#                                                              "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+#                                                              "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+#                                                              "or dale_chall_readability_score."
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         if readability_metric == "flesch_reading_ease":
+#             return textstat.flesch_reading_ease(text)
+#         elif readability_metric == "flesch_kincaid_grade":
+#             return textstat.flesch_kincaid_grade(text)
+#         elif readability_metric == "gunning_fog":
+#             return textstat.gunning_fog(text)
+#         elif readability_metric == "smog_index":
+#             return textstat.smog_index(text)
+#         elif readability_metric == "automated_readability_index":
+#             return textstat.automated_readability_index(text)
+#         elif readability_metric == "coleman_liau_index":
+#             return textstat.coleman_liau_index(text)
+#         elif readability_metric == "linsear_write_formula":
+#             return textstat.linsear_write_formula(text)
+#         elif readability_metric == "dale_chall_readability_score":
+#             return textstat.dale_chall_readability_score(text)
+#
+#     def long_words_count(self, threshold=6, input_text=None):
+#         """
+#         This function counts the number of words that are longer than a particular threshold.
+#         :param threshold: an integer showing the threshhold of long words.
+#         :param input_text: if this parameter is None, then the function counts the long words in the caller object text field
+#          , otherwise and in case of a string as an input for this parameter, the function counts the number of long words in the
+#          input_text.
+#         :return: an integer number showing the number of words which are longer than a particular threshhold.
+#         """
+#
+#         assert (isinstance(threshold, int) and threshold > 0), "threshhold has to be a positive integer"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         words = self.tweet_splitter(split_unit="word", input_text=text)
+#         return len([i for i in words if len(i) > threshold])
+#
+#     def multiple_syllables_count(self, threshold=2, input_text=None):
+#         """
+#         This function counts the number of words that their syllables number is more than a particular threshold.
+#         :param threshold: an integer showing the threshhold of syllables.
+#         :param input_text: if this parameter is None, then the function counts the number of syllables in the caller object text field
+#          , otherwise and in case of a string as an input for this parameter, the function counts the number of syllables in the
+#          input_text.
+#         :return: an integer number showing the number of wordsthat that their syllables number is higher than a particular threshold.
+#         """
+#
+#         assert (isinstance(threshold, int) and threshold > 0), "threshhold has to be a positive integer"
+#
+#         if input_text == None:
+#             text = self.get_text()
+#         else:
+#             text = input_text
+#
+#         words = self.tweet_splitter(split_unit="word", input_text=text)
+#         return len([i for i in words if textstat.syllable_count(i, lang='en_US') > threshold])
+#
+#     def get_tweet_photos(self, saving_address):
+#         photos = self.get_photo()
+#         for photo in photos:
+#             url = photo["media_url"]
+#             local_filename = url.split('/')[-1]
+#             response = requests.get(url, stream=True)
+#             if response.status_code == 200:
+#                 with open(saving_address + local_filename, 'wb') as f:
+#                     for chunk in response.iter_content(chunk_size=8192):
+#                         if chunk:
+#                             f.write(chunk)
+#             elif response.status_code == 404:
+#                 print("the photo in the specified address is not found")
+#             else:
+#                 return ("the error code: ", response.status_code)
+#
+#     def get_tweet_videos(self, saving_address):
+#         videos = self.get_video()  # So far, there is only possibility of uploading one single video in every tweet
+#         for video in videos:
+#             urls = video["video_info"]["variants"]
+#             for variant in urls:
+#                 if variant['content_type'] == 'video/mp4':
+#                     url = variant["url"]
+#                     break
+#             response = requests.get(url, stream=True)
+#             if response.status_code == 200:
+#                 local_filename = url.split('/')[-1]
+#                 reg = re.search(r'^.*\?', local_filename)
+#                 file_name = local_filename[reg.start():reg.end()].replace("?", "")
+#                 with open(saving_address + file_name, 'wb') as f:
+#                     for chunk in response.iter_content(chunk_size=8192):
+#                         if chunk:
+#                             f.write(chunk)
+#             elif response.status_code == 404:
+#                 print("the video in the specified address is not found")
+#             else:
+#                 return ("the error code: ", response.status_code)
+#
+#     def get_tweet_gifs(self, saving_address):
+#         gifs = self.get_gif()  # So far, there is only possibility of uploading one single gif in every tweet
+#         for gif in gifs:
+#             url = gif["video_info"]["variants"][0]["url"]
+#             response = requests.get(url, stream=True)
+#             if response.status_code == 200:
+#                 file_name = url.split('/')[-1]
+#                 # reg = re.search(r'^.*\?', local_filename)
+#                 # file_name = local_filename[reg.start():reg.end()].replace("?","")
+#                 with open(saving_address + file_name, 'wb') as f:
+#                     for chunk in response.iter_content(chunk_size=8192):
+#                         if chunk:
+#                             f.write(chunk)
+#             elif response.status_code == 404:
+#                 print("the gif in the specified address is not found")
+#             else:
+#                 return ("the error code: ", response.status_code)
 
 
 class RetweetedClass(SingleTweet):
