@@ -1,5 +1,6 @@
 from tweet import Tweet
 from tweets import Tweets
+from features import Features
 from file_collection import FileCollection
 
 from tqdm import tqdm
@@ -9,7 +10,7 @@ from datetime import datetime
 
 
 # json file collection
-test_folder_path = "./../tests/"
+test_folder_path = "./../tests/rt and quote/"
 fc = FileCollection()
 fc.collect_json(test_folder_path)
 json_paths = fc.get_all_json()
@@ -22,6 +23,14 @@ for path in tqdm(json_paths):
     # print("--------------------")
     # print(path)
     tweet_objects.append((Tweet(path), path))
+
+
+finding_quote_tweets_flag = False
+if finding_quote_tweets_flag:
+    for pair_obj in tweet_objects:
+        if pair_obj[0].is_tweet_quoted() and not pair_obj[0].is_tweet_retweeted():
+            print(pair_obj)
+
 
 # # Checking some condition withing the test tweets and dumping the result in a pickle file
 # all_conditions = {}
@@ -130,8 +139,9 @@ for path in tqdm(json_paths):
 test_tweets = Tweets([i[0] for i in tweet_objects])
 
 network_building_flag = False
-temporal_tweets_flag = True
-spatial_tweets_flag = True
+temporal_tweets_flag = False
+spatial_tweets_flag = False
+individual_features_flag = True
 if network_building_flag:
     # First: tweet-level networks
     tweet_level_reply_network = test_tweets.get_tweets_network().get_tweet_network().tweet_level_reply_network_building()
@@ -214,9 +224,30 @@ if spatial_tweets_flag:
         print(unit)
         tweets_distinct_locations = test_tweets.get_spatial_tweets().get_tweets_distinct_locations(spatial_unit=unit)
         tweets_with_location = test_tweets.get_spatial_tweets().get_tweets_with_location(spatial_unit=unit)
+if individual_features_flag:
+    tweets_features = Features(test_tweets)
+    individual_content_features = tweets_features.individual_content_features()
+    individual_user_features = tweets_features.individual_user_features()
+    individual_meta_features = tweets_features.individual_meta_features()
+    retweet_content_features = individual_meta_features.retweet_content_features()
+    retweet_user_features = individual_meta_features.retweet_user_features()
+    retweet_meta_features = individual_meta_features.retweet_meta_features()
+    quote_content_features = individual_meta_features.quote_content_features()
+    quote_user_features = individual_meta_features.quote_user_features()
+    quote_meta_features = individual_meta_features.quote_meta_features()
 
+    individual_content_features.tweet_character_count()
+    individual_user_features.user_screen_name_length()
+    individual_meta_features.tweet_month()
+    retweet_content_features.tweet_character_count(retweet_flag=True)
+    retweet_user_features.user_screen_name_length(retweet_flag=True)
+    retweet_meta_features.tweet_month(retweet_flag=True)
+    quote_content_features.tweet_character_count(quote_flag=True)
+    quote_user_features.user_screen_name_length(quote_flag=True)
+    quote_meta_features.tweet_month(quote_flag=True)
 
-
+    features = tweets_features.get_features()
+    features_guideline = tweets_features.get_features_names()
 # for path in tqdm(json_paths):
 #     try:
 #         tweet_objects.append(Tweet(path))

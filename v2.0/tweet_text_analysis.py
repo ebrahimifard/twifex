@@ -13,10 +13,10 @@ class TweetTextAnalysis:
     def __init__(self):
         self._tweet = None
 
-        path_to_stopword_corpus = {"stone": "./resource/stopwords(Stone).txt",
-                                   "nltk": "./resource/stopwords(nltk).txt",
-                                   "corenlp": "./resource/stopwords(corenlp).txt",
-                                   "glascow": "./resource/stopwords(glascow).txt"}
+        path_to_stopword_corpus = {"stone": "./resources/stopwords(Stone).txt",
+                                   "nltk": "./resources/stopwords(nltk).txt",
+                                   "corenlp": "./resources/stopwords(corenlp).txt",
+                                   "glascow": "./resources/stopwords(glascow).txt"}
 
         self._stopwords_dict = {}
         for corpus, corpus_path in path_to_stopword_corpus.items():
@@ -28,15 +28,15 @@ class TweetTextAnalysis:
         # self._nlp = en_core_web_sm.load()
 
         # Initialization of Vulgar dictionary
-        path_to_vulgar_corpus = "./resource/vulgar.txt"
+        path_to_vulgar_corpus = "./resources/vulgar.txt"
         self._vulgar_words_list = [term.strip() for term in open(path_to_vulgar_corpus).readlines()]
 
         # Initialization of abbreviations dictionary
-        path_to_abbreviations_corpus = "./resource/abbr.txt"
+        path_to_abbreviations_corpus = "./resources/abbr.txt"
         self._abbreviations_list = [term.strip() for term in open(path_to_abbreviations_corpus).readlines()]
 
         # Initialization of NRC sentiment analysis
-        path_to_nrc_corpus = "./resource/NRC.txt"
+        path_to_nrc_corpus = "./resources/NRC.txt"
         nrc_raw = open(path_to_nrc_corpus).readlines()
         nrc_dic = {}
         for i in nrc_raw:
@@ -51,7 +51,7 @@ class TweetTextAnalysis:
         self._nrc_corpus = nrc_dic
 
         # Initialization of VAD sentiment analysis
-        path_to_vad_corpus = "./resource/BRM-emot-submit.csv"
+        path_to_vad_corpus = "./resources/BRM-emot-submit.csv"
         emotions = pd.read_csv(path_to_vad_corpus)
         emotions = emotions[["Word", "V.Mean.Sum", "A.Mean.Sum", "D.Mean.Sum"]]
         emotions.columns = ["word", "valence", "arousal", "dominance"]
@@ -62,6 +62,18 @@ class TweetTextAnalysis:
 
         # Initialization of VADER sentiment analysis
         self._vader_analyser = SentimentIntensityAnalyzer()
+
+        #POS tags
+        self._pos_tags = ["ADJ", "ADP", "ADV", "AUX", "CCONJ", "DET", "INTJ", "NOUN", "NUM", "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X"]
+
+        #NER_tags
+        self._ner_tags = ["CARDINAL", "DATE", "EVENT", "FAC", "GPE", "LANGUAGE", "LAW", "LOC", "MONEY", "NORP", "ORDINAL", "ORG", "PERCENT", "PERSON", "PRODUCT", "QUANTITY", "TIME", "WORK_OF_ART"]
+
+        #vader_emotions
+        self._vader_emotions = ["anger", "anticipation", "disgust", "fear", "joy", "sadness", "surprise", "trust"]
+
+        #vad_dimensions
+        self._vad_dimensions = ["valence", "arousal", "dominance"]
 
     def parse_tweet_object(self, tweet_obj):
         self._tweet = tweet_obj
@@ -326,16 +338,16 @@ class TweetTextAnalysis:
 
         return text
 
-    def tweet_pos(self, pos_type="universal_pos", input_text=None):
+    def get_pos_tags(self):
+        return self._pos_tags
+
+    def tweet_pos(self, input_text=None):
         """
         This function replaces every word in the tweet by its corresponding Part-of-Speech (POS) tag.
-        :param pos_type: this parameter defines the level of elaboration for POS tagging. It can be either universal_pos or detailed_pos (For more information please refer to https://spacy.io/usage/linguistic-features).
         :param input_text: if this parameter is None, then the Part-of-Speech (POS) tagging is performed on the caller object text field,
         otherwise and in case of a string as an input for this parameter, the Part-of-Speech tagging is performed on the input text.
         :return: this function returns the POS tagged version of the tweet.
         """
-
-        assert (pos_type in ["universal_pos", "detailed_pos"]), "The pos_type can only be either universal_pos or detailed_pos"
 
         if input_text is None:
             text = self._tweet.get_tweet_text()
@@ -346,20 +358,28 @@ class TweetTextAnalysis:
 
         pos_text = ""
         spacy_text = self._nlp(text)
-        if pos_type == "universal_pos":
-            for token in spacy_text:
-                pos_text = pos_text + " " + token.pos_
-        elif pos_type == "detailed_pos":
-            for token in spacy_text:
-                pos_text = pos_text + " " + token.tag_
+        for token in spacy_text:
+            pos_text = pos_text + " " + token.pos_
         return pos_text.strip()
 
-    def tweet_pos_count(self):
-        pos_text = self.tweet_pos()
-        pos_tag_count = {}
+    def tweet_pos_count(self, input_text=None):
+        if input_text is None:
+            text = self._tweet.get_tweet_text()
+            pos_text = self.tweet_pos(input_text=text)
+        else:
+            pos_text = self.tweet_pos(input_text=input_text)
+
+        # pos_text = self.tweet_pos(pos_type="universal_pos", input_text=None)
+        pos_tag_count = {p: 0 for p in self.get_pos_tags()}
+
         for pos_tag in pos_text.split(" "):
-            pos_tag_count[pos_tag] = pos_tag_count.get(pos_tag, 0) + 1
+            pos_tag_count[pos_tag] += 1
+        # for pos_tag in pos_text.split(" "):
+        #     pos_tag_count[pos_tag] = pos_tag_count.get(pos_tag, 0) + 1
         return pos_tag_count
+
+    def get_ner_tags(self):
+        return self._ner_tags
 
     def tweet_ner(self, input_text=None):
         """
@@ -382,11 +402,21 @@ class TweetTextAnalysis:
 
         return ner_text.strip()
 
-    def tweet_ner_count(self):
-        ner_text = self.tweet_ner()
-        ner_tag_count = {}
+    def tweet_ner_count(self, input_text=None):
+        if input_text is None:
+            text = self._tweet.get_tweet_text()
+            ner_text = self.tweet_ner(input_text=text)
+        else:
+            ner_text = self.tweet_ner(input_text=input_text)
+
+        # ner_text = self.tweet_ner()
+        ner_tag_count = {p: 0 for p in self.get_ner_tags()}
+
         for ner_tag in ner_text.split(" "):
-            ner_tag_count[ner_tag] = ner_tag_count.get(ner_tag, 0) + 1
+            ner_tag_count[ner_tag] += 1
+
+        # for ner_tag in ner_text.split(" "):
+        #     ner_tag_count[ner_tag] = ner_tag_count.get(ner_tag, 0) + 1
         return ner_tag_count
 
     def tweet_lemmatization(self, input_text=None):
@@ -617,10 +647,10 @@ class TweetTextAnalysis:
         words = self.tweet_splitter(split_unit="word", input_text=text)
         return [i for i in words if i.lower() in self._vulgar_words_list]
 
-    def readability(self, readability_metric="flesch_kincaid_grade", input_text=None):
+    def readability(self, readability_metric="flesch_reading_ease", input_text=None):
         """
         This function measures the readability of the tweet text according to the chosen readbility metric.
-        :param readability_metric: the readability metrics can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+        :param readability_metric: the readability metrics can be "flesch_reading_ease", "flesch_kincaid_grade", "gunning_fog", "smog_index",
         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score"
         :param input_text: if this parameter is None, then the function measures the readability of the caller object text field
          , otherwise and in case of a string as an input for this parameter, the function measures the readability of the
@@ -628,10 +658,10 @@ class TweetTextAnalysis:
         :return:
         """
 
-        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+        assert (readability_metric in ["flesch_reading_ease", "flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
                            "coleman_liau_index", "linsear_write_formula",
                            "dale_chall_readability_score"]), "The metric " \
-                                                             "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+                                                             "has to be flesch_reading_ease, flesch_kincaid_grade, gunning_fog, smog_index, " \
                                                              "automated_readability_index, coleman_liau_index, linsear_write_formula," \
                                                              "or dale_chall_readability_score."
 
@@ -719,6 +749,12 @@ class TweetTextAnalysis:
             return len(self.tweet_splitter(split_unit="word", input_text=text))
         elif length_unit == "sentence":
             return len(self.tweet_splitter(split_unit="sentence", input_text=text))
+
+    def get_vader_emotional_dimensions(self):
+        return self._vader_emotions
+
+    def get_vad_emotional_dimensions(self):
+        return self.get_vad_emotional_dimensions()
 
     def sentiment_analysis(self, sentiment_engine="vader", input_text=None):
         """

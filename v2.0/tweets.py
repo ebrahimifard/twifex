@@ -39,6 +39,20 @@ class Tweets:
 
         return all_tweets
 
+    def get_retweeted_tweets(self):
+        """
+        This function filters retweeted tweets.
+        :return: a Tweets object containing only retweeted tweets.
+        """
+        return Tweets([twt for twt in self._tweets if twt.is_tweet_retweeted()])
+
+    def get_quoted_tweets(self):
+        """
+        This function filters quoted tweets.
+        :return: a Tweets object containing only quoted tweets.
+        """
+        return Tweets([twt for twt in self._tweets if twt.is_quote_status_object_available()])
+
     def get_tweets_network(self):
         return self._tweets_networks
 

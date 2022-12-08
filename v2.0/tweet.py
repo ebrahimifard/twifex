@@ -31,7 +31,10 @@ class Tweet:
         # tweet = json.load(open(tweet_path)) if len(kwargs) == 0 else kwargs["tweet_object"]
         self._creation_time = tweet["created_at"] if "created_at" in tweet.keys() else None
         self._id = tweet["id_str"] if "id_str" in tweet.keys() else None
+
         self._is_tweet_retweeted = True if "retweeted_status" in tweet.keys() else False
+        self._retweeted_status = Tweet(tweet_path=None, tweet_object=tweet["retweeted_status"]) \
+            if self._is_tweet_retweeted else None
 
         self._client = BeautifulSoup(tweet["source"], "html.parser").text if "source" in tweet.keys() else None
         self._truncated = tweet["truncated"] if "truncated" in tweet.keys() else None
@@ -79,13 +82,23 @@ class Tweet:
         # The fourth line returns that tweet as an object (if it exists)
         self._is_quote_status = tweet["is_quote_status"] if "is_quote_status" in tweet.keys() else None
         self._quoted_status_id = tweet["quoted_status_id_str"] if self._is_quote_status else None
-        self._quote_screen_name = re.findall("status.*", tweet["quoted_status_permalink"]["expanded"])[0].replace("status/", "") if "quoted_status_permalink" in tweet.keys() else None
-        self._is_quote_status_object_available = True if "quoted_status" in tweet.keys() else False
-        self._quoted_status_object = Tweet(tweet_path=None, tweet_object=tweet["quoted_status"]) \
-            if self._is_quote_status_object_available else None
-        
-        self._retweeted_status = Tweet(tweet_path=None, tweet_object=tweet["retweeted_status"]) \
-            if self._is_tweet_retweeted else None
+        # self._quote_screen_name = re.findall("status.*", tweet["quoted_status_permalink"]["expanded"])[0].replace("status/", "") if "quoted_status_permalink" in tweet.keys() else None
+        # self._is_quote_status_object_available = True if "quoted_status" in tweet.keys() else False
+        # self._quoted_status_object = Tweet(tweet_path=None, tweet_object=tweet["quoted_status"]) if self._is_quote_status_object_available else None
+        if "quoted_status" in tweet.keys():
+            self._is_quote_status_object_available = True
+            self._quoted_status_object = Tweet(tweet_path=None, tweet_object=tweet["quoted_status"])
+            self._quote_screen_name = tweet["quoted_status"]["user"]["screen_name"]
+        elif self._is_tweet_retweeted:
+            if "quoted_status" in tweet["retweeted_status"]:
+                self._is_quote_status_object_available = True
+                self._quoted_status_object = Tweet(tweet_path=None, tweet_object=tweet["retweeted_status"]["quoted_status"])
+                self._quote_screen_name = tweet["retweeted_status"]["quoted_status"]["user"]["screen_name"]
+        else:
+            self._is_quote_status_object_available = False
+            self._quoted_status_object = None
+            self._quote_screen_name = re.findall("status.*", tweet["quoted_status_permalink"]["expanded"])[0].replace(
+                "status/", "") if "quoted_status_permalink" in tweet.keys() else None
 
         self._quote_count = tweet["quote_count"] if "quote_count" in tweet.keys() else None
         self._reply_count = tweet["reply_count"] if "reply_count" in tweet.keys() else None

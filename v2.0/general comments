@@ -4,6 +4,7 @@
 # URL analysis => add all you did in Russian Disinfo project
 # Source analysis
 
+# You made some updates on retrieval of quote objects in the tweets where quote is in the retweet, it may have some effects on network building
 
 
 
