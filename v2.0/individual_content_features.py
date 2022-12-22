@@ -293,7 +293,7 @@ class IndividualContentFeatures:
                 twt_txt = tweet.get_quote_status_object().get_tweet_text()
             else:
                 twt_txt = tweet.get_tweet_text()
-            twt_uppercase_sentences_count = self._text_analysis.uppercase_count(input_text=twt_txt, unit_of_analysis="sentences")
+            twt_uppercase_sentences_count = self._text_analysis.uppercase_count(input_text=twt_txt, unit_of_analysis="sentence")
             self._tweets_features[tweet.get_tweet_id()][feature_id] = twt_uppercase_sentences_count
 
     def tweet_lowercase_to_uppercase_characters_fraction(self):
@@ -597,16 +597,21 @@ class IndividualContentFeatures:
         for tweet in self._tweets_collection:
             feature_indicator = ""
             if self._retweet_flag:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_obj = tweet.get_tweet_retweet_object()
+                # twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
                 feature_indicator = "retweet_" + "tweet_pos_frequency_"
             elif self._quote_flag:
-                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+                twt_obj = tweet.get_quote_status_object()
+                # twt_txt = tweet.get_quote_status_object().get_tweet_text()
                 feature_indicator = "quote_" + "tweet_pos_frequency_"
             else:
-                twt_txt = tweet.get_tweet_text()
+                twt_obj = tweet
+                # twt_txt = tweet.get_tweet_text()
                 feature_indicator = "tweet_pos_frequency_"
 
-            pos_freq = self._text_analysis.tweet_pos_count(input_text=twt_txt)
+            self._text_analysis.parse_tweet_object(twt_obj)
+            pos_freq = self._text_analysis.tweet_pos_count()
+            # pos_freq = self._text_analysis.tweet_pos_count(input_text=twt_txt)
             for tag in pos_freq:
                 self._tweets_features[tweet.get_tweet_id()][pos_features_dict[feature_indicator+tag]] = pos_freq[tag]
 
@@ -661,9 +666,9 @@ class IndividualContentFeatures:
             if self._retweet_flag:
                 twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
             elif self._quote_flag:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
             else:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_tweet_text()
             first_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_singular")
             first_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_plural")
             second_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="second_singular")
@@ -686,9 +691,9 @@ class IndividualContentFeatures:
             if self._retweet_flag:
                 twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
             elif self._quote_flag:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
             else:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_tweet_text()
 
             first_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_singular")
             self._tweets_features[tweet.get_tweet_id()][feature_id] = first_singular_pronoun_count
@@ -706,9 +711,9 @@ class IndividualContentFeatures:
             if self._retweet_flag:
                 twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
             elif self._quote_flag:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
             else:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_tweet_text()
 
             first_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_plural")
             self._tweets_features[tweet.get_tweet_id()][feature_id] = first_plural_pronoun_count
@@ -726,9 +731,9 @@ class IndividualContentFeatures:
             if self._retweet_flag:
                 twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
             elif self._quote_flag:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
             else:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_tweet_text()
 
             first_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_singular")
             first_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_plural")
@@ -752,9 +757,9 @@ class IndividualContentFeatures:
             if self._retweet_flag:
                 twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
             elif self._quote_flag:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
             else:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_tweet_text()
 
             second_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="second_plural")
             self._tweets_features[tweet.get_tweet_id()][feature_id] = second_plural_pronoun_count
@@ -772,9 +777,9 @@ class IndividualContentFeatures:
             if self._retweet_flag:
                 twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
             elif self._quote_flag:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
             else:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_tweet_text()
 
             third_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="third_singular")
             self._tweets_features[tweet.get_tweet_id()][feature_id] = third_singular_pronoun_count
@@ -792,9 +797,9 @@ class IndividualContentFeatures:
             if self._retweet_flag:
                 twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
             elif self._quote_flag:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
             else:
-                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+                twt_txt = tweet.get_tweet_text()
 
             third_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="third_plural")
             self._tweets_features[tweet.get_tweet_id()][feature_id] = third_plural_pronoun_count
@@ -1113,7 +1118,7 @@ class IndividualContentFeatures:
                 twt_txt = tweet.get_tweet_text()
                 feature_indicator = "tweet_nrc_emotions_score_"
 
-            vader_emotions = self._text_analysis.sentiment_analysis(sentiment_engine="vader", input_text=twt_txt)
+            vader_emotions = self._text_analysis.sentiment_analysis(sentiment_engine="nrc", input_text=twt_txt)
             for emotion in vader_emotions:
                 self._tweets_features[tweet.get_tweet_id()][vader_emotions_dict[feature_indicator+emotion.replace("_score", "")]] = vader_emotions[emotion]
 

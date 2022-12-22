@@ -89,15 +89,21 @@ class TweetTextAnalysis:
 
         assert (split_unit in ["word", "sentence"]), "The split_unit argument can be set to word or sentence"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
-            text = input_text
+        def inner_tweet_splitter(inner_input_text=None, inner_split_unit="word"):
+            inner_text = inner_input_text
+            if inner_split_unit == "word":
+                return re.findall(r'\S+', inner_text)
+            elif inner_split_unit == "sentence":
+                return [i for i in re.split(r'[.?!]+', inner_text) if i != '']
 
-        if split_unit == "word":
-            return re.findall(r'\S+', text)
-        elif split_unit == "sentence":
-            return [i for i in re.split(r'[.?!]+', text) if i != '']
+        if input_text is not None:
+            return inner_tweet_splitter(inner_input_text=input_text, inner_split_unit=split_unit)
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+                return inner_tweet_splitter(inner_input_text=text, inner_split_unit=split_unit)
+            elif self._tweet is None:
+                return
 
     def tweet_stemming(self, input_text=None, inplace=False):
         """
@@ -113,18 +119,22 @@ class TweetTextAnalysis:
 
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
-            text = input_text
+        def inner_tweet_stemming(inner_input_text=None):
+            inner_stemmed_text = PorterStemmer().stem(inner_input_text)
+            return inner_stemmed_text
 
-        stemmed_text = PorterStemmer().stem(text)
-
-        if inplace:
-            self._tweet.set_tweet_text(text)
-            return self._tweet
-        else:
-            return stemmed_text
+        if input_text is not None:
+            return inner_tweet_stemming(inner_input_text=input_text)
+        elif input_text is None:
+            if self._tweet is not None:
+                stemmed_text = inner_tweet_stemming(inner_input_text=self._tweet.get_tweet_text())
+                if inplace:
+                    self._tweet.set_tweet_text(stemmed_text)
+                    return self._tweet
+                else:
+                    return stemmed_text
+            elif self._tweet is None:
+                return
 
     def control_characters_removal(self, control_chars_list=r'[\r\t\n]', substitute_char=" ", input_text=None, inplace=False):
         """
@@ -142,19 +152,25 @@ class TweetTextAnalysis:
 
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
-            text = input_text
+        def inner_control_characters_removal(inner_control_chars_list=r'[\r\t\n]', inner_substitute_char=" ", inner_input_text=None):
+            inner_text = inner_input_text
+            inner_pattern = re.compile(inner_control_chars_list)
+            inner_modified_text = inner_pattern.sub(inner_substitute_char, inner_text)
+            return inner_modified_text
 
-        # pattern = re.compile(r'[\r\t\n]')
-        pattern = re.compile(control_chars_list)
-        text = pattern.sub(substitute_char, text)
-        if inplace:
-            self._tweet.set_tweet_text(text)
-            return self._tweet
-        else:
-            return text
+        if input_text is not None:
+            return inner_control_characters_removal(inner_control_chars_list=control_chars_list, inner_substitute_char=substitute_char, inner_input_text=input_text)
+
+        elif input_text is None:
+            if self._tweet is not None:
+                modified_text = inner_control_characters_removal(inner_control_chars_list=control_chars_list, inner_substitute_char=substitute_char, inner_input_text=self._tweet.get_tweet_text())
+                if inplace:
+                    self._tweet.set_tweet_text(modified_text)
+                    return self._tweet
+                else:
+                    return modified_text
+            elif self._tweet is None:
+                return
 
     def stopwords_removal(self, input_text=None, stopword_corpus="stone", inplace=False):
         """
@@ -174,27 +190,34 @@ class TweetTextAnalysis:
                                     "glascow", "spacy"]), "stopword_orpus can be stone, nltk, corenlp, and glascow"
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        ##### self inside the inner function
+        def inner_stopwords_removal(inner_input_text=None, inner_stopword_corpus="stone"):
+            if inner_stopword_corpus == "spacy":
+                inner_processed_text = ""
+                inner_spacy_text = self._nlp(inner_input_text)
+                for inner_token in inner_spacy_text:
+                    if not inner_token.token.is_stop:
+                        inner_processed_text = inner_processed_text + " " + inner_token
+                inner_processed_text = inner_processed_text.strip()
+            else:
+                inner_words = self.tweet_splitter(inner_input_text)
+                inner_processed_text = " ".join([inner_word for inner_word in inner_words if inner_word.lower() not in self._stopwords_dict[stopword_corpus]])
+            return inner_processed_text
+
+        if input_text is not None:
             text = input_text
-
-        if stopword_corpus == "spacy":
-            processed_text = ""
-            spacy_text = self._nlp(text)
-            for token in spacy_text:
-                if not token.token.is_stop:
-                    processed_text = processed_text + " " + token
-            processed_text = processed_text.strip()
-        else:
-            words = self.tweet_splitter(text)
-            processed_text = " ".join([word for word in words if word.lower() not in self._stopwords_dict[stopword_corpus]])
-
-        if inplace:
-            self._tweet.set_tweet_text(processed_text)
-            return self._tweet
-        else:
-            return processed_text
+            if stopword_corpus == "spacy":
+                return inner_stopwords_removal(inner_input_text=input_text, inner_stopword_corpus=stopword_corpus)
+        elif input_text is None:
+            if self._tweet is not None:
+                processed_text = inner_stopwords_removal(inner_input_text=self._tweet.get_tweet_text(), inner_stopword_corpus=stopword_corpus)
+                if inplace:
+                    self._tweet.set_tweet_text(processed_text)
+                    return self._tweet
+                else:
+                    return processed_text
+            elif self._tweet is None:
+                return
 
     def whitespace_removal(self, input_text=None, inplace=False):
         """
@@ -210,19 +233,24 @@ class TweetTextAnalysis:
 
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
-            text = input_text
+        def inner_whitespace_removal(inner_input_text=None):
+            inner_modified_text = inner_input_text.strip()
+            while inner_modified_text.count("  ") > 0:
+                inner_modified_text = inner_modified_text.replace("  ", " ")
+            return inner_modified_text
 
-        text = text.strip()
-        while text.count("  ") > 0:
-            text = text.replace("  ", " ")
-        if inplace:
-            self._tweet.set_tweet_text(text)
-            return self._tweet
-        else:
-            return text
+        if input_text is not None:
+            return inner_whitespace_removal(inner_input_text=input_text)
+        elif input_text is None:
+            if self._tweet is not None:
+                modified_text = inner_whitespace_removal(inner_input_text=self._tweet.get_tweet_text())
+                if inplace:
+                    self._tweet.set_tweet_text(modified_text)
+                    return self._tweet
+                else:
+                    return modified_text
+            elif self._tweet is None:
+                return
 
     def punctuation_removal(self, input_text=None, inplace=False):
         """
@@ -238,21 +266,36 @@ class TweetTextAnalysis:
 
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
-            text = input_text
+        def inner_punctuation_removal(inner_input_text=None):
+            inner_text = inner_input_text
+            inner_punctuation_free = textstat.remove_punctuation(inner_text).replace("(", "").replace(")", "").replace("[",
+                                                                                                           "").replace(
+                "]", "").replace("{", "").replace("}", "").replace("—", "").replace("–", "").replace("-", "").replace(
+                ".", "").replace("?", "").replace("!", "").replace(",", "").replace(";", "").replace(":", "").replace(
+                "…", "").replace("‘", "").replace("’", "").replace("'", "").replace("\"", "").replace("“", "").replace(
+                "”", "").strip()
+            return inner_punctuation_free
 
-        punctuation_free = textstat.remove_punctuation(text).replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace("—", "").replace("–", "").replace("-", "").replace(".", "").replace("?", "").replace("!", "").replace(",", "").replace(";", "").replace(":", "").replace("…", "").replace("‘", "").replace("’", "").replace("'", "").replace("\"", "").replace("“", "").replace("”", "").strip()
-        if inplace:
-            self._tweet.set_tweet_text(punctuation_free)
-            return self._tweet
-        else:
-            return punctuation_free
+        if input_text is not None:
+            return inner_punctuation_removal(inner_input_text=input_text)
+        elif input_text is None:
+            if self._tweet is not None:
+                modified_text = inner_punctuation_removal(inner_input_text=self._tweet.get_tweet_text())
+                if inplace:
+                    self._tweet.set_tweet_text(modified_text)
+                    return self._tweet
+                else:
+                    return modified_text
+            elif self._tweet is None:
+                return
 
-    def text_preprocessing(self, input_text=None, url=True, case=True, punctuation=True, hashtag=2, mention=2,
+
+########################################################################################################################
+
+
+    def tweet_text_preprocessing(self, input_text=None, url=True, case=True, punctuation=True, hashtag=2, mention=2,
                            whitespace=True, control_chars=True, control_chars_list=r'[\r\t\n]', substitute_char=" ",
-                           stopword=True, stopword_corpus="stone", hashtag_split=True, mention_replacement=True):
+                           stopword=True, stopword_corpus="stone", hashtag_split=True, mention_replacement=True, inplace=False):
         """
         This function preprocess the tweet text.
         :param input_text: if this parameter is None, then preprocessing is performed on the caller object text field,
@@ -293,50 +336,81 @@ class TweetTextAnalysis:
         assert (hashtag_split in [True, False]), "hashtag_split parameter can be True or False"
         assert (mention_replacement in [True, False]), "mention_replacement parameter can be True or False"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+            #fill this part in, write functions that are independent of tweet object
+            if url is True:
+                ###
+            if mention_replacement is True:
+                ###
+            if hashtag_split is True:
+                ###
+            if hashtag == 1:
+                ###
+            elif hashtag == 2:
+                ###
+            elif hashtag == 3:
+                ###
+            if mention == 1:
+                pass
+            elif mention == 2:
+                ###
+            elif mention == 3:
+                ###
+            if stopword is True:
+                text = self.stopwords_removal(input_text=text, stopword_corpus=stopword_corpus)
+            if punctuation is True:
+                text = self.punctuation_removal(input_text=text)
+            if control_chars is True:
+                text = self.control_characters_removal(control_chars_list=control_chars_list,
+                                                       substitute_char=substitute_char, input_text=text)
+            if case is True:
+                text = text.lower()
+            if whitespace is True:
+                text = self.whitespace_removal(input_text=text)
+            return text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+                if url is True:
+                    text = self._tweet.get_tweet_urls().url_removal()
+                if mention_replacement is True:
+                    text = self._tweet.get_tweet_mentions().mention_replacement()
+                if hashtag_split is True:
+                    text = self._tweet.get_tweet_hashtags().hashtag_splitter()
+                if hashtag == 1:
+                    pass
+                elif hashtag == 2:
+                    text = self._tweet.get_tweet_hashtags().hashtags_removal(mode=2)
+                elif hashtag == 3:
+                    text = self._tweet.get_tweet_hashtags().hashtags_removal(mode=3)
+                if mention == 1:
+                    pass
+                elif mention == 2:
+                    text = self._tweet.get_tweet_mentions().mentions_removal()
+                elif mention == 3:
+                    text = self._tweet.get_tweet_mentions().mentions_removal()
+                if stopword is True:
+                    text = self.stopwords_removal(stopword_corpus=stopword_corpus)
+                if punctuation is True:
+                    text = self.punctuation_removal()
+                if control_chars is True:
+                    text = self.control_characters_removal(control_chars_list=control_chars_list, substitute_char=substitute_char)
+                if case is True:
+                    text = text.lower()
+                if whitespace is True:
+                    text = self.whitespace_removal()
+                if inplace:
+                    self._tweet.set_tweet_text(text)
+                    return self._tweet
+                else:
+                    return text
+            elif self._tweet is None:
+                return
 
-        if url is True:
-            text = self._tweet.get_tweet_urls().url_removal(input_text=text)
+    ########################################################################################################################
 
-        if mention_replacement is True:
-            text = self._tweet.get_tweet_mentions().mention_replacement(input_text=text)
 
-        if hashtag_split is True:
-            text = self._tweet.get_tweet_hashtags().hashtag_splitter(input_text=text)
-
-        if hashtag == 1:
-            pass
-        elif hashtag == 2:
-            text = self._tweet.get_tweet_hashtags().hashtags_removal(input_text=text, mode=2)
-        elif hashtag == 3:
-            text = self._tweet.get_tweet_hashtags().hashtags_removal(input_text=text, mode=3)
-
-        if mention == 1:
-            pass
-        elif mention == 2:
-            text = self._tweet.get_tweet_mentions().mentions_removal(input_text=text)
-        elif mention == 3:
-            text = self._tweet.get_tweet_mentions().mentions_removal(input_text=text)
-
-        if stopword is not False:
-            text = self.stopwords_removal(input_text=text, stopword_corpus=stopword_corpus)
-
-        if whitespace is True:
-            text = self.whitespace_removal(input_text=text)
-
-        if punctuation is True:
-            text = self.punctuation_removal(input_text=text)
-
-        if control_chars is True:
-            text = self.control_characters_removal(control_chars_list=control_chars_list, substitute_char=substitute_char, input_text=text)
-
-        if case is True:
-            text = text.lower()
-
-        return text
 
     def get_pos_tags(self):
         return self._pos_tags
@@ -349,33 +423,37 @@ class TweetTextAnalysis:
         :return: this function returns the POS tagged version of the tweet.
         """
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
-        text = self.text_preprocessing(input_text=text)
+        text = self.tweet_text_preprocessing(input_text=text)
 
-        pos_text = ""
+        pos_text_list = []
         spacy_text = self._nlp(text)
         for token in spacy_text:
-            pos_text = pos_text + " " + token.pos_
-        return pos_text.strip()
+            pos_text_list.append(token.pos_)
+        return pos_text_list
 
     def tweet_pos_count(self, input_text=None):
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-            pos_text = self.tweet_pos(input_text=text)
-        else:
-            pos_text = self.tweet_pos(input_text=input_text)
 
-        # pos_text = self.tweet_pos(pos_type="universal_pos", input_text=None)
+        if input_text is not None:
+            text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
+
+        pos_text_list = self.tweet_pos(input_text=text)
         pos_tag_count = {p: 0 for p in self.get_pos_tags()}
 
-        for pos_tag in pos_text.split(" "):
+        for pos_tag in pos_text_list:
             pos_tag_count[pos_tag] += 1
-        # for pos_tag in pos_text.split(" "):
-        #     pos_tag_count[pos_tag] = pos_tag_count.get(pos_tag, 0) + 1
         return pos_tag_count
 
     def get_ner_tags(self):
@@ -389,34 +467,40 @@ class TweetTextAnalysis:
         NER tagging is performed on the input text.
         :return: this function returns the Named-Entity-Recognition (NER) tagged version of the tweet.
         """
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
-            text = input_text
-        text = self.text_preprocessing(input_text=text)
 
-        ner_text = ""
+        if input_text is not None:
+            text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
+
+        text = self.tweet_text_preprocessing(input_text=text)
+
+        ner_text_list = []
         spacy_text = self._nlp(text)
         for token in spacy_text.ents:
-            ner_text = ner_text + " " + token.label_
+            ner_text_list.append(token.label_)
 
-        return ner_text.strip()
+        return ner_text_list
 
     def tweet_ner_count(self, input_text=None):
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-            ner_text = self.tweet_ner(input_text=text)
-        else:
-            ner_text = self.tweet_ner(input_text=input_text)
 
-        # ner_text = self.tweet_ner()
+        if input_text is not None:
+            text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
+
+        ner_text_list = self.tweet_ner(input_text=text)
         ner_tag_count = {p: 0 for p in self.get_ner_tags()}
 
-        for ner_tag in ner_text.split(" "):
+        for ner_tag in ner_text_list:
             ner_tag_count[ner_tag] += 1
 
-        # for ner_tag in ner_text.split(" "):
-        #     ner_tag_count[ner_tag] = ner_tag_count.get(ner_tag, 0) + 1
         return ner_tag_count
 
     def tweet_lemmatization(self, input_text=None):
@@ -431,7 +515,7 @@ class TweetTextAnalysis:
             text = self._tweet.get_tweet_text()
         else:
             text = input_text
-        text = self.text_preprocessing(input_text=text)
+        text = self.tweet_text_preprocessing(input_text=text)
 
         tweet_lemmas = ""
         spacy_text = self._nlp(text)
@@ -452,10 +536,13 @@ class TweetTextAnalysis:
         assert (complexity_unit in ["word", "sentence", "syllables"]), "unit parameter can be word, " \
                                                                        "sentence, or syllables"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         if complexity_unit == "word":
             return np.average([len(word) for word in self.tweet_splitter(split_unit="word", input_text=text)])
@@ -463,8 +550,7 @@ class TweetTextAnalysis:
             return np.average([len(self.tweet_splitter(split_unit="word", input_text=sentence)) for sentence in
                                self.tweet_splitter(split_unit="sentence", input_text=text)])
         elif complexity_unit == "syllables":
-            return np.average([textstat.syllable_count(i, lang='en_US')
-                               for i in self.tweet_splitter(split_unit="word", input_text=text)])
+            return np.average([textstat.syllable_count(i, lang='en_US') for i in self.tweet_splitter(split_unit="word", input_text=text)])
 
     def text_pronoun_count(self, input_text=None, pronoun="third_singular"):
         """
@@ -481,10 +567,13 @@ class TweetTextAnalysis:
                             "third_plural"]), "the pronoun parameter can be first_singular, first_plural, second_singular, second_plural, " \
                                               "third_singular, or third_plural"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         words = [i.lower() for i in self.tweet_splitter(split_unit="word", input_text=text)]
         if pronoun == "first_singular":
@@ -523,10 +612,13 @@ class TweetTextAnalysis:
 
         assert (unit_of_analysis in ["character", "word", "sentence"]), "unit can be character or word"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         lower_count = 0
         if unit_of_analysis == "character":
@@ -554,10 +646,13 @@ class TweetTextAnalysis:
 
         assert (unit_of_analysis in ["character", "word", "sentence"]), "unit can be character or word"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         upper_count = 0
         if unit_of_analysis == "character":
@@ -583,10 +678,14 @@ class TweetTextAnalysis:
         :param character: this parameter specifies which character is counted by the function.
         :return: an integer showing the number of occurrence of an indicated character in the tweet text.
         """
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
+
         return text.count(character)
 
     def exclamation_mark_count(self, input_text=None):
@@ -597,10 +696,14 @@ class TweetTextAnalysis:
          input_text is counted.
         :return: an integer showing the number of exclamation mark in the tweet text.
         """
-        if input_text is None:
-            return self.special_character_count(character="!")
-        else:
-            return self.special_character_count(input_text=input_text, character="!")
+        if input_text is not None:
+            text = input_text
+            return self.special_character_count(input_text=text, character="!")
+        elif input_text is None:
+            if self._tweet is not None:
+                return self.special_character_count(character="!")
+            elif self._tweet is None:
+                return
 
     def question_mark_count(self, input_text=None):
         """
@@ -610,10 +713,14 @@ class TweetTextAnalysis:
          input_text is counted.
         :return: an integer showing the number of question marks in the tweet text.
         """
-        if input_text is None:
-            return self.special_character_count(character="?")
-        else:
-            return self.special_character_count(input_text=input_text, character="?")
+        if input_text is not None:
+            text = input_text
+            return self.special_character_count(input_text=text, character="?")
+        elif input_text is None:
+            if self._tweet is not None:
+                return self.special_character_count(character="?")
+            elif self._tweet is None:
+                return
 
     def abbreviations(self, input_text=None):
         """
@@ -623,10 +730,13 @@ class TweetTextAnalysis:
         input_text.
         :return: a list of abbreviations used in the tweet text.
         """
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         words = self.tweet_splitter(split_unit="word", input_text=text)
         return [i for i in words if i in self._abbreviations_list]
@@ -639,10 +749,13 @@ class TweetTextAnalysis:
          input_text.
          :return: a list of vulgar terms used in the tweet text.
          """
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         words = self.tweet_splitter(split_unit="word", input_text=text)
         return [i for i in words if i.lower() in self._vulgar_words_list]
@@ -665,10 +778,13 @@ class TweetTextAnalysis:
                                                              "automated_readability_index, coleman_liau_index, linsear_write_formula," \
                                                              "or dale_chall_readability_score."
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         if readability_metric == "flesch_reading_ease":
             return textstat.flesch_reading_ease(text)
@@ -699,10 +815,13 @@ class TweetTextAnalysis:
 
         assert (isinstance(threshold, int) and threshold > 0), "threshold has to be a positive integer"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         words = self.tweet_splitter(split_unit="word", input_text=text)
         return len([i for i in words if len(i) > threshold])
@@ -719,10 +838,13 @@ class TweetTextAnalysis:
 
         assert (isinstance(threshold, int) and threshold > 0), "threshold has to be a positive integer"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         words = self.tweet_splitter(split_unit="word", input_text=text)
         return len([i for i in words if textstat.syllable_count(i, lang='en_US') > threshold])
@@ -738,10 +860,13 @@ class TweetTextAnalysis:
 
         assert (length_unit in ["character", "word", "sentence"]), "the unit can be character, word, or sentence"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         if length_unit == "character":
             return len(text)
@@ -754,7 +879,7 @@ class TweetTextAnalysis:
         return self._vader_emotions
 
     def get_vad_emotional_dimensions(self):
-        return self.get_vad_emotional_dimensions()
+        return self._vad_dimensions
 
     def sentiment_analysis(self, sentiment_engine="vader", input_text=None):
         """
@@ -774,10 +899,13 @@ class TweetTextAnalysis:
         assert (sentiment_engine in ["textblob", "vader", "nrc", "vad"]), \
             "the sentiment_engine has to be" "textblob, vader, nrc, or vad"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+            elif self._tweet is None:
+                return
 
         if sentiment_engine == "textblob":
             return {"subjectivity": TextBlob(text).sentiment.subjectivity,
