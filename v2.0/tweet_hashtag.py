@@ -1,9 +1,10 @@
 from tweet_entities import TweetEntities
 import wordninja
+import re
 
 
 class TweetHashtag(TweetEntities):
-    def __init__(self, tweet_obj, tweet_json):
+    def __init__(self, tweet_obj=None, tweet_json={}):
 
         # assert isinstance(tweet_obj, Tweet), "The tweet_obj has to be an instance of Tweet class"
         assert isinstance(tweet_json, dict), "The tweet_json has to be a dict"
@@ -11,7 +12,7 @@ class TweetHashtag(TweetEntities):
         super().__init__(tweet_obj, tweet_json)
         self._hashtags = self._tweet_entities["hashtags"] if "hashtags" in self._tweet_entities else None
 
-    def get_tweet_hashtags(self, case_sensitivity="small", hashtag_symbol=True, distinct_hashtags=True):
+    def get_tweet_hashtags(self, input_text=None, case_sensitivity="small", hashtag_symbol=True, distinct_hashtags=True):
         """
         This function returns a list of hashtags in this tweet.
         :param case_sensitivity: By setting this parameter to small hashtags will be returned in small format.
@@ -24,14 +25,42 @@ class TweetHashtag(TweetEntities):
         assert (hashtag_symbol in [True, False]), "the hashtag_symbol has to be True or False"
         assert (distinct_hashtags in [True, False]), "the distinct_hashtags has to be True or False"
 
-        if self._hashtags is None:
-            return []
-        else:
-            hashtags = [element['text'] for element in self._hashtags]
-            hashtags = list(set(hashtags)) if distinct_hashtags else hashtags
-            hashtags = ["#"+element if hashtag_symbol else element for element in hashtags]
-            hashtags = [element.lower() if case_sensitivity == "small" else element for element in hashtags]
-            return hashtags
+        def inner_hashtags_processing(inner_hashtags, inner_case_sensitivity="small", inner_hashtag_symbol=True, inner_distinct_hashtags=True):
+            inner_hashtags = list(set(inner_hashtags)) if inner_distinct_hashtags else inner_hashtags
+            inner_hashtags = ["#" + inner_element if inner_hashtag_symbol else inner_element for inner_element in inner_hashtags]
+            inner_hashtags = [inner_element.lower() if inner_case_sensitivity == "small" else inner_element for inner_element in inner_hashtags]
+            return inner_hashtags
+
+        if input_text is not None:
+            text = input_text
+            pattern = r'#(\w+)'
+            string_numbers = [str(u) for u in range(0, 10)]
+            ht_list = []
+            matches = list(re.finditer(pattern, text, flags=re.UNICODE))
+            for match_index, match_ht in enumerate(matches):
+                flag = True
+                start_index = match_ht.start()
+                end_index = match_ht.end()
+
+                if match_index != 0:
+                    if start_index == matches[match_index-1].end():
+                        flag = False
+                if match_index != len(matches)-1:
+                    if end_index == matches[match_index+1].start():
+                        flag = False
+
+                if flag:
+                    if text[start_index+1] not in string_numbers:
+                        ht_list.append(text[start_index+1:end_index])
+
+            return inner_hashtags_processing(inner_hashtags=ht_list, inner_case_sensitivity=case_sensitivity, inner_hashtag_symbol=hashtag_symbol, inner_distinct_hashtags=distinct_hashtags)
+
+        elif input_text is None:
+            if self._hashtags is None:
+                return []
+            else:
+                hashtags = [element['text'] for element in self._hashtags]
+                return inner_hashtags_processing(inner_hashtags=hashtags, inner_case_sensitivity=case_sensitivity, inner_hashtag_symbol=hashtag_symbol, inner_distinct_hashtags=distinct_hashtags)
 
     def hashtag_splitter(self, input_text=None, inplace=False):
         """
@@ -45,22 +74,29 @@ class TweetHashtag(TweetEntities):
         """
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
-
-        if self._hashtags is not None:
-            for hashtag in self._hashtags:
-                hashtag_text = hashtag["text"]
-                hashtag_first_index, hashtag_last_index = hashtag["indices"][0], hashtag["indices"][1]
-                text = text.replace(text[hashtag_first_index+1:hashtag_last_index], "  #".join(wordninja.split(hashtag_text)))
-
-        if inplace:
-            self._tweet.set_tweet_text(text)
-            return self._tweet
-        else:
+            hashtags = self.get_tweet_hashtags(input_text=text, case_sensitivity="original")
+            for hashtag in hashtags:
+                for ht in list(re.finditer(hashtag, text)):
+                    hashtag_text = hashtag[1:]
+                    hashtag_first_index, hashtag_last_index = ht.start(), ht.end()
+                    text = text.replace(text[hashtag_first_index + 1:hashtag_last_index]," #".join(wordninja.split(hashtag_text)))
             return text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+                for hashtag in self._hashtags:
+                    hashtag_text = hashtag["text"]
+                    hashtag_first_index, hashtag_last_index = hashtag["indices"][0], hashtag["indices"][1]
+                    text = text.replace(text[hashtag_first_index + 1:hashtag_last_index], " #".join(wordninja.split(hashtag_text)))
+                if inplace:
+                    self._tweet.set_tweet_text(text)
+                    return self._tweet
+                else:
+                    return text
+            elif self._tweet is None:
+                return
 
     def hashtags_removal(self, input_text=None, mode=2, inplace=False):
         """
@@ -80,20 +116,30 @@ class TweetHashtag(TweetEntities):
         assert (mode in [1, 2, 3]), "The mode can be 1, 2, or 3"
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
-        if input_text is None:
-            text = self._tweet.get_tweet_text()
-        else:
+        if input_text is not None:
             text = input_text
-
-        if mode == 1:
-            pass
-        elif mode == 2:
-            text = text.replace("#", "")
-        elif mode == 3:
-            for h in self.get_tweet_hashtags():
-                text = text.replace("#" + h, "")
-        if inplace:
-            self._tweet.set_tweet_text(text)
-            return self._tweet
-        else:
+            if mode == 1:
+                pass
+            elif mode == 2:
+                text = text.replace("#", "")
+            elif mode == 3:
+                for h in self.get_tweet_hashtags(input_text=text, case_sensitivity="original"):
+                    text = text.replace(h, "")
             return text
+        elif input_text is None:
+            if self._tweet is not None:
+                text = self._tweet.get_tweet_text()
+                if mode == 1:
+                    pass
+                elif mode == 2:
+                    text = text.replace("#", "")
+                elif mode == 3:
+                    for h in self.get_tweet_hashtags(case_sensitivity="original"):
+                        text = text.replace(h, "")
+                if inplace:
+                    self._tweet.set_tweet_text(text)
+                    return self._tweet
+                else:
+                    return text
+            elif self._tweet is None:
+                return

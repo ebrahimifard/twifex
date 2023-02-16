@@ -619,1842 +619,1842 @@ class TimeIndependentLocationIndependentMassFeatures:
 #     #         places_dict[tweet.get_place()["full_name"]] = places_dict.get(tweet.get_place()["full_name"], []) + [tweet]
 #     #     return places_dict
 
-
-class TimeDependentLocationIndependentTweetMassFeatures(TemporalFeatures):
-    # def __init__(self, tweets):
-    #     self.tweets = tweets
-    #     self.nodes = self.tweets_period()
-    def tweet_complexity_change(self, nodes, complexity_unit="word"):
-        """
-        :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
-        the timestamps and all the tweets that are posted within every timestamp.
-        :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
-        :return: a dictionary that represents the change of the tweet complexity across the timespan of the dataset
-        due to selected unit of analysis. The key-value pair in this dictionary corresponds to
-        the timestamps and the statistical metrics of the tweet complexity scores in all the tweets that are posted
-        within every timestamp.
-        """
-
-        assert (complexity_unit in ["word", "sentence",
-                         "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
-
-        complexity = {}
-        for time_frame, tweets in nodes.items():
-            complexity[time_frame] = []
-            complexity_results = []
-            for tweet in tweets:
-                complexity_results.append(tweet.text_complexity(complexity_unit=complexity_unit))
-            for result in complexity_results:
-                complexity[time_frame] = complexity.get(time_frame, []) + [float(result)]
-
-            scores = complexity[time_frame]
-            complexity[time_frame] = {}
-            if len(scores) > 0:
-                complexity[time_frame]["average"] = np.nanmean(scores)
-                complexity[time_frame]["max"] = np.nanmax(scores)
-                complexity[time_frame]["min"] = np.nanmin(scores)
-                complexity[time_frame]["stdev"] = np.nanstd(scores)
-                complexity[time_frame]["median"] = np.nanmedian(scores)
-            else:
-                complexity[time_frame]["average"] = np.nan
-                complexity[time_frame]["max"] = np.nan
-                complexity[time_frame]["min"] = np.nan
-                complexity[time_frame]["stdev"] = np.nan
-                complexity[time_frame]["median"] = np.nan
-        return complexity
-
-    def tweet_readability_change(self, nodes, readability_metric="flesch_kincaid_grade"):
-        """
-        :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
-        the timestamps and all the tweets that are posted within every timestamp.
-        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
-        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score"
-        :return: a dictionary that represents the change of the tweet readability across the timespan of the dataset
-        due to selected readability metric. The key-value pair in this dictionary corresponds to the timestamps and
-        the statistical metrics of the tweet readability scores in all the tweets that are posted within every timestamp.
-        """
-
-        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
-                           "coleman_liau_index", "linsear_write_formula",
-                           "dale_chall_readability_score", ]), "The metric " \
-                                                               "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
-                                                               "automated_readability_index, coleman_liau_index, linsear_write_formula," \
-                                                               "or dale_chall_readability_score."
-
-        readability = {}
-        for time_frame, tweets in nodes.items():
-            readability[time_frame] = []
-            readability_results = []
-            for tweet in tweets:
-                readability_results.append(tweet.readability(readability_metric=readability_metric))
-            for result in readability_results:
-                readability[time_frame] = readability.get(time_frame, []) + [float(result)]
-
-            scores = readability[time_frame]
-            readability[time_frame] = {}
-            if len(scores) > 0:
-                readability[time_frame]["average"] = np.nanmean(scores)
-                readability[time_frame]["max"] = np.nanmax(scores)
-                readability[time_frame]["min"] = np.nanmin(scores)
-                readability[time_frame]["stdev"] = np.nanstd(scores)
-                readability[time_frame]["median"] = np.nanmedian(scores)
-            else:
-                readability[time_frame]["average"] = np.nan
-                readability[time_frame]["max"] = np.nan
-                readability[time_frame]["min"] = np.nan
-                readability[time_frame]["stdev"] = np.nan
-                readability[time_frame]["median"] = np.nan
-        return readability
-
-    def tweet_length_change(self, nodes, length_unit="word"):
-        """
-        :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
-        the timestamps and all the tweets that are posted within every timestamp.
-        :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
-        :return: a dictionary that represents the change of the tweet length across the timespan of the dataset
-        due to selected unit of analysis. The key-value pair in this dictionary corresponds to the timestamps and
-        the statistical metrics of the tweet length in all the tweets that are posted within every timestamp.
-        """
-
-        assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
-
-        tweet_length = {}
-        for time_frame, tweets in nodes.items():
-            tweet_length[time_frame] = []
-            tweet_length_results = []
-            for tweet in tweets:
-                tweet_length_results.append(tweet.text_length(length_unit=length_unit))
-            for result in tweet_length_results:
-                tweet_length[time_frame] = tweet_length.get(time_frame, []) + [float(result)]
-
-            scores = tweet_length[time_frame]
-            tweet_length[time_frame] = {}
-            if len(scores) > 0:
-                tweet_length[time_frame]["average"] = np.nanmean(scores)
-                tweet_length[time_frame]["max"] = np.nanmax(scores)
-                tweet_length[time_frame]["min"] = np.nanmin(scores)
-                tweet_length[time_frame]["stdev"] = np.nanstd(scores)
-                tweet_length[time_frame]["median"] = np.nanmedian(scores)
-                tweet_length[time_frame]["median"] = np.nanmedian(scores)
-            else:
-                tweet_length[time_frame]["average"] = np.nan
-                tweet_length[time_frame]["max"] = np.nan
-                tweet_length[time_frame]["min"] = np.nan
-                tweet_length[time_frame]["stdev"] = np.nan
-                tweet_length[time_frame]["median"] = np.nan
-                tweet_length[time_frame]["median"] = np.nan
-        return tweet_length
-
-    def tweet_count_change(self, nodes):
-        """
-        :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
-        the timestamps and all the tweets that are posted within every timestamp.
-        :return: a dictionary that represents the change of the tweet count across the timespan of the dataset.
-        The key-value pair in this dictionary corresponds to the timestamps and
-        the number of tweets that are posted within every timestamp.
-        """
-
-        tweet_count = {}
-        for time_frame, tweets in nodes.items():
-            tweet_count[time_frame] = len(tweets)
-        return tweet_count
-
-    def sentiment_change(self, nodes, sentiment_engine="vader"):
-        """
-        :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
-        the timestamps and all the tweets that are posted within every timestamp.
-        :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
-        "vad".
-        :return: a dictionary that represents the change of the sentiment across the timespan of the dataset
-        due to selected sentiment engine. The key-value pair in this dictionary corresponds to
-        the timestamps and the statistical metrics of the sentiment scores in all the tweets that are posted
-        within every timestamp.
-        """
-
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
-                                     "vad"]), "The sentiment_engine has to be" \
-                                              "textblob, vader, nrc," \
-                                              "hate_speech or vad"
-        sentiments = {}
-        for time_frame, tweets in nodes.items():
-            sentiments[time_frame] = {}
-            sentiment_results = []
-            for tweet in tweets:
-                sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
-            for result in sentiment_results:
-                for score in result:
-                    sentiments[time_frame][score] = sentiments[time_frame].get(score, []) + [float(result[score])]
-
-            for score in sentiments[time_frame]:
-                scores = sentiments[time_frame][score]
-                sentiments[time_frame][score] = {}
-                sentiments[time_frame][score]["average"] = np.nanmean(scores)
-                sentiments[time_frame][score]["max"] = np.nanmax(scores)
-                sentiments[time_frame][score]["min"] = np.nanmin(scores)
-                sentiments[time_frame][score]["stdev"] = np.nanstd(scores)
-                sentiments[time_frame][score]["median"] = np.nanmedian(scores)
-        return sentiments
-
-
-class TimeDependentLocationIndependentUserMassFeatures(TemporalFeatures):
-    # def __init__(self, tweets):
-    def users_role_change(self, nodes):
-        """
-        :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
-        the timestamps and all the tweets that are posted within every timestamp.
-        :return: a dictionary that represents the change of the user role across the timespan of the dataset.
-        The key-value pair in this dictionary corresponds to the timestamps and statistical metrics of the user roles
-        in all the tweets that are posted within every timestamp.
-        """
-
-        user_roles = {}
-        for time_frame, tweets in nodes.items():
-            user_roles[time_frame] = []
-            user_roles_results = []
-            for tweet in tweets:
-                user_roles_results.append(tweet.get_twitter().get_user_role())
-            for result in user_roles_results:
-                user_roles[time_frame] = user_roles.get(time_frame, []) + [float(result)]
-
-            scores = user_roles[time_frame]
-            user_roles[time_frame] = {}
-            if len(scores) > 0:
-                user_roles[time_frame]["average"] = np.nanmean(scores)
-                user_roles[time_frame]["max"] = np.nanmax(scores)
-                user_roles[time_frame]["min"] = np.nanmin(scores)
-                user_roles[time_frame]["stdev"] = np.nanstd(scores)
-                user_roles[time_frame]["median"] = np.nanmedian(scores)
-            else:
-                user_roles[time_frame]["average"] = np.nan
-                user_roles[time_frame]["max"] = np.nan
-                user_roles[time_frame]["min"] = np.nan
-                user_roles[time_frame]["stdev"] = np.nan
-                user_roles[time_frame]["median"] = np.nan
-        return user_roles
-
-
-class TimeDependentLocationDependentTweetMassFeatures(TemporalFeatures, PlaceFeatures):
-
-    def temporal_spatial_tweets(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
-                                spatial_resolution='country'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: an embedded dictionary that classifies a set of tweets into a hierarchical structure in which the key-value corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be all tweets corresponding to the location and timestamp.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-        tweet_set = {}
-        if order == "spatial-temporal":
-            spatial_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-            for location, tweets in spatial_tweets.items():
-                tweet_set[location] = TemporalFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
-        elif order == "temporal-spatial":
-            temporal_tweets = self.tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
-            for timestamp, tweets in temporal_tweets.items():
-                tweet_set[timestamp] = PlaceFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
-        return tweet_set
-
-    def temporal_spatial_tweet_complexity(self, order='spatial-temporal', temporal_resolution='day',
-                                          temporal_frequency=1, spatial_resolution='country', complexity_unit="word"):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
-        :return: an embedded dictionary that represents the tweet complexity across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet complexity scores in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (complexity_unit in ["word", "sentence",
-                         "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
-
-
-
-
-        complexity = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            complexity[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                complexity[layer1][layer2] = []
-                for tweet in tweets:
-                    complexity[layer1][layer2] = complexity[layer1].get(layer2, []) + [float(tweet.text_complexity(complexity_unit=complexity_unit))]
-
-                scores = complexity[layer1][layer2]
-                complexity[layer1][layer2] = {}
-                if len(scores) > 0:
-                    complexity[layer1][layer2]["average"] = np.nanmean(scores)
-                    complexity[layer1][layer2]["max"] = np.nanmax(scores)
-                    complexity[layer1][layer2]["min"] = np.nanmin(scores)
-                    complexity[layer1][layer2]["stdev"] = np.nanstd(scores)
-                    complexity[layer1][layer2]["median"] = np.nanmedian(scores)
-                    complexity[layer1][layer2]["sum"] = np.nansum(scores)
-                else:
-                    complexity[layer1][layer2]["average"] = np.nan
-                    complexity[layer1][layer2]["max"] = np.nan
-                    complexity[layer1][layer2]["min"] = np.nan
-                    complexity[layer1][layer2]["stdev"] = np.nan
-                    complexity[layer1][layer2]["median"] = np.nan
-                    complexity[layer1][layer2]["sum"] = np.nan
-                complexity[layer1][layer2]["count"] = len(scores)
-
-        return complexity
-
-    def temporal_spatial_tweet_readability(self, order='spatial-temporal', temporal_resolution='day',
-                                           temporal_frequency=1, spatial_resolution='country',
-                                           readability_metric="flesch_kincaid_grade"):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
-        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
-        :return: an embedded dictionary that represents the tweet readability across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet readability scores in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
-                           "coleman_liau_index", "linsear_write_formula",
-                           "dale_chall_readability_score", ]), "The metric " \
-                                                               "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
-                                                               "automated_readability_index, coleman_liau_index, linsear_write_formula," \
-                                                               "or dale_chall_readability_score."
-
-        readability = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            readability[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                readability[layer1][layer2] = []
-                for tweet in tweets:
-                    readability[layer1][layer2] = readability[layer1].get(layer2, []) + [float(tweet.readability(readability_metric=readability_metric))]
-
-                scores = readability[layer1][layer2]
-                readability[layer1][layer2] = {}
-                if len(scores) > 0:
-                    readability[layer1][layer2]["average"] = np.nanmean(scores)
-                    readability[layer1][layer2]["max"] = np.nanmax(scores)
-                    readability[layer1][layer2]["min"] = np.nanmin(scores)
-                    readability[layer1][layer2]["stdev"] = np.nanstd(scores)
-                    readability[layer1][layer2]["median"] = np.nanmedian(scores)
-                    readability[layer1][layer2]["sum"] = np.nansum(scores)
-                else:
-                    readability[layer1][layer2]["average"] = np.nan
-                    readability[layer1][layer2]["max"] = np.nan
-                    readability[layer1][layer2]["min"] = np.nan
-                    readability[layer1][layer2]["stdev"] = np.nan
-                    readability[layer1][layer2]["median"] = np.nan
-                    readability[layer1][layer2]["sum"] = np.nan
-                readability[layer1][layer2]["count"] = len(scores)
-
-        return readability
-
-    def temporal_spatial_tweet_length(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
-                                      spatial_resolution='country', length_unit="word"):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
-        :return: an embedded dictionary that represents the tweet length across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the length in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
-
-        tweet_length = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            tweet_length[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                tweet_length[layer1][layer2] = []
-                for tweet in tweets:
-                    tweet_length[layer1][layer2] = tweet_length[layer1].get(layer2, []) + [float(tweet.text_length(length_unit=length_unit))]
-
-                scores = tweet_length[layer1][layer2]
-                tweet_length[layer1][layer2] = {}
-                if len(scores) > 0:
-                    tweet_length[layer1][layer2]["average"] = np.nanmean(scores)
-                    tweet_length[layer1][layer2]["max"] = np.nanmax(scores)
-                    tweet_length[layer1][layer2]["min"] = np.nanmin(scores)
-                    tweet_length[layer1][layer2]["stdev"] = np.nanstd(scores)
-                    tweet_length[layer1][layer2]["median"] = np.nanmedian(scores)
-                    tweet_length[layer1][layer2]["sum"] = np.nansum(scores)
-                else:
-                    tweet_length[layer1][layer2]["average"] = np.nan
-                    tweet_length[layer1][layer2]["max"] = np.nan
-                    tweet_length[layer1][layer2]["min"] = np.nan
-                    tweet_length[layer1][layer2]["stdev"] = np.nan
-                    tweet_length[layer1][layer2]["median"] = np.nan
-                    tweet_length[layer1][layer2]["sum"] = np.nan
-                tweet_length[layer1][layer2]["count"] = len(scores)
-
-        return tweet_length
-
-    def temporal_spatial_tweet_count(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
-                                     spatial_resolution='country'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: an embedded dictionary that represents the number of tweets across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the number of tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-        tweet_count = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            tweet_count[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                tweet_count[layer1][layer2] = len(tweets)
-        return tweet_count
-
-    def temporal_spatial_tweet_sentiment(self, order='spatial-temporal', temporal_resolution='day',
-                                         temporal_frequency=1, spatial_resolution='country', sentiment_engine="vader"):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
-        "vad".
-        :return: an embedded dictionary that represents the tweets sentiment across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the sentiment scores in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
-                                     "vad"]), "The sentiment_engine has to be" \
-                                              "textblob, vader, nrc," \
-                                              "hate_speech or vad"
-
-        sentiments = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            sentiments[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                sentiments[layer1][layer2] = {}
-                sentiment_results = []
-                for tweet in tweets:
-                    sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
-                for result in sentiment_results:
-                    for score in result:
-                        sentiments[layer1][layer2][score] = sentiments[layer1][layer2].get(score, []) + [float(result[score])]
-
-                for score in sentiments[layer1][layer2]:
-                    scores = sentiments[layer1][layer2][score]
-                    sentiments[layer1][layer2][score] = {}
-                    sentiments[layer1][layer2][score]["average"] = np.nanmean(scores)
-                    sentiments[layer1][layer2][score]["max"] = np.nanmax(scores)
-                    sentiments[layer1][layer2][score]["min"] = np.nanmin(scores)
-                    sentiments[layer1][layer2][score]["stdev"] = np.nanstd(scores)
-                    sentiments[layer1][layer2][score]["median"] = np.nanmedian(scores)
-                    sentiments[layer1][layer2][score]["sum"] = np.nansum(scores)
-                    sentiments[layer1][layer2][score]["count"] = len(scores)
-        return sentiments
-
-    def temporal_spatial_tweet_likes_count(self, order='spatial-temporal', temporal_resolution='day',
-                                           temporal_frequency=1, spatial_resolution='country'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: an embedded dictionary that represents the number of tweet likes across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the likes count in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-        tweet_likes = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            tweet_likes[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                tweet_likes[layer1][layer2] = []
-                for tweet in tweets:
-                    tweet_likes[layer1][layer2] = tweet_likes[layer1].get(layer2, []) + [float(tweet.get_likes_count())]
-
-                scores = tweet_likes[layer1][layer2]
-                tweet_likes[layer1][layer2] = {}
-                if len(scores) > 0:
-                    tweet_likes[layer1][layer2]["average"] = np.nanmean(scores)
-                    tweet_likes[layer1][layer2]["max"] = np.nanmax(scores)
-                    tweet_likes[layer1][layer2]["min"] = np.nanmin(scores)
-                    tweet_likes[layer1][layer2]["stdev"] = np.nanstd(scores)
-                    tweet_likes[layer1][layer2]["median"] = np.nanmedian(scores)
-                    tweet_likes[layer1][layer2]["sum"] = np.nansum(scores)
-                else:
-                    tweet_likes[layer1][layer2]["average"] = np.nan
-                    tweet_likes[layer1][layer2]["max"] = np.nan
-                    tweet_likes[layer1][layer2]["min"] = np.nan
-                    tweet_likes[layer1][layer2]["stdev"] = np.nan
-                    tweet_likes[layer1][layer2]["median"] = np.nan
-                    tweet_likes[layer1][layer2]["sum"] = np.nan
-                tweet_likes[layer1][layer2]["count"] = len(scores)
-
-        return tweet_likes
-
-    def temporal_spatial_tweet_retweet_count(self, order='spatial-temporal', temporal_resolution='day',
-                                             temporal_frequency=1, spatial_resolution='country'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: an embedded dictionary that represents the number of retweets across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the retweets count in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-        retweets = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            retweets[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                retweets[layer1][layer2] = []
-                for tweet in tweets:
-                    retweets[layer1][layer2] = retweets[layer1].get(layer2, []) + [float(tweet.get_retweet_count())]
-
-                scores = retweets[layer1][layer2]
-                retweets[layer1][layer2] = {}
-                if len(scores) > 0:
-                    retweets[layer1][layer2]["average"] = np.nanmean(scores)
-                    retweets[layer1][layer2]["max"] = np.nanmax(scores)
-                    retweets[layer1][layer2]["min"] = np.nanmin(scores)
-                    retweets[layer1][layer2]["stdev"] = np.nanstd(scores)
-                    retweets[layer1][layer2]["median"] = np.nanmedian(scores)
-                    retweets[layer1][layer2]["sum"] = np.nansum(scores)
-                else:
-                    retweets[layer1][layer2]["average"] = np.nan
-                    retweets[layer1][layer2]["max"] = np.nan
-                    retweets[layer1][layer2]["min"] = np.nan
-                    retweets[layer1][layer2]["stdev"] = np.nan
-                    retweets[layer1][layer2]["median"] = np.nan
-                    retweets[layer1][layer2]["sum"] = np.nan
-                retweets[layer1][layer2]["count"] = len(scores)
-
-        return retweets
-
-    def temporal_spatial_tweet_language(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
-                                        spatial_resolution='country'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: an embedded dictionary that represents the distribution of tweets language across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the distribution of languages in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-        languages = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            languages[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                languages[layer1][layer2] = []
-                for tweet in tweets:
-                    languages[layer1][layer2] = languages[layer1].get(layer2, []) + [tweet.get_language()]
-                scores = languages[layer1][layer2]
-                lang_agg = {}
-                for i in scores:
-                    lang_agg[i] = lang_agg.get(i, 0) + 1
-
-                languages[layer1][layer2] = lang_agg
-
-        return languages
-
-    def temporal_spatial_tweet_emojis(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
-                                      spatial_resolution='country'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: an embedded dictionary that represents the distribution of tweets emojis across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the distribution of emojis in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-        tweet_emojis = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            tweet_emojis[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                tweet_emojis[layer1][layer2] = []
-                for tweet in tweets:
-                    emoji_list = []
-                    for emj in tweet.get_emojis(count=False):
-                        emoji_list += emj["emoji"]
-                    tweet_emojis[layer1][layer2] = tweet_emojis[layer1].get(layer2, []) + emoji_list
-
-                scores = tweet_emojis[layer1][layer2]
-                emojis_agg = {}
-                for i in scores:
-                    emojis_agg[i] = emojis_agg.get(i, 0) + 1
-
-                tweet_emojis[layer1][layer2] = emojis_agg
-
-        return tweet_emojis
-
-    def temporal_spatial_tweet_case_analysis(self, order='spatial-temporal', temporal_resolution='day',
-                                             temporal_frequency=1, spatial_resolution='country',
-                                             unit_of_analysis='character'):
-
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
-        it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param unit_of_analysis: the unit parameter can be word or character.
-        :return: an embedded dictionary that represents the number of uppercase and lowercase characters or small and capital words (depending on the unit of analysis) across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the number of uppercase and lowercase characters or small and capital words in all the tweets that are posted
-        within every timeframe and spatial unit.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (unit_of_analysis in ["character", "word"]), "unit can be character or word"
-
-        tweet_case_analysis = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            tweet_case_analysis[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                tweet_case_analysis[layer1][layer2] = {}
-                case_analysis_results = []
-                for tweet in tweets:
-                    case_analysis_results.append(tweet.case_analysis(frac=False, unit_of_analysis=unit_of_analysis))
-                for result in case_analysis_results:
-                    for score in result:
-                        tweet_case_analysis[layer1][layer2][score] = tweet_case_analysis[layer1][layer2].get(score, []) + [float(result[score])]
-
-                for score in tweet_case_analysis[layer1][layer2]:
-                    scores = tweet_case_analysis[layer1][layer2][score]
-                    tweet_case_analysis[layer1][layer2][score] = {}
-                    tweet_case_analysis[layer1][layer2][score]["average"] = np.nanmean(scores)
-                    tweet_case_analysis[layer1][layer2][score]["max"] = np.nanmax(scores)
-                    tweet_case_analysis[layer1][layer2][score]["min"] = np.nanmin(scores)
-                    tweet_case_analysis[layer1][layer2][score]["stdev"] = np.nanstd(scores)
-                    tweet_case_analysis[layer1][layer2][score]["median"] = np.nanmedian(scores)
-                    tweet_case_analysis[layer1][layer2][score]["sum"] = np.nansum(scores)
-        return tweet_case_analysis
-
-
-class TimeDependentLocationDependentUserMassFeatures(TemporalFeatures, PlaceFeatures):
-    # def test(self):
-    #     print("test")
-    def temporal_spatial_tweets(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
-                                spatial_resolution='country'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal",
-        then the first key would be a location and the second one is a timestamp. Otherwise and if the values of this
-        parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a
-        location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and
-        frequency=2, it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or
-        place.
-        :return: an embedded dictionary that classifies a set of tweets into a hierarchical structure in which the
-        key-value corresponds to a location (or a timestamp depending on the value of "order" parameter) and another
-        dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be all tweets
-        corresponding to the location and timestamp.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"])
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      "hour, minute, " \
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency>0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-        tweet_set = {}
-        if order == "spatial-temporal":
-            spatial_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-            for location, tweets in spatial_tweets.items():
-                tweet_set[location] = TemporalFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
-        elif order == "temporal-spatial":
-            temporal_tweets = self.tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
-            for timestamp, tweets in temporal_tweets.items():
-                tweet_set[timestamp] = PlaceFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
-        return tweet_set
-
-    def temporal_spatial_user_status_count(self, order='spatial-temporal', temporal_resolution='day',
-                                           temporal_frequency=1, spatial_resolution='country'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal",
-        then the first key would be a location and the second one is a timestamp. Otherwise and if the values of this
-        parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a
-        location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and
-        frequency=2, it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or
-        place.
-        :return: a dictionary that represents user score across spatial units. The key-value pair in this dictionary
-        corresponds to the spatial unit of analysis and statistical metrics of the user role of every account
-        that has posted at least a tweet within each spatial unit.
-        :return: an embedded dictionary that represents number of user's posts within a hierarchical structure in
-        which the key-value corresponds to a location (or a timestamp depending on the value of "order" parameter)
-        and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would
-        be all the tweets posted by the user accounts corresponding to the location and timestamp.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-
-        total_likes = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution,
-                                                           temporal_frequency=temporal_frequency,
-                                                           spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            total_likes[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                total_likes[layer1][layer2] = []
-                for tweet in tweets:
-                    total_likes[layer1][layer2] = total_likes[layer1].get(layer2, []) + \
-                                                 [float(tweet.get_twitter().get_statusses_count())]
-
-                scores = total_likes[layer1][layer2]
-                total_likes[layer1][layer2] = {}
-                if len(scores) > 0:
-                    total_likes[layer1][layer2]["average"] = np.nanmean(scores)
-                    total_likes[layer1][layer2]["max"] = np.nanmax(scores)
-                    total_likes[layer1][layer2]["min"] = np.nanmin(scores)
-                    total_likes[layer1][layer2]["stdev"] = np.nanstd(scores)
-                    total_likes[layer1][layer2]["median"] = np.nanmedian(scores)
-                    total_likes[layer1][layer2]["sum"] = np.nansum(scores)
-                else:
-                    total_likes[layer1][layer2]["average"] = np.nan
-                    total_likes[layer1][layer2]["max"] = np.nan
-                    total_likes[layer1][layer2]["min"] = np.nan
-                    total_likes[layer1][layer2]["stdev"] = np.nan
-                    total_likes[layer1][layer2]["median"] = np.nan
-                    total_likes[layer1][layer2]["sum"] = np.nan
-                total_likes[layer1][layer2]["count"] = len(scores)
-
-        return total_likes
-
-    def temporal_spatial_user_analysis(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
-                                       spatial_resolution='country', analysis_type='follower_count'):
-        """
-        :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal",
-        then the first key would be a location and the second one is a timestamp. Otherwise and if the values of this
-        parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a
-        location.
-        :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
-        "hour", "minute" and "second".
-        :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and
-        frequency=2, it means tweets are categorised by the time-frame of two weeks.
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or
-        place.
-        :param analysis_type: This field specifies the type of analysis on the tweet users. It can be "users_role",
-        "users_reputation", "users_followers_count", "users_friends_count", "users_account_age", "total_likes_count",
-        and "users_status_count".
-        :return: an embedded dictionary that represents users reputation within a hierarchical structure in which the
-        key-value corresponds to a location (or a timestamp depending on the value of "order" parameter) and another
-        dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be all the
-        user reputation corresponding to the location and timestamp.
-        """
-
-        assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
-                                                                    "temporal-spatial"
-        assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
-                                                                                                      "resolution " \
-                                                                                                      "should be year,"\
-                                                                                                      "month,week,day,"\
-                                                                                                      " hour, minute,"\
-                                                                                                      "or second"
-        assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
-                                                                               "positive integer"
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (analysis_type in ["users_role", "users_reputation", "users_followers_count", "users_friends_count",
-                                  "users_account_age", "total_likes_count", "users_status_count"]), "The type of " \
-                                                                                                    "analysis could be " \
-                                                                                                    "user role, " \
-                                                                                                    "user reputation, " \
-                                                                                                    "users_followers_count, " \
-                                                                                                    "users_friends_count, " \
-                                                                                                    "users_account_age, " \
-                                                                                                    "total_likes_count," \
-                                                                                                    " and users_status_count"
-
-        container = {}
-        hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution,
-                                                           temporal_frequency=temporal_frequency,
-                                                           spatial_resolution=spatial_resolution)
-        for layer1, embedded_dictionary in hierarchical_tweets.items():
-            container[layer1] = {}
-            for layer2, tweets in embedded_dictionary.items():
-                container[layer1][layer2] = []
-                for tweet in tweets:
-
-                    if analysis_type == "users_role":
-                        container[layer1][layer2] = container[layer1].get(layer2, []) + \
-                                                     [float(tweet.get_twitter().get_user_role())]
-                    elif analysis_type == "users_reputation":
-                        container[layer1][layer2] = container[layer1].get(layer2, []) + \
-                                                          [float(tweet.get_twitter().get_user_reputation())]
-                    elif analysis_type == "users_followers_count":
-                        container[layer1][layer2] = container[layer1].get(layer2, []) + \
-                                                     [float(tweet.get_twitter().get_followers_count())]
-                    elif analysis_type == "users_friends_count":
-                        container[layer1][layer2] = container[layer1].get(layer2, []) + \
-                                                       [float(tweet.get_twitter().get_friends_count())]
-                    elif analysis_type == "users_account_age":
-                        container[layer1][layer2] = container[layer1].get(layer2, []) + \
-                                                      [float(tweet.get_twitter().get_account_age())]
-                    elif analysis_type == "total_likes_count":
-                        container[layer1][layer2] = container[layer1].get(layer2, []) + \
-                                                      [float(tweet.get_twitter().get_user_total_likes_count())]
-                    elif analysis_type == "users_status_count":
-                        container[layer1][layer2] = container[layer1].get(layer2, []) + \
-                                                      [float(tweet.get_twitter().get_statusses_count())]
-
-                # scores = container[layer1][layer2]
-                # container[layer1][layer2] = {}
-
-                container[layer1][layer2] = TwifexUtility.basic_statistics(container[layer1][layer2])
-                # if len(scores) > 0:
-                #     container[layer1][layer2]["average"] = np.nanmean(scores)
-                #     container[layer1][layer2]["max"] = np.nanmax(scores)
-                #     container[layer1][layer2]["min"] = np.nanmin(scores)
-                #     container[layer1][layer2]["stdev"] = np.nanstd(scores)
-                #     container[layer1][layer2]["median"] = np.nanmedian(scores)
-                #     container[layer1][layer2]["sum"] = np.nansum(scores)
-                # else:
-                #     container[layer1][layer2]["average"] = np.nan
-                #     container[layer1][layer2]["max"] = np.nan
-                #     container[layer1][layer2]["min"] = np.nan
-                #     container[layer1][layer2]["stdev"] = np.nan
-                #     container[layer1][layer2]["median"] = np.nan
-                #     container[layer1][layer2]["sum"] = np.nan
-                # container[layer1][layer2]["count"] = len(scores)
-
-        return container
-
-
-class TimeIndependentLocationIndependentTweetMassFeatures:
-    def __init__(self, tweets):
-        self.tweets = tweets
-
-    def tweets_tf_idf(self):
-        """
-        This function measures tf-idf for every tweet in the dataset. Tf-idf is the result of elementwise product
-         of tf and idf vector. Tf vector of a tweet shows the frequency of each tweet term in that tweet. Df vector
-         of each tweet shows every token of a tweet occurs in how many of the tweets in the dataset. After making
-         df vector for every tweet, we can build corresponding idf vector by calculating log(N/df_term) for every term
-         where N is the total number of terms in each tweet.
-        :return: a dictionary that maps every tweet_id to its tf-idf vector.
-        """
-        tweet_tokens = {}
-        term_space = set()
-
-        for tweet_id in tqdm(self.tweets):
-            tokens = self.tweets[tweet_id].tweet_tokens()
-            tweet_tokens[tweet_id] = tokens
-            for token in tokens:
-                term_space.add(token)
-
-        tf = {}
-        for tweet_id, tokens in tweet_tokens.items():
-            tf[tweet_id] = {}
-            for term in tokens:
-                tf[tweet_id][term] = tf[tweet_id].get(term, 0) + 1
-
-        df = {}
-        for tweet_id, tokens in tf.items():
-            # tmp = {p: 0 for p in tokens}
-            df[tweet_id] = {}
-            for token in set(tokens):
-                for tweet_id2 in tf:
-                    if token in tf[tweet_id2]:
-                        df[tweet_id][token] = df[tweet_id].get(token, 0) + 1
-
-        tf_idf = {}
-        for tweet_id in tf:
-            tf_idf[tweet_id] = {}
-            for token in tf[tweet_id]:
-                tf_idf[tweet_id][token] = tf[tweet_id][token] * np.log(len(df) / df[tweet_id][token])
-        return tf_idf
-
-    def tweets_pos_tf_idf(self):
-        """
-        This function measures tf-idf for tweet text part-of-speech (POS). Measuring pos_tf_idf is slightly different
-        from ordinary tf-idf . In pos_tf_idf, instead of tweet texts, all the operations are performed on tweet text
-        part-of-speech (POS).
-        :return: a dictionary that maps every tweet_id to the tf-idf vector of its POS.
-        """
-
-        pos_dict = {}
-        pos_space = set()
-
-        for tweet_id in self.tweets:
-            tokens = self.tweets[tweet_id].tweet_tokens(input_text=self.tweets[tweet_id].tweet_pos())
-            pos_dict[tweet_id] = tokens
-            for token in tokens:
-                pos_space.add(token)
-
-        tf = {}
-        for tweet_id, tokens in pos_dict.items():
-            # tmp = {p:0 for p in pos_space}
-            tf[tweet_id] = {}
-            for term in tokens:
-                tf[tweet_id][term] = tf[tweet_id].get(term, 0) + 1
-
-        df = {}
-        for tweet_id, tokens in tf.items():
-            df[tweet_id] = {}
-            for token in tokens:
-                for tweet_id2 in tf:
-                    # tf_tweet_id2 = [w for w in tf[tweet_id2] if tf[tweet_id2][w]!=0]
-                    # If we put tf instead of post_dict then df for every pos would be the same (becasue in tf all the pos are available)
-                    if token in tf[tweet_id2]:
-                        df[tweet_id][token] = df[tweet_id].get(token, 0) + 1
-
-        tf_idf = {}
-        for tweet_id in tf:
-            tf_idf[tweet_id] = {}
-            for token in tf[tweet_id]:
-                tf_idf[tweet_id][token] = tf[tweet_id][token] * np.log(len(df) / df[tweet_id][token])
-        return tf_idf
-
-    def tf_idf_dimension_balancer(self, tf_idf):
-        """
-        This function equalise the dimension of tweets tf-idf vectors. To this end, it pulls all the tweets distinct tokens
-        and makes a d dimensional (d:number of distinct tokens) space. In this space, all tf-idf vectors have the same
-        dimension.
-        :param tf_idf: a dictionary that maps every tweet_id to its corresponding tf-idf vector
-        :return: a dictionary that maps every tweet_id to its corresponding tf-idf vector. All tweets have the same dimension.
-        """
-        tfidf = {}
-        term_space = set()
-
-        for tweet_id in tf_idf:
-            for token in tf_idf[tweet_id]:
-                term_space.add(token)
-
-        for tweet_id in tf_idf:
-            tfidf[tweet_id] = {}
-            # temp = {p:0 for p in term_space}
-            # for element in tfidf[tweet_id]:
-            # vec = {}
-            for term in term_space:
-                tfidf[tweet_id][term] = tf_idf[tweet_id].get(term, 0)
-                # temp[element] = tfidf[tweet_id][element]
-            # tfidf[tweet_id] = vec
-        return tfidf
-
-    def tweets_mention_histogram(self):
-        """
-        This function counts the frequency of mentioning different users in the dataset.
-        :return: a sorted dictionary that shows the frequency of mapping different users.
-        """
-        mention_histogram = {}
-        for tweet_id in self.tweets:
-            mentions = self.tweets[tweet_id].get_mentions()
-            if len(mentions) != 0:
-                for mention in mentions:
-                    mention_histogram[mention["screen_name"]] = mention_histogram.get(mention["screen_name"], 0) + 1
-        return {m[0]: m[1] for m in sorted(mention_histogram.items(), key=lambda p: p[1], reverse=True)}
-
-    def tweets_hashtag_histogram(self):
-        """
-        This function counts the frequency of different hashtags in the dataset.
-        :return: a sorted dictionary that shows the frequency of different hashtags.
-        """
-        hashtag_histogram = {}
-        for tweet_id in self.tweets:
-            hashtags = self.tweets[tweet_id].get_hashtags()
-            if len(hashtags) != 0:
-                for hashtag in hashtags:
-                    hashtag_histogram[hashtag["text"]] = hashtag_histogram.get(hashtag["text"], 0) + 1
-        return {m[0]: m[1] for m in sorted(hashtag_histogram.items(), key=lambda p: p[1], reverse=True)}
-
-    def tweets_retweeted_status_histogram(self):
-        """
-        This function counts how many of the tweets in the dataset are retweets.
-        :return: a dictionary that shows the number of retweets(True) and non-retweets(False).
-        """
-        retweet = {True: 0, False: 0}
-        for tweet_id in self.tweets:
-            if self.tweets[tweet_id].is_retweeted():
-                retweet[True] += 1
-            else:
-                retweet[False] += 1
-        return retweet
-
-    def tweets_quoted_status_histogram(self):
-        """
-        This function counts how many of the tweets in the dataset are quoted.
-        :return: a dictionary that shows the number of quoted-tweets(True) and non-quoted tweets(False).
-        """
-        quoted = {True: 0, False: 0}
-        for tweet_id in self.tweets:
-            if self.tweets[tweet_id].is_quoted():
-                quoted[True] += 1
-            else:
-                quoted[False] += 1
-        return quoted
-
-    def tweets_emojis_histogram(self):
-        """
-        This function counts the frequency of different emojis in the dataset.
-        :return: a sorted dictionary that shows the frequency of different emojis.
-        """
-        emojis_histogram = {}
-        for tweet_id in self.tweets:
-            emojis = self.tweets[tweet_id].get_emojis(count=False)
-            if len(emojis) != 0:
-                for emoji in emojis:
-                    emojis_histogram[emoji["emoji"]] = emojis_histogram.get(emoji["emoji"], 0) + 1
-        return {m[0]: m[1] for m in sorted(emojis_histogram.items(), key=lambda p: p[1], reverse=True)}
-
-    def tweets_emoticons_histogram(self):
-        """
-        This function counts the frequency of different emoticons in the dataset.
-        :return: a sorted dictionary that shows the frequency of different emoticons.
-        """
-        emoticons_histogram = {}
-        for tweet_id in self.tweets:
-            emoticons = self.tweets[tweet_id].get_emoticon(count=False)
-            if len(emoticons) != 0:
-                for emoticon in emoticons:
-                    emoticons_histogram[emoticon] = emoticons_histogram.get(emoticon, 0) + 1
-        return {m[0]: m[1] for m in sorted(emoticons_histogram.items(), key=lambda p: p[1], reverse=True)}
-
-    def tweets_count(self):
-        """
-        This function count the number of tweets in the dataset.
-        :return: an integer showing the number of tweets in the dataset.
-        """
-        return len(self.tweets)
-
-    def official_source_fraction(self):
-        """
-        This function finds the fraction of tweets posted from official sources in the dataset.
-        :return: a float number showing the fraction of tweets posted from official sources.
-        """
-        target = 0
-        for tweet_id, tweet in self.tweets.items():
-            if tweet.tweet_source_status():
-                target += 1
-        return target / len(self.tweets)
-
-    def tweets_photo_histogram(self):
-        """
-        This function counts the frequency of photos in the dataset.
-        :return: a sorted dictionary that shows the frequency of mapping different users.
-        """
-        photos_histogram = {}
-        for tweet_id in self.tweets:
-            photos = self.tweets[tweet_id].get_photo()
-            photos_histogram[len(photos)] = photos_histogram.get(len(photos), 0) + 1
-        return photos_histogram
-
-    def tweets_video_histogram(self):
-        """
-        This function counts the frequency of videos in the dataset.
-        :return: a sorted dictionary that shows the frequency of mapping different users.
-        """
-        videos_histogram = {}
-        for tweet_id in self.tweets:
-            videos = self.tweets[tweet_id].get_video()
-            videos_histogram[len(videos)] = videos_histogram.get(len(videos), 0) + 1
-        return videos_histogram
-
-    def tweets_gif_histogram(self):
-        """
-        This function counts the frequency of gifs in the dataset.
-        :return: a sorted dictionary that shows the frequency of mapping different users.
-        """
-        gifs_histogram = {}
-        for tweet_id in self.tweets:
-            gifs = self.tweets[tweet_id].get_gif()
-            gifs_histogram[len(gifs)] = gifs_histogram.get(len(gifs), 0) + 1
-        return gifs_histogram
-
-    def tweets_symbols_histogram(self):
-        """
-        This function counts the frequency of symbols in the dataset.
-        :return: a sorted dictionary that shows the frequency of mapping different users.
-        """
-        symbols_histogram = {}
-        for tweet_id in self.tweets:
-            symbols = self.tweets[tweet_id].get_gif()
-            symbols_histogram[len(symbols)] = symbols_histogram.get(len(symbols), 0) + 1
-        return symbols_histogram
-
-
-class TimeIndependentLocationIndependentUserMassFeatures:
-    def __init__(self, tweets):
-        self.tweets = tweets
-
-    def users_followers_fraction(self, period=True, threshold=100):
-        """
-        This function finds the fraction of users whose followers number is equal or greater (depending on period)
-        than threshold.
-        :param period: if this boolean parameter is False, then he function counts the number of users whose
-        followers number is equal to threshold, otherwise it counts the number of users whose
-        followers number is equal or greater than the threshold.
-        :param threshold: an integer number that shows the minimum of followers.
-        :return: a float number that shows the fraction of users whose followers number is equal or greater (depending on period)
-        than threshold.
-        """
-        all_users = self.get_distinct_users()
-        target = 0
-        for user in all_users:
-            if period:
-                if user.get_followers_count() >= threshold:
-                    target += 1
-            else:
-                if user.get_followers_count() == threshold:
-                    target += 1
-        return target / self.distinct_users_count()
-
-    def users_friends_fraction(self, period=True, threshold=100):
-        """
-        This function finds the fraction of users whose friends (followee) number is equal or greater (depending on period)
-        than threshold.
-        :param period: if this boolean parameter is False, then he function counts the number of users whose
-        friends number is equal to threshold, otherwise it counts the number of users whose
-        friends number is equal or greater than the threshold.
-        :param threshold: an integer number that shows the minimum of friends.
-        :return: a float number that shows the fraction of users whose friends number is equal or greater (depending on period)
-        than threshold.
-        """
-        target = 0
-        all_users = self.get_distinct_users()
-        for user in all_users:
-            if period:
-                if user.get_friends_count() >= threshold:
-                    target += 1
-            else:
-                if user.get_friends_count() == threshold:
-                    target += 1
-        return target / self.distinct_users_count()
-
-    def users_role_fraction(self, period=True, threshold=1):
-        """
-        This function finds the fraction of users whose role is equal or greater (depending on period)
-        than threshold.
-        :param period: if this boolean parameter is False, then he function counts the number of users whose
-        role is equal to threshold, otherwise it counts the number of users whose
-        role is equal or greater than the threshold.
-        :param threshold: an integer number that shows the minimum of the user role.
-        :return: a float number that shows the fraction of users whose role is equal or greater (depending on period)
-        than threshold.
-        """
-        target = 0
-        all_users = self.get_distinct_users()
-        for user in all_users:
-            if period:
-                if user.get_user_role() >= threshold:
-                    target += 1
-            else:
-                if user.get_user_role() == threshold:
-                    target += 1
-        return target / self.distinct_users_count()
-
-    def verified_users_fraction(self):
-        """
-        This function finds the fraction of verified users in the dataset.
-        :return: a float number showing the fraction of verified users.
-        """
-        target = 0
-        all_users = self.get_distinct_users()
-        for user in all_users:
-            if user.get_user_verification_status() == True:
-                target += 1
-        return target / self.distinct_users_count()
-
-    def users_with_location_fraction(self):
-        """
-        This function finds the fraction of geolocated users in the dataset.
-        :return: a float number showing the fraction of geolocated users.
-        """
-        target = 0
-        all_users = self.get_distinct_users()
-        for user in all_users:
-            if user.user_has_profile_location() == True:
-                target += 1
-        return target / self.distinct_users_count()
-
-    def users_with_photo_fraction(self):
-        """
-        This function finds the fraction of users with profile picture in the dataset.
-        :return: a float number showing the fraction of users with profile picture.
-        """
-        target = 0
-        all_users = self.get_distinct_users()
-        for user in all_users:
-            if user.user_has_profile_picture() == True:
-                target += 1
-        return target / self.distinct_users_count()
-
-    def users_with_url_fraction(self):
-        """
-        This function finds the fraction of users with profile url in the dataset.
-        :return: a float number showing the fraction of users with profile url.
-        """
-        target = 0
-        all_users = self.get_distinct_users()
-        for user in all_users:
-            if user.user_has_profile_url() == True:
-                target += 1
-        return target / self.distinct_users_count()
-
-    def users_with_description_fraction(self):
-        """
-        This function finds the fraction of users with profile description in the dataset.
-        :return: a float number showing the fraction of users with profile description.
-        """
-        target = 0
-        all_users = self.get_distinct_users()
-        for user in all_users:
-            if user.user_has_profile_description() == True:
-                target += 1
-        return target / self.distinct_users_count()
-
-    def protected_users_fraction(self):
-        """
-        This function finds the fraction of protected users in the dataset.
-        :return: a float number showing the fraction of protected users.
-        """
-        target = 0
-        all_users = self.get_distinct_users()
-        for user in all_users:
-            if user.user_protected_profile() == True:
-                target += 1
-        return target / self.distinct_users_count()
-
-    def top_twitters(self, threshold_mode=True, threshold=5, top_k_mode=False, top_k=10):
-        """
-        This function finds either the users whose tweets number is more than the threshold (threshold-mode), or
-        top k users with highest tweets number (top_k-mode).
-        :param threshold_mode: a boolean parameter that activates threshhold-mode.
-        :param threshold: an integer showing the threshhold of the threshold-mode.
-        :param top_k_mode: a boolean parameter that activates top_k-mode.
-        :param top_k: an integer showing the top_k in top_k-mode.
-        :return:
-        """
-        assert (threshold_mode != top_k_mode), "Only one of the threshold-mode and top_k-mode can be active at the " \
-                                               "same time."
-        users = {}
-        for tweet_id in self.tweets:
-            tweet_id = self.tweets[tweet_id].get_id()
-            user_id = self.tweets[tweet_id].get_twitter().get_user_id()
-            users[user_id] = users.get(user_id, []) + [tweet_id]
-        top_users = {user: len(users[user]) for user in users}
-
-        if threshold_mode and not top_k_mode:
-            return {user: top_users[user] for user in top_users if top_users[user] > threshold}
-        elif top_k_mode and not threshold_mode:
-            return {m[0]: m[1] for m in sorted(top_users.items(), key=lambda p: p[1], reverse=True)[:top_k]}
-
-    def users_tweet_count_histogram(self):
-        """
-        This function counts the frequency of users for distinct number of tweets.
-        :return: a sorted dictionary that maps frequency of users to tweet number.
-        """
-        all_users = self.top_twitters(threshold_mode=False, threshold=50, top_k_mode=True,
-                                      top_k=self.distinct_users_count())
-        histogram = {}
-        for user in all_users:
-            histogram[all_users[user]] = histogram.get(all_users[user], 0) + 1
-        return {m[0]: m[1] for m in sorted(histogram.items(), key=lambda p: p[0])}
-
-    def distinct_users_count(self):
-        """
-        This function counts the number of all distinct users who posted at least one tweet in the dataset.
-        :return: an integer showing the number of distinct users
-        """
-        users = set()
-        for tweet_id in self.tweets:
-            users.add(self.tweets[tweet_id].get_twitter().get_user_id())
-        return len(users)
-
-    def get_distinct_users(self, output="users_list"):
-        """
-        This function gives all distinct users who posted at least one tweet in the dataset.
-        :param output: the output can be "users_list" or "users_id", or "users_tweet_dictionary".
-        :return: a list of all distinct users_object or user_ids.
-        """
-
-        assert (output in ["users_list", "id",
-                           "users_tweet_dictionary"]), "the output paramater can be users_list or id, or " \
-                                                       "users_tweet_dictionary"
-
-        users = set()
-        users_object = []
-        users_tweet_dict = {}
-        for tweet_id in self.tweets:
-            user_obj = self.tweets[tweet_id].get_twitter()
-            user_id = user_obj.get_user_id()
-            if user_id not in users:
-                users.add(user_id)
-                users_object.append(user_obj)
-            users_tweet_dict[user_id] = users_tweet_dict.get(user_id, []) + [self.tweets[tweet_id]]
-        if output == "users_list":
-            return users_object
-        elif output == "id":
-            return list(users)
-        elif output == "users_tweet_dictionary":
-            return users_tweet_dict
-    # def get_users_with_duplicated_tweets(self):
-    #     user_tweet_dict = {p:q for p,q in self.get_distinct_users(output="users_tweet_dictionary").items() if len(q)>1}
-    #     users_redundant_dict = {}
-    #     for user_id, tweet_list in user_tweet_dict.items():
-    #         users_redundant_dict[user_id] = {}
-    #         for pair in combinations(tweet_list, 2):
-    #             dist = TwifexUtility.levenshtein_distance(pair[0], pair[1])
-    #             if dist == 0:
-    #                 users_redundant_dict[user_id][len(users_redundant_dict[user_id])+1] =
-
-
-class TimeIndependentLocationDependentTweetMassFeatures(PlaceFeatures):
-
-    def spatial_tweet_complexity(self, spatial_resolution='country', complexity_unit="word"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
-        :return: a dictionary that represents the tweet complexity across the spatial units. The key-value pair in this dictionary corresponds to
-        the spatial unit of analysis and the statistical metrics of the tweet complexity scores in all the tweets that are posted
-        within every spatial unit.
-        """
-
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (complexity_unit in ["word", "sentence",
-                         "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
-
-        complexity = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            complexity[location] = []
-            for tweet in tweets:
-                complexity[location] = complexity.get(location, []) + [float(tweet.text_complexity(complexity_unit=complexity_unit))]
-
-            scores = complexity[location]
-            complexity[location] = {}
-            if len(scores) > 0:
-                complexity[location]["average"] = np.nanmean(scores)
-                complexity[location]["max"] = np.nanmax(scores)
-                complexity[location]["min"] = np.nanmin(scores)
-                complexity[location]["stdev"] = np.nanstd(scores)
-                complexity[location]["median"] = np.nanmedian(scores)
-            else:
-                complexity[location]["average"] = np.nan
-                complexity[location]["max"] = np.nan
-                complexity[location]["min"] = np.nan
-                complexity[location]["stdev"] = np.nan
-                complexity[location]["median"] = np.nan
-        return complexity
-
-    def spatial_tweet_readability(self, spatial_resolution='country', readability_metric="flesch_kincaid_grade"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
-        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
-        :return: a dictionary that represents the tweet readability score across the spatial units. The key-value pair in this dictionary corresponds to
-        the spatial unit of analysis and the statistical metrics of the tweet readability scores in all the tweets that are posted
-        within every spatial unit.
-        """
-
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
-                           "coleman_liau_index", "linsear_write_formula",
-                           "dale_chall_readability_score", ]), "The metric " \
-                                                               "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
-                                                               "automated_readability_index, coleman_liau_index, linsear_write_formula," \
-                                                               "or dale_chall_readability_score."
-
-        readability = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            readability[location] = []
-            for tweet in tweets:
-                readability[location] = readability.get(location, []) + [float(tweet.readability(readability_metric=readability_metric))]
-
-            scores = readability[location]
-            readability[location] = {}
-            if len(scores) > 0:
-                readability[location]["average"] = np.nanmean(scores)
-                readability[location]["max"] = np.nanmax(scores)
-                readability[location]["min"] = np.nanmin(scores)
-                readability[location]["stdev"] = np.nanstd(scores)
-                readability[location]["median"] = np.nanmedian(scores)
-            else:
-                readability[location]["average"] = np.nan
-                readability[location]["max"] = np.nan
-                readability[location]["min"] = np.nan
-                readability[location]["stdev"] = np.nan
-                readability[location]["median"] = np.nan
-        return readability
-
-    def spatial_tweet_length(self, spatial_resolution='country', length_unit="word"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
-        :return: a dictionary that represents the tweet length across the spatial units. The key-value pair in this dictionary corresponds to
-        the spatial unit of analysis and the statistical metrics of the tweet length in all the tweets that are posted
-        within every spatial unit.
-        """
-
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
-
-        tweet_length = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            tweet_length[location] = []
-            for tweet in tweets:
-                tweet_length[location] = tweet_length.get(location, []) + [float(tweet.text_length(length_unit=length_unit))]
-
-            scores = tweet_length[location]
-            tweet_length[location] = {}
-            if len(scores) > 0:
-                tweet_length[location]["average"] = np.nanmean(scores)
-                tweet_length[location]["max"] = np.nanmax(scores)
-                tweet_length[location]["min"] = np.nanmin(scores)
-                tweet_length[location]["stdev"] = np.nanstd(scores)
-                tweet_length[location]["median"] = np.nanmedian(scores)
-            else:
-                tweet_length[location]["average"] = np.nan
-                tweet_length[location]["max"] = np.nan
-                tweet_length[location]["min"] = np.nan
-                tweet_length[location]["stdev"] = np.nan
-                tweet_length[location]["median"] = np.nan
-        return tweet_length
-
-    def spatial_tweet_count(self, spatial_resolution='country'):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that represents the tweet count across the spatial units.
-        The key-value pair in this dictionary corresponds to the spatial unit of analysis and
-        the the number of the tweets that are posted within every spatial unit.
-        """
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-
-        tweet_count = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-
-        for location, tweets in geotagged_tweets.items():
-            tweet_count[location] = len(tweets)
-        return tweet_count
-
-    def spatial_sentiment(self, spatial_resolution='country', sentiment_engine="vader"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
-        "vad".
-        :return: a dictionary that represents the tweet sentiments across the spatial units regarding the selected sentiment engine. The key-value pair in this dictionary corresponds to
-        the spatial unit of analysis and the statistical metrics of the sentiment scores in all the tweets that are posted within every spatial unit.
-        """
-
-        assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
-        assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
-                                     "vad"]), "The sentiment_engine has to be" \
-                                              "textblob, vader, nrc," \
-                                              "hate_speech or vad"
-
-        sentiments = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            sentiments[location] = {}
-            sentiment_results = []
-            for tweet in tweets:
-                sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
-            for result in sentiment_results:
-                for score in result:
-                    sentiments[location][score] = sentiments[location].get(score, []) + [float(result[score])]
-
-            for score in sentiments[location]:
-                scores = sentiments[location][score]
-                sentiments[location][score] = {}
-                sentiments[location][score]["average"] = np.nanmean(scores)
-                sentiments[location][score]["max"] = np.nanmax(scores)
-                sentiments[location][score]["min"] = np.nanmin(scores)
-                sentiments[location][score]["stdev"] = np.nanstd(scores)
-                sentiments[location][score]["median"] = np.nanmedian(scores)
-        return sentiments
-
-
-class TimeIndependentLocationDependentUserMassFeatures(PlaceFeatures):
-
-    def spatial_user_role(self, spatial_resolution="country"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that represents user score across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the user role of every account
-        that has posted at least a tweet within each spatial unit.
-        """
-
-        user_roles = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            user_roles[location] = []
-            for tweet in tweets:
-                user_roles[location] = user_roles.get(location, []) + [float(tweet.get_twitter().get_user_role())]
-
-            scores = user_roles[location]
-            user_roles[location] = {}
-            if len(scores) > 0:
-                user_roles[location]["average"] = np.nanmean(scores)
-                user_roles[location]["max"] = np.nanmax(scores)
-                user_roles[location]["min"] = np.nanmin(scores)
-                user_roles[location]["stdev"] = np.nanstd(scores)
-                user_roles[location]["median"] = np.nanmedian(scores)
-            else:
-                user_roles[location]["average"] = np.nan
-                user_roles[location]["max"] = np.nan
-                user_roles[location]["min"] = np.nan
-                user_roles[location]["stdev"] = np.nan
-                user_roles[location]["median"] = np.nan
-        return user_roles
-
-    def spatial_user_reputation(self, spatial_resolution="country"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that represents user reputation across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the user reputation of every account
-        that has posted at least a tweet within each spatial unit.
-        """
-
-        user_reputation = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            user_reputation[location] = []
-            for tweet in tweets:
-                user_reputation[location] = user_reputation.get(location, []) + [float(tweet.get_twitter().get_user_reputation())]
-
-            scores = user_reputation[location]
-            user_reputation[location] = {}
-            if len(scores) > 0:
-                user_reputation[location]["average"] = np.nanmean(scores)
-                user_reputation[location]["max"] = np.nanmax(scores)
-                user_reputation[location]["min"] = np.nanmin(scores)
-                user_reputation[location]["stdev"] = np.nanstd(scores)
-                user_reputation[location]["median"] = np.nanmedian(scores)
-            else:
-                user_reputation[location]["average"] = np.nan
-                user_reputation[location]["max"] = np.nan
-                user_reputation[location]["min"] = np.nan
-                user_reputation[location]["stdev"] = np.nan
-                user_reputation[location]["median"] = np.nan
-        return user_reputation
-
-    def spatial_followers(self, spatial_resolution="country"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that represents followers count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the followers count of every account
-        that has posted at least a tweet within each spatial unit.
-        """
-
-        followers_count = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            followers_count[location] = []
-            for tweet in tweets:
-                followers_count[location] = followers_count.get(location, []) + \
-                                            [float(tweet.get_twitter().get_followers_count())]
-
-            scores = followers_count[location]
-            followers_count[location] = {}
-            if len(scores) > 0:
-                followers_count[location]["average"] = np.nanmean(scores)
-                followers_count[location]["max"] = np.nanmax(scores)
-                followers_count[location]["min"] = np.nanmin(scores)
-                followers_count[location]["stdev"] = np.nanstd(scores)
-                followers_count[location]["median"] = np.nanmedian(scores)
-            else:
-                followers_count[location]["average"] = np.nan
-                followers_count[location]["max"] = np.nan
-                followers_count[location]["min"] = np.nan
-                followers_count[location]["stdev"] = np.nan
-                followers_count[location]["median"] = np.nan
-        return followers_count
-
-    def spatial_friends(self, spatial_resolution="country"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that represents friends count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the friends count of every account
-        that has posted at least a tweet within each spatial unit.
-        """
-
-        friends_count = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            friends_count[location] = []
-            for tweet in tweets:
-                friends_count[location] = friends_count.get(location, []) + [float(tweet.get_twitter().get_friends_count())]
-
-            scores = friends_count[location]
-            friends_count[location] = {}
-            if len(scores) > 0:
-                friends_count[location]["average"] = np.nanmean(scores)
-                friends_count[location]["max"] = np.nanmax(scores)
-                friends_count[location]["min"] = np.nanmin(scores)
-                friends_count[location]["stdev"] = np.nanstd(scores)
-                friends_count[location]["median"] = np.nanmedian(scores)
-            else:
-                friends_count[location]["average"] = np.nan
-                friends_count[location]["max"] = np.nan
-                friends_count[location]["min"] = np.nan
-                friends_count[location]["stdev"] = np.nan
-                friends_count[location]["median"] = np.nan
-        return friends_count
-
-    def spatial_account_age(self, spatial_resolution="country"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that represents account age across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the age of every account
-        that has posted at least a tweet within each spatial unit.
-        """
-
-        account_age = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            account_age[location] = []
-            for tweet in tweets:
-                account_age[location] = account_age.get(location, []) + [float(tweet.get_twitter().get_account_age())]
-
-            scores = account_age[location]
-            account_age[location] = {}
-            if len(scores) > 0:
-                account_age[location]["average"] = np.nanmean(scores)
-                account_age[location]["max"] = np.nanmax(scores)
-                account_age[location]["min"] = np.nanmin(scores)
-                account_age[location]["stdev"] = np.nanstd(scores)
-                account_age[location]["median"] = np.nanmedian(scores)
-            else:
-                account_age[location]["average"] = np.nan
-                account_age[location]["max"] = np.nan
-                account_age[location]["min"] = np.nan
-                account_age[location]["stdev"] = np.nan
-                account_age[location]["median"] = np.nan
-        return account_age
-
-    def spatial_total_likes(self, spatial_resolution="country"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that represents total account likes across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the totall likes of every account
-        that has posted at least a tweet within each spatial unit.
-        """
-
-        total_likes = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            total_likes[location] = []
-            for tweet in tweets:
-                total_likes[location] = total_likes.get(location, []) + [float(tweet.get_twitter().get_user_total_likes_count())]
-
-            scores = total_likes[location]
-            total_likes[location] = {}
-            if len(scores) > 0:
-                total_likes[location]["average"] = np.nanmean(scores)
-                total_likes[location]["max"] = np.nanmax(scores)
-                total_likes[location]["min"] = np.nanmin(scores)
-                total_likes[location]["stdev"] = np.nanstd(scores)
-                total_likes[location]["median"] = np.nanmedian(scores)
-            else:
-                total_likes[location]["average"] = np.nan
-                total_likes[location]["max"] = np.nan
-                total_likes[location]["min"] = np.nan
-                total_likes[location]["stdev"] = np.nan
-                total_likes[location]["median"] = np.nan
-        return total_likes
-
-    def spatial_status_count(self, spatial_resolution="country"):
-        """
-        :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
-        :return: a dictionary that represents status count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the status count of every account
-        that has posted at least a tweet within each spatial unit.
-        """
-
-        status_count = {}
-        geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
-        for location, tweets in geotagged_tweets.items():
-            status_count[location] = []
-            for tweet in tweets:
-                status_count[location] = status_count.get(location, []) + [float(tweet.get_twitter().get_statusses_count())]
-
-            scores = status_count[location]
-            status_count[location] = {}
-            if len(scores) > 0:
-                status_count[location]["average"] = np.nanmean(scores)
-                status_count[location]["max"] = np.nanmax(scores)
-                status_count[location]["min"] = np.nanmin(scores)
-                status_count[location]["stdev"] = np.nanstd(scores)
-                status_count[location]["median"] = np.nanmedian(scores)
-            else:
-                status_count[location]["average"] = np.nan
-                status_count[location]["max"] = np.nan
-                status_count[location]["min"] = np.nan
-                status_count[location]["stdev"] = np.nan
-                status_count[location]["median"] = np.nan
-        return status_count
+# #TRANSFERRED
+# class TimeDependentLocationIndependentTweetMassFeatures(TemporalFeatures):
+#     # def __init__(self, tweets):
+#     #     self.tweets = tweets
+#     #     self.nodes = self.tweets_period()
+#     def tweet_complexity_change(self, nodes, complexity_unit="word"):
+#         """
+#         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
+#         the timestamps and all the tweets that are posted within every timestamp.
+#         :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
+#         :return: a dictionary that represents the change of the tweet complexity across the timespan of the dataset
+#         due to selected unit of analysis. The key-value pair in this dictionary corresponds to
+#         the timestamps and the statistical metrics of the tweet complexity scores in all the tweets that are posted
+#         within every timestamp.
+#         """
+#
+#         assert (complexity_unit in ["word", "sentence",
+#                          "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
+#
+#         complexity = {}
+#         for time_frame, tweets in nodes.items():
+#             complexity[time_frame] = []
+#             complexity_results = []
+#             for tweet in tweets:
+#                 complexity_results.append(tweet.text_complexity(complexity_unit=complexity_unit))
+#             for result in complexity_results:
+#                 complexity[time_frame] = complexity.get(time_frame, []) + [float(result)]
+#
+#             scores = complexity[time_frame]
+#             complexity[time_frame] = {}
+#             if len(scores) > 0:
+#                 complexity[time_frame]["average"] = np.nanmean(scores)
+#                 complexity[time_frame]["max"] = np.nanmax(scores)
+#                 complexity[time_frame]["min"] = np.nanmin(scores)
+#                 complexity[time_frame]["stdev"] = np.nanstd(scores)
+#                 complexity[time_frame]["median"] = np.nanmedian(scores)
+#             else:
+#                 complexity[time_frame]["average"] = np.nan
+#                 complexity[time_frame]["max"] = np.nan
+#                 complexity[time_frame]["min"] = np.nan
+#                 complexity[time_frame]["stdev"] = np.nan
+#                 complexity[time_frame]["median"] = np.nan
+#         return complexity
+#
+#     def tweet_readability_change(self, nodes, readability_metric="flesch_kincaid_grade"):
+#         """
+#         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
+#         the timestamps and all the tweets that are posted within every timestamp.
+#         :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+#         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score"
+#         :return: a dictionary that represents the change of the tweet readability across the timespan of the dataset
+#         due to selected readability metric. The key-value pair in this dictionary corresponds to the timestamps and
+#         the statistical metrics of the tweet readability scores in all the tweets that are posted within every timestamp.
+#         """
+#
+#         assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+#                            "coleman_liau_index", "linsear_write_formula",
+#                            "dale_chall_readability_score", ]), "The metric " \
+#                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+#                                                                "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+#                                                                "or dale_chall_readability_score."
+#
+#         readability = {}
+#         for time_frame, tweets in nodes.items():
+#             readability[time_frame] = []
+#             readability_results = []
+#             for tweet in tweets:
+#                 readability_results.append(tweet.readability(readability_metric=readability_metric))
+#             for result in readability_results:
+#                 readability[time_frame] = readability.get(time_frame, []) + [float(result)]
+#
+#             scores = readability[time_frame]
+#             readability[time_frame] = {}
+#             if len(scores) > 0:
+#                 readability[time_frame]["average"] = np.nanmean(scores)
+#                 readability[time_frame]["max"] = np.nanmax(scores)
+#                 readability[time_frame]["min"] = np.nanmin(scores)
+#                 readability[time_frame]["stdev"] = np.nanstd(scores)
+#                 readability[time_frame]["median"] = np.nanmedian(scores)
+#             else:
+#                 readability[time_frame]["average"] = np.nan
+#                 readability[time_frame]["max"] = np.nan
+#                 readability[time_frame]["min"] = np.nan
+#                 readability[time_frame]["stdev"] = np.nan
+#                 readability[time_frame]["median"] = np.nan
+#         return readability
+#
+#     def tweet_length_change(self, nodes, length_unit="word"):
+#         """
+#         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
+#         the timestamps and all the tweets that are posted within every timestamp.
+#         :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
+#         :return: a dictionary that represents the change of the tweet length across the timespan of the dataset
+#         due to selected unit of analysis. The key-value pair in this dictionary corresponds to the timestamps and
+#         the statistical metrics of the tweet length in all the tweets that are posted within every timestamp.
+#         """
+#
+#         assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
+#
+#         tweet_length = {}
+#         for time_frame, tweets in nodes.items():
+#             tweet_length[time_frame] = []
+#             tweet_length_results = []
+#             for tweet in tweets:
+#                 tweet_length_results.append(tweet.text_length(length_unit=length_unit))
+#             for result in tweet_length_results:
+#                 tweet_length[time_frame] = tweet_length.get(time_frame, []) + [float(result)]
+#
+#             scores = tweet_length[time_frame]
+#             tweet_length[time_frame] = {}
+#             if len(scores) > 0:
+#                 tweet_length[time_frame]["average"] = np.nanmean(scores)
+#                 tweet_length[time_frame]["max"] = np.nanmax(scores)
+#                 tweet_length[time_frame]["min"] = np.nanmin(scores)
+#                 tweet_length[time_frame]["stdev"] = np.nanstd(scores)
+#                 tweet_length[time_frame]["median"] = np.nanmedian(scores)
+#                 tweet_length[time_frame]["median"] = np.nanmedian(scores)
+#             else:
+#                 tweet_length[time_frame]["average"] = np.nan
+#                 tweet_length[time_frame]["max"] = np.nan
+#                 tweet_length[time_frame]["min"] = np.nan
+#                 tweet_length[time_frame]["stdev"] = np.nan
+#                 tweet_length[time_frame]["median"] = np.nan
+#                 tweet_length[time_frame]["median"] = np.nan
+#         return tweet_length
+#
+#     def tweet_count_change(self, nodes):
+#         """
+#         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
+#         the timestamps and all the tweets that are posted within every timestamp.
+#         :return: a dictionary that represents the change of the tweet count across the timespan of the dataset.
+#         The key-value pair in this dictionary corresponds to the timestamps and
+#         the number of tweets that are posted within every timestamp.
+#         """
+#
+#         tweet_count = {}
+#         for time_frame, tweets in nodes.items():
+#             tweet_count[time_frame] = len(tweets)
+#         return tweet_count
+#
+#     def sentiment_change(self, nodes, sentiment_engine="vader"):
+#         """
+#         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
+#         the timestamps and all the tweets that are posted within every timestamp.
+#         :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
+#         "vad".
+#         :return: a dictionary that represents the change of the sentiment across the timespan of the dataset
+#         due to selected sentiment engine. The key-value pair in this dictionary corresponds to
+#         the timestamps and the statistical metrics of the sentiment scores in all the tweets that are posted
+#         within every timestamp.
+#         """
+#
+#         assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+#                                      "vad"]), "The sentiment_engine has to be" \
+#                                               "textblob, vader, nrc," \
+#                                               "hate_speech or vad"
+#         sentiments = {}
+#         for time_frame, tweets in nodes.items():
+#             sentiments[time_frame] = {}
+#             sentiment_results = []
+#             for tweet in tweets:
+#                 sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
+#             for result in sentiment_results:
+#                 for score in result:
+#                     sentiments[time_frame][score] = sentiments[time_frame].get(score, []) + [float(result[score])]
+#
+#             for score in sentiments[time_frame]:
+#                 scores = sentiments[time_frame][score]
+#                 sentiments[time_frame][score] = {}
+#                 sentiments[time_frame][score]["average"] = np.nanmean(scores)
+#                 sentiments[time_frame][score]["max"] = np.nanmax(scores)
+#                 sentiments[time_frame][score]["min"] = np.nanmin(scores)
+#                 sentiments[time_frame][score]["stdev"] = np.nanstd(scores)
+#                 sentiments[time_frame][score]["median"] = np.nanmedian(scores)
+#         return sentiments
+
+# #TRANSFERRED
+# class TimeDependentLocationIndependentUserMassFeatures(TemporalFeatures):
+#     # def __init__(self, tweets):
+#     def users_role_change(self, nodes):
+#         """
+#         :param nodes: a dictionary of temporal tweets. The key-value pair in this dictionary corresponds to
+#         the timestamps and all the tweets that are posted within every timestamp.
+#         :return: a dictionary that represents the change of the user role across the timespan of the dataset.
+#         The key-value pair in this dictionary corresponds to the timestamps and statistical metrics of the user roles
+#         in all the tweets that are posted within every timestamp.
+#         """
+#
+#         user_roles = {}
+#         for time_frame, tweets in nodes.items():
+#             user_roles[time_frame] = []
+#             user_roles_results = []
+#             for tweet in tweets:
+#                 user_roles_results.append(tweet.get_twitter().get_user_role())
+#             for result in user_roles_results:
+#                 user_roles[time_frame] = user_roles.get(time_frame, []) + [float(result)]
+#
+#             scores = user_roles[time_frame]
+#             user_roles[time_frame] = {}
+#             if len(scores) > 0:
+#                 user_roles[time_frame]["average"] = np.nanmean(scores)
+#                 user_roles[time_frame]["max"] = np.nanmax(scores)
+#                 user_roles[time_frame]["min"] = np.nanmin(scores)
+#                 user_roles[time_frame]["stdev"] = np.nanstd(scores)
+#                 user_roles[time_frame]["median"] = np.nanmedian(scores)
+#             else:
+#                 user_roles[time_frame]["average"] = np.nan
+#                 user_roles[time_frame]["max"] = np.nan
+#                 user_roles[time_frame]["min"] = np.nan
+#                 user_roles[time_frame]["stdev"] = np.nan
+#                 user_roles[time_frame]["median"] = np.nan
+#         return user_roles
+
+# #TRANSFERRED
+# class TimeDependentLocationDependentTweetMassFeatures(TemporalFeatures, PlaceFeatures):
+#
+#     def temporal_spatial_tweets(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
+#                                 spatial_resolution='country'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: an embedded dictionary that classifies a set of tweets into a hierarchical structure in which the key-value corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be all tweets corresponding to the location and timestamp.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#         tweet_set = {}
+#         if order == "spatial-temporal":
+#             spatial_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#             for location, tweets in spatial_tweets.items():
+#                 tweet_set[location] = TemporalFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
+#         elif order == "temporal-spatial":
+#             temporal_tweets = self.tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
+#             for timestamp, tweets in temporal_tweets.items():
+#                 tweet_set[timestamp] = PlaceFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
+#         return tweet_set
+#
+#     def temporal_spatial_tweet_complexity(self, order='spatial-temporal', temporal_resolution='day',
+#                                           temporal_frequency=1, spatial_resolution='country', complexity_unit="word"):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
+#         :return: an embedded dictionary that represents the tweet complexity across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet complexity scores in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (complexity_unit in ["word", "sentence",
+#                          "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
+#
+#
+#
+#
+#         complexity = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             complexity[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 complexity[layer1][layer2] = []
+#                 for tweet in tweets:
+#                     complexity[layer1][layer2] = complexity[layer1].get(layer2, []) + [float(tweet.text_complexity(complexity_unit=complexity_unit))]
+#
+#                 scores = complexity[layer1][layer2]
+#                 complexity[layer1][layer2] = {}
+#                 if len(scores) > 0:
+#                     complexity[layer1][layer2]["average"] = np.nanmean(scores)
+#                     complexity[layer1][layer2]["max"] = np.nanmax(scores)
+#                     complexity[layer1][layer2]["min"] = np.nanmin(scores)
+#                     complexity[layer1][layer2]["stdev"] = np.nanstd(scores)
+#                     complexity[layer1][layer2]["median"] = np.nanmedian(scores)
+#                     complexity[layer1][layer2]["sum"] = np.nansum(scores)
+#                 else:
+#                     complexity[layer1][layer2]["average"] = np.nan
+#                     complexity[layer1][layer2]["max"] = np.nan
+#                     complexity[layer1][layer2]["min"] = np.nan
+#                     complexity[layer1][layer2]["stdev"] = np.nan
+#                     complexity[layer1][layer2]["median"] = np.nan
+#                     complexity[layer1][layer2]["sum"] = np.nan
+#                 complexity[layer1][layer2]["count"] = len(scores)
+#
+#         return complexity
+#
+#     def temporal_spatial_tweet_readability(self, order='spatial-temporal', temporal_resolution='day',
+#                                            temporal_frequency=1, spatial_resolution='country',
+#                                            readability_metric="flesch_kincaid_grade"):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+#         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
+#         :return: an embedded dictionary that represents the tweet readability across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the tweet readability scores in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+#                            "coleman_liau_index", "linsear_write_formula",
+#                            "dale_chall_readability_score", ]), "The metric " \
+#                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+#                                                                "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+#                                                                "or dale_chall_readability_score."
+#
+#         readability = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             readability[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 readability[layer1][layer2] = []
+#                 for tweet in tweets:
+#                     readability[layer1][layer2] = readability[layer1].get(layer2, []) + [float(tweet.readability(readability_metric=readability_metric))]
+#
+#                 scores = readability[layer1][layer2]
+#                 readability[layer1][layer2] = {}
+#                 if len(scores) > 0:
+#                     readability[layer1][layer2]["average"] = np.nanmean(scores)
+#                     readability[layer1][layer2]["max"] = np.nanmax(scores)
+#                     readability[layer1][layer2]["min"] = np.nanmin(scores)
+#                     readability[layer1][layer2]["stdev"] = np.nanstd(scores)
+#                     readability[layer1][layer2]["median"] = np.nanmedian(scores)
+#                     readability[layer1][layer2]["sum"] = np.nansum(scores)
+#                 else:
+#                     readability[layer1][layer2]["average"] = np.nan
+#                     readability[layer1][layer2]["max"] = np.nan
+#                     readability[layer1][layer2]["min"] = np.nan
+#                     readability[layer1][layer2]["stdev"] = np.nan
+#                     readability[layer1][layer2]["median"] = np.nan
+#                     readability[layer1][layer2]["sum"] = np.nan
+#                 readability[layer1][layer2]["count"] = len(scores)
+#
+#         return readability
+#
+#     def temporal_spatial_tweet_length(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
+#                                       spatial_resolution='country', length_unit="word"):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
+#         :return: an embedded dictionary that represents the tweet length across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the length in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
+#
+#         tweet_length = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             tweet_length[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 tweet_length[layer1][layer2] = []
+#                 for tweet in tweets:
+#                     tweet_length[layer1][layer2] = tweet_length[layer1].get(layer2, []) + [float(tweet.text_length(length_unit=length_unit))]
+#
+#                 scores = tweet_length[layer1][layer2]
+#                 tweet_length[layer1][layer2] = {}
+#                 if len(scores) > 0:
+#                     tweet_length[layer1][layer2]["average"] = np.nanmean(scores)
+#                     tweet_length[layer1][layer2]["max"] = np.nanmax(scores)
+#                     tweet_length[layer1][layer2]["min"] = np.nanmin(scores)
+#                     tweet_length[layer1][layer2]["stdev"] = np.nanstd(scores)
+#                     tweet_length[layer1][layer2]["median"] = np.nanmedian(scores)
+#                     tweet_length[layer1][layer2]["sum"] = np.nansum(scores)
+#                 else:
+#                     tweet_length[layer1][layer2]["average"] = np.nan
+#                     tweet_length[layer1][layer2]["max"] = np.nan
+#                     tweet_length[layer1][layer2]["min"] = np.nan
+#                     tweet_length[layer1][layer2]["stdev"] = np.nan
+#                     tweet_length[layer1][layer2]["median"] = np.nan
+#                     tweet_length[layer1][layer2]["sum"] = np.nan
+#                 tweet_length[layer1][layer2]["count"] = len(scores)
+#
+#         return tweet_length
+#
+#     def temporal_spatial_tweet_count(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
+#                                      spatial_resolution='country'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: an embedded dictionary that represents the number of tweets across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the number of tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#         tweet_count = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             tweet_count[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 tweet_count[layer1][layer2] = len(tweets)
+#         return tweet_count
+#
+#     def temporal_spatial_tweet_sentiment(self, order='spatial-temporal', temporal_resolution='day',
+#                                          temporal_frequency=1, spatial_resolution='country', sentiment_engine="vader"):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
+#         "vad".
+#         :return: an embedded dictionary that represents the tweets sentiment across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the sentiment scores in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+#                                      "vad"]), "The sentiment_engine has to be" \
+#                                               "textblob, vader, nrc," \
+#                                               "hate_speech or vad"
+#
+#         sentiments = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             sentiments[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 sentiments[layer1][layer2] = {}
+#                 sentiment_results = []
+#                 for tweet in tweets:
+#                     sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
+#                 for result in sentiment_results:
+#                     for score in result:
+#                         sentiments[layer1][layer2][score] = sentiments[layer1][layer2].get(score, []) + [float(result[score])]
+#
+#                 for score in sentiments[layer1][layer2]:
+#                     scores = sentiments[layer1][layer2][score]
+#                     sentiments[layer1][layer2][score] = {}
+#                     sentiments[layer1][layer2][score]["average"] = np.nanmean(scores)
+#                     sentiments[layer1][layer2][score]["max"] = np.nanmax(scores)
+#                     sentiments[layer1][layer2][score]["min"] = np.nanmin(scores)
+#                     sentiments[layer1][layer2][score]["stdev"] = np.nanstd(scores)
+#                     sentiments[layer1][layer2][score]["median"] = np.nanmedian(scores)
+#                     sentiments[layer1][layer2][score]["sum"] = np.nansum(scores)
+#                     sentiments[layer1][layer2][score]["count"] = len(scores)
+#         return sentiments
+#
+#     def temporal_spatial_tweet_likes_count(self, order='spatial-temporal', temporal_resolution='day',
+#                                            temporal_frequency=1, spatial_resolution='country'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: an embedded dictionary that represents the number of tweet likes across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the likes count in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#         tweet_likes = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             tweet_likes[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 tweet_likes[layer1][layer2] = []
+#                 for tweet in tweets:
+#                     tweet_likes[layer1][layer2] = tweet_likes[layer1].get(layer2, []) + [float(tweet.get_likes_count())]
+#
+#                 scores = tweet_likes[layer1][layer2]
+#                 tweet_likes[layer1][layer2] = {}
+#                 if len(scores) > 0:
+#                     tweet_likes[layer1][layer2]["average"] = np.nanmean(scores)
+#                     tweet_likes[layer1][layer2]["max"] = np.nanmax(scores)
+#                     tweet_likes[layer1][layer2]["min"] = np.nanmin(scores)
+#                     tweet_likes[layer1][layer2]["stdev"] = np.nanstd(scores)
+#                     tweet_likes[layer1][layer2]["median"] = np.nanmedian(scores)
+#                     tweet_likes[layer1][layer2]["sum"] = np.nansum(scores)
+#                 else:
+#                     tweet_likes[layer1][layer2]["average"] = np.nan
+#                     tweet_likes[layer1][layer2]["max"] = np.nan
+#                     tweet_likes[layer1][layer2]["min"] = np.nan
+#                     tweet_likes[layer1][layer2]["stdev"] = np.nan
+#                     tweet_likes[layer1][layer2]["median"] = np.nan
+#                     tweet_likes[layer1][layer2]["sum"] = np.nan
+#                 tweet_likes[layer1][layer2]["count"] = len(scores)
+#
+#         return tweet_likes
+#
+#     def temporal_spatial_tweet_retweet_count(self, order='spatial-temporal', temporal_resolution='day',
+#                                              temporal_frequency=1, spatial_resolution='country'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: an embedded dictionary that represents the number of retweets across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the retweets count in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#         retweets = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             retweets[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 retweets[layer1][layer2] = []
+#                 for tweet in tweets:
+#                     retweets[layer1][layer2] = retweets[layer1].get(layer2, []) + [float(tweet.get_retweet_count())]
+#
+#                 scores = retweets[layer1][layer2]
+#                 retweets[layer1][layer2] = {}
+#                 if len(scores) > 0:
+#                     retweets[layer1][layer2]["average"] = np.nanmean(scores)
+#                     retweets[layer1][layer2]["max"] = np.nanmax(scores)
+#                     retweets[layer1][layer2]["min"] = np.nanmin(scores)
+#                     retweets[layer1][layer2]["stdev"] = np.nanstd(scores)
+#                     retweets[layer1][layer2]["median"] = np.nanmedian(scores)
+#                     retweets[layer1][layer2]["sum"] = np.nansum(scores)
+#                 else:
+#                     retweets[layer1][layer2]["average"] = np.nan
+#                     retweets[layer1][layer2]["max"] = np.nan
+#                     retweets[layer1][layer2]["min"] = np.nan
+#                     retweets[layer1][layer2]["stdev"] = np.nan
+#                     retweets[layer1][layer2]["median"] = np.nan
+#                     retweets[layer1][layer2]["sum"] = np.nan
+#                 retweets[layer1][layer2]["count"] = len(scores)
+#
+#         return retweets
+#
+#     def temporal_spatial_tweet_language(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
+#                                         spatial_resolution='country'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: an embedded dictionary that represents the distribution of tweets language across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the distribution of languages in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#         languages = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             languages[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 languages[layer1][layer2] = []
+#                 for tweet in tweets:
+#                     languages[layer1][layer2] = languages[layer1].get(layer2, []) + [tweet.get_language()]
+#                 scores = languages[layer1][layer2]
+#                 lang_agg = {}
+#                 for i in scores:
+#                     lang_agg[i] = lang_agg.get(i, 0) + 1
+#
+#                 languages[layer1][layer2] = lang_agg
+#
+#         return languages
+#
+#     def temporal_spatial_tweet_emojis(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
+#                                       spatial_resolution='country'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: an embedded dictionary that represents the distribution of tweets emojis across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the distribution of emojis in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#         tweet_emojis = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             tweet_emojis[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 tweet_emojis[layer1][layer2] = []
+#                 for tweet in tweets:
+#                     emoji_list = []
+#                     for emj in tweet.get_emojis(count=False):
+#                         emoji_list += emj["emoji"]
+#                     tweet_emojis[layer1][layer2] = tweet_emojis[layer1].get(layer2, []) + emoji_list
+#
+#                 scores = tweet_emojis[layer1][layer2]
+#                 emojis_agg = {}
+#                 for i in scores:
+#                     emojis_agg[i] = emojis_agg.get(i, 0) + 1
+#
+#                 tweet_emojis[layer1][layer2] = emojis_agg
+#
+#         return tweet_emojis
+#
+#     def temporal_spatial_tweet_case_analysis(self, order='spatial-temporal', temporal_resolution='day',
+#                                              temporal_frequency=1, spatial_resolution='country',
+#                                              unit_of_analysis='character'):
+#
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal", then the first key would be a location and the second one is a timestamp. Otherwise and if the valuse of this parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and frequency=2,
+#         it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param unit_of_analysis: the unit parameter can be word or character.
+#         :return: an embedded dictionary that represents the number of uppercase and lowercase characters or small and capital words (depending on the unit of analysis) across the temporal and spatial units regarding the selected display order. The key-value pair corresponds to a location (or a timestamp depending on the value of "order" parameter) and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be the statistical metrics of the number of uppercase and lowercase characters or small and capital words in all the tweets that are posted
+#         within every timeframe and spatial unit.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (unit_of_analysis in ["character", "word"]), "unit can be character or word"
+#
+#         tweet_case_analysis = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution, temporal_frequency=temporal_frequency, spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             tweet_case_analysis[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 tweet_case_analysis[layer1][layer2] = {}
+#                 case_analysis_results = []
+#                 for tweet in tweets:
+#                     case_analysis_results.append(tweet.case_analysis(frac=False, unit_of_analysis=unit_of_analysis))
+#                 for result in case_analysis_results:
+#                     for score in result:
+#                         tweet_case_analysis[layer1][layer2][score] = tweet_case_analysis[layer1][layer2].get(score, []) + [float(result[score])]
+#
+#                 for score in tweet_case_analysis[layer1][layer2]:
+#                     scores = tweet_case_analysis[layer1][layer2][score]
+#                     tweet_case_analysis[layer1][layer2][score] = {}
+#                     tweet_case_analysis[layer1][layer2][score]["average"] = np.nanmean(scores)
+#                     tweet_case_analysis[layer1][layer2][score]["max"] = np.nanmax(scores)
+#                     tweet_case_analysis[layer1][layer2][score]["min"] = np.nanmin(scores)
+#                     tweet_case_analysis[layer1][layer2][score]["stdev"] = np.nanstd(scores)
+#                     tweet_case_analysis[layer1][layer2][score]["median"] = np.nanmedian(scores)
+#                     tweet_case_analysis[layer1][layer2][score]["sum"] = np.nansum(scores)
+#         return tweet_case_analysis
+#
+# #TRANSFERRED
+# class TimeDependentLocationDependentUserMassFeatures(TemporalFeatures, PlaceFeatures):
+#     # def test(self):
+#     #     print("test")
+#     def temporal_spatial_tweets(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
+#                                 spatial_resolution='country'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal",
+#         then the first key would be a location and the second one is a timestamp. Otherwise and if the values of this
+#         parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a
+#         location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and
+#         frequency=2, it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or
+#         place.
+#         :return: an embedded dictionary that classifies a set of tweets into a hierarchical structure in which the
+#         key-value corresponds to a location (or a timestamp depending on the value of "order" parameter) and another
+#         dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be all tweets
+#         corresponding to the location and timestamp.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"])
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       "hour, minute, " \
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency>0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#         tweet_set = {}
+#         if order == "spatial-temporal":
+#             spatial_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#             for location, tweets in spatial_tweets.items():
+#                 tweet_set[location] = TemporalFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
+#         elif order == "temporal-spatial":
+#             temporal_tweets = self.tweets_in_periods(resolution=temporal_resolution, frequency=temporal_frequency)
+#             for timestamp, tweets in temporal_tweets.items():
+#                 tweet_set[timestamp] = PlaceFeatures(TwifexUtility.collective_tweets_to_dictionary(tweets)).tweets_with_location(spatial_resolution=spatial_resolution)
+#         return tweet_set
+#
+#     def temporal_spatial_user_status_count(self, order='spatial-temporal', temporal_resolution='day',
+#                                            temporal_frequency=1, spatial_resolution='country'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal",
+#         then the first key would be a location and the second one is a timestamp. Otherwise and if the values of this
+#         parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a
+#         location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and
+#         frequency=2, it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or
+#         place.
+#         :return: a dictionary that represents user score across spatial units. The key-value pair in this dictionary
+#         corresponds to the spatial unit of analysis and statistical metrics of the user role of every account
+#         that has posted at least a tweet within each spatial unit.
+#         :return: an embedded dictionary that represents number of user's posts within a hierarchical structure in
+#         which the key-value corresponds to a location (or a timestamp depending on the value of "order" parameter)
+#         and another dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would
+#         be all the tweets posted by the user accounts corresponding to the location and timestamp.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#
+#         total_likes = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution,
+#                                                            temporal_frequency=temporal_frequency,
+#                                                            spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             total_likes[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 total_likes[layer1][layer2] = []
+#                 for tweet in tweets:
+#                     total_likes[layer1][layer2] = total_likes[layer1].get(layer2, []) + \
+#                                                  [float(tweet.get_twitter().get_statusses_count())]
+#
+#                 scores = total_likes[layer1][layer2]
+#                 total_likes[layer1][layer2] = {}
+#                 if len(scores) > 0:
+#                     total_likes[layer1][layer2]["average"] = np.nanmean(scores)
+#                     total_likes[layer1][layer2]["max"] = np.nanmax(scores)
+#                     total_likes[layer1][layer2]["min"] = np.nanmin(scores)
+#                     total_likes[layer1][layer2]["stdev"] = np.nanstd(scores)
+#                     total_likes[layer1][layer2]["median"] = np.nanmedian(scores)
+#                     total_likes[layer1][layer2]["sum"] = np.nansum(scores)
+#                 else:
+#                     total_likes[layer1][layer2]["average"] = np.nan
+#                     total_likes[layer1][layer2]["max"] = np.nan
+#                     total_likes[layer1][layer2]["min"] = np.nan
+#                     total_likes[layer1][layer2]["stdev"] = np.nan
+#                     total_likes[layer1][layer2]["median"] = np.nan
+#                     total_likes[layer1][layer2]["sum"] = np.nan
+#                 total_likes[layer1][layer2]["count"] = len(scores)
+#
+#         return total_likes
+#
+#     def temporal_spatial_user_analysis(self, order='spatial-temporal', temporal_resolution='day', temporal_frequency=1,
+#                                        spatial_resolution='country', analysis_type='follower_count'):
+#         """
+#         :param order: the hierarchical structure of temporal-spatial embedded dictionary. If it is "spatial-temporal",
+#         then the first key would be a location and the second one is a timestamp. Otherwise and if the values of this
+#         parameter is equal to "temporal-spatial", then the first key would be a timestamp and the second one is a
+#         location.
+#         :param temporal_resolution: the time resolution of tweets categories. It can be "year", "month", "week", "day",
+#         "hour", "minute" and "second".
+#         :param temporal_frequency: the time frequency of tweets categories. For instance, if resolution="week" and
+#         frequency=2, it means tweets are categorised by the time-frame of two weeks.
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or
+#         place.
+#         :param analysis_type: This field specifies the type of analysis on the tweet users. It can be "users_role",
+#         "users_reputation", "users_followers_count", "users_friends_count", "users_account_age", "total_likes_count",
+#         and "users_status_count".
+#         :return: an embedded dictionary that represents users reputation within a hierarchical structure in which the
+#         key-value corresponds to a location (or a timestamp depending on the value of "order" parameter) and another
+#         dictionary. In this second dictionary, the key is a timestamp (or a location) and the value would be all the
+#         user reputation corresponding to the location and timestamp.
+#         """
+#
+#         assert (order in ["spatial-temporal", "temporal-spatial"]), "The order should be either spatial-temporal or " \
+#                                                                     "temporal-spatial"
+#         assert (temporal_resolution in ["year", "month", "week", "day", "hour", "minute", "second"]), "The time " \
+#                                                                                                       "resolution " \
+#                                                                                                       "should be year,"\
+#                                                                                                       "month,week,day,"\
+#                                                                                                       " hour, minute,"\
+#                                                                                                       "or second"
+#         assert (isinstance(temporal_frequency, int) and temporal_frequency > 0), "The temporal frequency has to be a " \
+#                                                                                "positive integer"
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (analysis_type in ["users_role", "users_reputation", "users_followers_count", "users_friends_count",
+#                                   "users_account_age", "total_likes_count", "users_status_count"]), "The type of " \
+#                                                                                                     "analysis could be " \
+#                                                                                                     "user role, " \
+#                                                                                                     "user reputation, " \
+#                                                                                                     "users_followers_count, " \
+#                                                                                                     "users_friends_count, " \
+#                                                                                                     "users_account_age, " \
+#                                                                                                     "total_likes_count," \
+#                                                                                                     " and users_status_count"
+#
+#         container = {}
+#         hierarchical_tweets = self.temporal_spatial_tweets(order=order, temporal_resolution=temporal_resolution,
+#                                                            temporal_frequency=temporal_frequency,
+#                                                            spatial_resolution=spatial_resolution)
+#         for layer1, embedded_dictionary in hierarchical_tweets.items():
+#             container[layer1] = {}
+#             for layer2, tweets in embedded_dictionary.items():
+#                 container[layer1][layer2] = []
+#                 for tweet in tweets:
+#
+#                     if analysis_type == "users_role":
+#                         container[layer1][layer2] = container[layer1].get(layer2, []) + \
+#                                                      [float(tweet.get_twitter().get_user_role())]
+#                     elif analysis_type == "users_reputation":
+#                         container[layer1][layer2] = container[layer1].get(layer2, []) + \
+#                                                           [float(tweet.get_twitter().get_user_reputation())]
+#                     elif analysis_type == "users_followers_count":
+#                         container[layer1][layer2] = container[layer1].get(layer2, []) + \
+#                                                      [float(tweet.get_twitter().get_followers_count())]
+#                     elif analysis_type == "users_friends_count":
+#                         container[layer1][layer2] = container[layer1].get(layer2, []) + \
+#                                                        [float(tweet.get_twitter().get_friends_count())]
+#                     elif analysis_type == "users_account_age":
+#                         container[layer1][layer2] = container[layer1].get(layer2, []) + \
+#                                                       [float(tweet.get_twitter().get_account_age())]
+#                     elif analysis_type == "total_likes_count":
+#                         container[layer1][layer2] = container[layer1].get(layer2, []) + \
+#                                                       [float(tweet.get_twitter().get_user_total_likes_count())]
+#                     elif analysis_type == "users_status_count":
+#                         container[layer1][layer2] = container[layer1].get(layer2, []) + \
+#                                                       [float(tweet.get_twitter().get_statusses_count())]
+#
+#                 # scores = container[layer1][layer2]
+#                 # container[layer1][layer2] = {}
+#
+#                 container[layer1][layer2] = TwifexUtility.basic_statistics(container[layer1][layer2])
+#                 # if len(scores) > 0:
+#                 #     container[layer1][layer2]["average"] = np.nanmean(scores)
+#                 #     container[layer1][layer2]["max"] = np.nanmax(scores)
+#                 #     container[layer1][layer2]["min"] = np.nanmin(scores)
+#                 #     container[layer1][layer2]["stdev"] = np.nanstd(scores)
+#                 #     container[layer1][layer2]["median"] = np.nanmedian(scores)
+#                 #     container[layer1][layer2]["sum"] = np.nansum(scores)
+#                 # else:
+#                 #     container[layer1][layer2]["average"] = np.nan
+#                 #     container[layer1][layer2]["max"] = np.nan
+#                 #     container[layer1][layer2]["min"] = np.nan
+#                 #     container[layer1][layer2]["stdev"] = np.nan
+#                 #     container[layer1][layer2]["median"] = np.nan
+#                 #     container[layer1][layer2]["sum"] = np.nan
+#                 # container[layer1][layer2]["count"] = len(scores)
+#
+#         return container
+
+# #TRANSFERRED
+# class TimeIndependentLocationIndependentTweetMassFeatures:
+#     def __init__(self, tweets):
+#         self.tweets = tweets
+#
+#     def tweets_tf_idf(self):
+#         """
+#         This function measures tf-idf for every tweet in the dataset. Tf-idf is the result of elementwise product
+#          of tf and idf vector. Tf vector of a tweet shows the frequency of each tweet term in that tweet. Df vector
+#          of each tweet shows every token of a tweet occurs in how many of the tweets in the dataset. After making
+#          df vector for every tweet, we can build corresponding idf vector by calculating log(N/df_term) for every term
+#          where N is the total number of terms in each tweet.
+#         :return: a dictionary that maps every tweet_id to its tf-idf vector.
+#         """
+#         tweet_tokens = {}
+#         term_space = set()
+#
+#         for tweet_id in tqdm(self.tweets):
+#             tokens = self.tweets[tweet_id].tweet_tokens()
+#             tweet_tokens[tweet_id] = tokens
+#             for token in tokens:
+#                 term_space.add(token)
+#
+#         tf = {}
+#         for tweet_id, tokens in tweet_tokens.items():
+#             tf[tweet_id] = {}
+#             for term in tokens:
+#                 tf[tweet_id][term] = tf[tweet_id].get(term, 0) + 1
+#
+#         df = {}
+#         for tweet_id, tokens in tf.items():
+#             # tmp = {p: 0 for p in tokens}
+#             df[tweet_id] = {}
+#             for token in set(tokens):
+#                 for tweet_id2 in tf:
+#                     if token in tf[tweet_id2]:
+#                         df[tweet_id][token] = df[tweet_id].get(token, 0) + 1
+#
+#         tf_idf = {}
+#         for tweet_id in tf:
+#             tf_idf[tweet_id] = {}
+#             for token in tf[tweet_id]:
+#                 tf_idf[tweet_id][token] = tf[tweet_id][token] * np.log(len(df) / df[tweet_id][token])
+#         return tf_idf
+#
+#     def tweets_pos_tf_idf(self):
+#         """
+#         This function measures tf-idf for tweet text part-of-speech (POS). Measuring pos_tf_idf is slightly different
+#         from ordinary tf-idf . In pos_tf_idf, instead of tweet texts, all the operations are performed on tweet text
+#         part-of-speech (POS).
+#         :return: a dictionary that maps every tweet_id to the tf-idf vector of its POS.
+#         """
+#
+#         pos_dict = {}
+#         pos_space = set()
+#
+#         for tweet_id in self.tweets:
+#             tokens = self.tweets[tweet_id].tweet_tokens(input_text=self.tweets[tweet_id].tweet_pos())
+#             pos_dict[tweet_id] = tokens
+#             for token in tokens:
+#                 pos_space.add(token)
+#
+#         tf = {}
+#         for tweet_id, tokens in pos_dict.items():
+#             # tmp = {p:0 for p in pos_space}
+#             tf[tweet_id] = {}
+#             for term in tokens:
+#                 tf[tweet_id][term] = tf[tweet_id].get(term, 0) + 1
+#
+#         df = {}
+#         for tweet_id, tokens in tf.items():
+#             df[tweet_id] = {}
+#             for token in tokens:
+#                 for tweet_id2 in tf:
+#                     # tf_tweet_id2 = [w for w in tf[tweet_id2] if tf[tweet_id2][w]!=0]
+#                     # If we put tf instead of post_dict then df for every pos would be the same (becasue in tf all the pos are available)
+#                     if token in tf[tweet_id2]:
+#                         df[tweet_id][token] = df[tweet_id].get(token, 0) + 1
+#
+#         tf_idf = {}
+#         for tweet_id in tf:
+#             tf_idf[tweet_id] = {}
+#             for token in tf[tweet_id]:
+#                 tf_idf[tweet_id][token] = tf[tweet_id][token] * np.log(len(df) / df[tweet_id][token])
+#         return tf_idf
+#
+#     def tf_idf_dimension_balancer(self, tf_idf):
+#         """
+#         This function equalise the dimension of tweets tf-idf vectors. To this end, it pulls all the tweets distinct tokens
+#         and makes a d dimensional (d:number of distinct tokens) space. In this space, all tf-idf vectors have the same
+#         dimension.
+#         :param tf_idf: a dictionary that maps every tweet_id to its corresponding tf-idf vector
+#         :return: a dictionary that maps every tweet_id to its corresponding tf-idf vector. All tweets have the same dimension.
+#         """
+#         tfidf = {}
+#         term_space = set()
+#
+#         for tweet_id in tf_idf:
+#             for token in tf_idf[tweet_id]:
+#                 term_space.add(token)
+#
+#         for tweet_id in tf_idf:
+#             tfidf[tweet_id] = {}
+#             # temp = {p:0 for p in term_space}
+#             # for element in tfidf[tweet_id]:
+#             # vec = {}
+#             for term in term_space:
+#                 tfidf[tweet_id][term] = tf_idf[tweet_id].get(term, 0)
+#                 # temp[element] = tfidf[tweet_id][element]
+#             # tfidf[tweet_id] = vec
+#         return tfidf
+#
+#     def tweets_mention_histogram(self):
+#         """
+#         This function counts the frequency of mentioning different users in the dataset.
+#         :return: a sorted dictionary that shows the frequency of mapping different users.
+#         """
+#         mention_histogram = {}
+#         for tweet_id in self.tweets:
+#             mentions = self.tweets[tweet_id].get_mentions()
+#             if len(mentions) != 0:
+#                 for mention in mentions:
+#                     mention_histogram[mention["screen_name"]] = mention_histogram.get(mention["screen_name"], 0) + 1
+#         return {m[0]: m[1] for m in sorted(mention_histogram.items(), key=lambda p: p[1], reverse=True)}
+#
+#     def tweets_hashtag_histogram(self):
+#         """
+#         This function counts the frequency of different hashtags in the dataset.
+#         :return: a sorted dictionary that shows the frequency of different hashtags.
+#         """
+#         hashtag_histogram = {}
+#         for tweet_id in self.tweets:
+#             hashtags = self.tweets[tweet_id].get_hashtags()
+#             if len(hashtags) != 0:
+#                 for hashtag in hashtags:
+#                     hashtag_histogram[hashtag["text"]] = hashtag_histogram.get(hashtag["text"], 0) + 1
+#         return {m[0]: m[1] for m in sorted(hashtag_histogram.items(), key=lambda p: p[1], reverse=True)}
+#
+#     def tweets_retweeted_status_histogram(self):
+#         """
+#         This function counts how many of the tweets in the dataset are retweets.
+#         :return: a dictionary that shows the number of retweets(True) and non-retweets(False).
+#         """
+#         retweet = {True: 0, False: 0}
+#         for tweet_id in self.tweets:
+#             if self.tweets[tweet_id].is_retweeted():
+#                 retweet[True] += 1
+#             else:
+#                 retweet[False] += 1
+#         return retweet
+#
+#     def tweets_quoted_status_histogram(self):
+#         """
+#         This function counts how many of the tweets in the dataset are quoted.
+#         :return: a dictionary that shows the number of quoted-tweets(True) and non-quoted tweets(False).
+#         """
+#         quoted = {True: 0, False: 0}
+#         for tweet_id in self.tweets:
+#             if self.tweets[tweet_id].is_quoted():
+#                 quoted[True] += 1
+#             else:
+#                 quoted[False] += 1
+#         return quoted
+#
+#     def tweets_emojis_histogram(self):
+#         """
+#         This function counts the frequency of different emojis in the dataset.
+#         :return: a sorted dictionary that shows the frequency of different emojis.
+#         """
+#         emojis_histogram = {}
+#         for tweet_id in self.tweets:
+#             emojis = self.tweets[tweet_id].get_emojis(count=False)
+#             if len(emojis) != 0:
+#                 for emoji in emojis:
+#                     emojis_histogram[emoji["emoji"]] = emojis_histogram.get(emoji["emoji"], 0) + 1
+#         return {m[0]: m[1] for m in sorted(emojis_histogram.items(), key=lambda p: p[1], reverse=True)}
+#
+#     def tweets_emoticons_histogram(self):
+#         """
+#         This function counts the frequency of different emoticons in the dataset.
+#         :return: a sorted dictionary that shows the frequency of different emoticons.
+#         """
+#         emoticons_histogram = {}
+#         for tweet_id in self.tweets:
+#             emoticons = self.tweets[tweet_id].get_emoticon(count=False)
+#             if len(emoticons) != 0:
+#                 for emoticon in emoticons:
+#                     emoticons_histogram[emoticon] = emoticons_histogram.get(emoticon, 0) + 1
+#         return {m[0]: m[1] for m in sorted(emoticons_histogram.items(), key=lambda p: p[1], reverse=True)}
+#
+#     def tweets_count(self):
+#         """
+#         This function count the number of tweets in the dataset.
+#         :return: an integer showing the number of tweets in the dataset.
+#         """
+#         return len(self.tweets)
+#
+#     def official_source_fraction(self):
+#         """
+#         This function finds the fraction of tweets posted from official sources in the dataset.
+#         :return: a float number showing the fraction of tweets posted from official sources.
+#         """
+#         target = 0
+#         for tweet_id, tweet in self.tweets.items():
+#             if tweet.tweet_source_status():
+#                 target += 1
+#         return target / len(self.tweets)
+#
+#     def tweets_photo_histogram(self):
+#         """
+#         This function counts the frequency of photos in the dataset.
+#         :return: a sorted dictionary that shows the frequency of mapping different users.
+#         """
+#         photos_histogram = {}
+#         for tweet_id in self.tweets:
+#             photos = self.tweets[tweet_id].get_photo()
+#             photos_histogram[len(photos)] = photos_histogram.get(len(photos), 0) + 1
+#         return photos_histogram
+#
+#     def tweets_video_histogram(self):
+#         """
+#         This function counts the frequency of videos in the dataset.
+#         :return: a sorted dictionary that shows the frequency of mapping different users.
+#         """
+#         videos_histogram = {}
+#         for tweet_id in self.tweets:
+#             videos = self.tweets[tweet_id].get_video()
+#             videos_histogram[len(videos)] = videos_histogram.get(len(videos), 0) + 1
+#         return videos_histogram
+#
+#     def tweets_gif_histogram(self):
+#         """
+#         This function counts the frequency of gifs in the dataset.
+#         :return: a sorted dictionary that shows the frequency of mapping different users.
+#         """
+#         gifs_histogram = {}
+#         for tweet_id in self.tweets:
+#             gifs = self.tweets[tweet_id].get_gif()
+#             gifs_histogram[len(gifs)] = gifs_histogram.get(len(gifs), 0) + 1
+#         return gifs_histogram
+#
+#     def tweets_symbols_histogram(self):
+#         """
+#         This function counts the frequency of symbols in the dataset.
+#         :return: a sorted dictionary that shows the frequency of mapping different users.
+#         """
+#         symbols_histogram = {}
+#         for tweet_id in self.tweets:
+#             symbols = self.tweets[tweet_id].get_gif()
+#             symbols_histogram[len(symbols)] = symbols_histogram.get(len(symbols), 0) + 1
+#         return symbols_histogram
+
+# #TRANSFERRED
+# class TimeIndependentLocationIndependentUserMassFeatures:
+#     def __init__(self, tweets):
+#         self.tweets = tweets
+#
+#     def users_followers_fraction(self, period=True, threshold=100):
+#         """
+#         This function finds the fraction of users whose followers number is equal or greater (depending on period)
+#         than threshold.
+#         :param period: if this boolean parameter is False, then he function counts the number of users whose
+#         followers number is equal to threshold, otherwise it counts the number of users whose
+#         followers number is equal or greater than the threshold.
+#         :param threshold: an integer number that shows the minimum of followers.
+#         :return: a float number that shows the fraction of users whose followers number is equal or greater (depending on period)
+#         than threshold.
+#         """
+#         all_users = self.get_distinct_users()
+#         target = 0
+#         for user in all_users:
+#             if period:
+#                 if user.get_followers_count() >= threshold:
+#                     target += 1
+#             else:
+#                 if user.get_followers_count() == threshold:
+#                     target += 1
+#         return target / self.distinct_users_count()
+#
+#     def users_friends_fraction(self, period=True, threshold=100):
+#         """
+#         This function finds the fraction of users whose friends (followee) number is equal or greater (depending on period)
+#         than threshold.
+#         :param period: if this boolean parameter is False, then he function counts the number of users whose
+#         friends number is equal to threshold, otherwise it counts the number of users whose
+#         friends number is equal or greater than the threshold.
+#         :param threshold: an integer number that shows the minimum of friends.
+#         :return: a float number that shows the fraction of users whose friends number is equal or greater (depending on period)
+#         than threshold.
+#         """
+#         target = 0
+#         all_users = self.get_distinct_users()
+#         for user in all_users:
+#             if period:
+#                 if user.get_friends_count() >= threshold:
+#                     target += 1
+#             else:
+#                 if user.get_friends_count() == threshold:
+#                     target += 1
+#         return target / self.distinct_users_count()
+#
+#     def users_role_fraction(self, period=True, threshold=1):
+#         """
+#         This function finds the fraction of users whose role is equal or greater (depending on period)
+#         than threshold.
+#         :param period: if this boolean parameter is False, then he function counts the number of users whose
+#         role is equal to threshold, otherwise it counts the number of users whose
+#         role is equal or greater than the threshold.
+#         :param threshold: an integer number that shows the minimum of the user role.
+#         :return: a float number that shows the fraction of users whose role is equal or greater (depending on period)
+#         than threshold.
+#         """
+#         target = 0
+#         all_users = self.get_distinct_users()
+#         for user in all_users:
+#             if period:
+#                 if user.get_user_role() >= threshold:
+#                     target += 1
+#             else:
+#                 if user.get_user_role() == threshold:
+#                     target += 1
+#         return target / self.distinct_users_count()
+#
+#     def verified_users_fraction(self):
+#         """
+#         This function finds the fraction of verified users in the dataset.
+#         :return: a float number showing the fraction of verified users.
+#         """
+#         target = 0
+#         all_users = self.get_distinct_users()
+#         for user in all_users:
+#             if user.get_user_verification_status() == True:
+#                 target += 1
+#         return target / self.distinct_users_count()
+#
+#     def users_with_location_fraction(self):
+#         """
+#         This function finds the fraction of geolocated users in the dataset.
+#         :return: a float number showing the fraction of geolocated users.
+#         """
+#         target = 0
+#         all_users = self.get_distinct_users()
+#         for user in all_users:
+#             if user.user_has_profile_location() == True:
+#                 target += 1
+#         return target / self.distinct_users_count()
+#
+#     def users_with_photo_fraction(self):
+#         """
+#         This function finds the fraction of users with profile picture in the dataset.
+#         :return: a float number showing the fraction of users with profile picture.
+#         """
+#         target = 0
+#         all_users = self.get_distinct_users()
+#         for user in all_users:
+#             if user.user_has_profile_picture() == True:
+#                 target += 1
+#         return target / self.distinct_users_count()
+#
+#     def users_with_url_fraction(self):
+#         """
+#         This function finds the fraction of users with profile url in the dataset.
+#         :return: a float number showing the fraction of users with profile url.
+#         """
+#         target = 0
+#         all_users = self.get_distinct_users()
+#         for user in all_users:
+#             if user.user_has_profile_url() == True:
+#                 target += 1
+#         return target / self.distinct_users_count()
+#
+#     def users_with_description_fraction(self):
+#         """
+#         This function finds the fraction of users with profile description in the dataset.
+#         :return: a float number showing the fraction of users with profile description.
+#         """
+#         target = 0
+#         all_users = self.get_distinct_users()
+#         for user in all_users:
+#             if user.user_has_profile_description() == True:
+#                 target += 1
+#         return target / self.distinct_users_count()
+#
+#     def protected_users_fraction(self):
+#         """
+#         This function finds the fraction of protected users in the dataset.
+#         :return: a float number showing the fraction of protected users.
+#         """
+#         target = 0
+#         all_users = self.get_distinct_users()
+#         for user in all_users:
+#             if user.user_protected_profile() == True:
+#                 target += 1
+#         return target / self.distinct_users_count()
+#
+#     def top_twitters(self, threshold_mode=True, threshold=5, top_k_mode=False, top_k=10):
+#         """
+#         This function finds either the users whose tweets number is more than the threshold (threshold-mode), or
+#         top k users with highest tweets number (top_k-mode).
+#         :param threshold_mode: a boolean parameter that activates threshhold-mode.
+#         :param threshold: an integer showing the threshhold of the threshold-mode.
+#         :param top_k_mode: a boolean parameter that activates top_k-mode.
+#         :param top_k: an integer showing the top_k in top_k-mode.
+#         :return:
+#         """
+#         assert (threshold_mode != top_k_mode), "Only one of the threshold-mode and top_k-mode can be active at the " \
+#                                                "same time."
+#         users = {}
+#         for tweet_id in self.tweets:
+#             tweet_id = self.tweets[tweet_id].get_id()
+#             user_id = self.tweets[tweet_id].get_twitter().get_user_id()
+#             users[user_id] = users.get(user_id, []) + [tweet_id]
+#         top_users = {user: len(users[user]) for user in users}
+#
+#         if threshold_mode and not top_k_mode:
+#             return {user: top_users[user] for user in top_users if top_users[user] > threshold}
+#         elif top_k_mode and not threshold_mode:
+#             return {m[0]: m[1] for m in sorted(top_users.items(), key=lambda p: p[1], reverse=True)[:top_k]}
+#
+#     def users_tweet_count_histogram(self):
+#         """
+#         This function counts the frequency of users for distinct number of tweets.
+#         :return: a sorted dictionary that maps frequency of users to tweet number.
+#         """
+#         all_users = self.top_twitters(threshold_mode=False, threshold=50, top_k_mode=True,
+#                                       top_k=self.distinct_users_count())
+#         histogram = {}
+#         for user in all_users:
+#             histogram[all_users[user]] = histogram.get(all_users[user], 0) + 1
+#         return {m[0]: m[1] for m in sorted(histogram.items(), key=lambda p: p[0])}
+#
+#     def distinct_users_count(self):
+#         """
+#         This function counts the number of all distinct users who posted at least one tweet in the dataset.
+#         :return: an integer showing the number of distinct users
+#         """
+#         users = set()
+#         for tweet_id in self.tweets:
+#             users.add(self.tweets[tweet_id].get_twitter().get_user_id())
+#         return len(users)
+#
+#     def get_distinct_users(self, output="users_list"):
+#         """
+#         This function gives all distinct users who posted at least one tweet in the dataset.
+#         :param output: the output can be "users_list" or "users_id", or "users_tweet_dictionary".
+#         :return: a list of all distinct users_object or user_ids.
+#         """
+#
+#         assert (output in ["users_list", "id",
+#                            "users_tweet_dictionary"]), "the output paramater can be users_list or id, or " \
+#                                                        "users_tweet_dictionary"
+#
+#         users = set()
+#         users_object = []
+#         users_tweet_dict = {}
+#         for tweet_id in self.tweets:
+#             user_obj = self.tweets[tweet_id].get_twitter()
+#             user_id = user_obj.get_user_id()
+#             if user_id not in users:
+#                 users.add(user_id)
+#                 users_object.append(user_obj)
+#             users_tweet_dict[user_id] = users_tweet_dict.get(user_id, []) + [self.tweets[tweet_id]]
+#         if output == "users_list":
+#             return users_object
+#         elif output == "id":
+#             return list(users)
+#         elif output == "users_tweet_dictionary":
+#             return users_tweet_dict
+#     # def get_users_with_duplicated_tweets(self):
+#     #     user_tweet_dict = {p:q for p,q in self.get_distinct_users(output="users_tweet_dictionary").items() if len(q)>1}
+#     #     users_redundant_dict = {}
+#     #     for user_id, tweet_list in user_tweet_dict.items():
+#     #         users_redundant_dict[user_id] = {}
+#     #         for pair in combinations(tweet_list, 2):
+#     #             dist = TwifexUtility.levenshtein_distance(pair[0], pair[1])
+#     #             if dist == 0:
+#     #                 users_redundant_dict[user_id][len(users_redundant_dict[user_id])+1] =
+
+# #TRANSFERRED
+# class TimeIndependentLocationDependentTweetMassFeatures(PlaceFeatures):
+#
+#     def spatial_tweet_complexity(self, spatial_resolution='country', complexity_unit="word"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param complexity_unit: the unit of analysis for measuring tweet complexity. It can be "word", "sentence", or "syllables".
+#         :return: a dictionary that represents the tweet complexity across the spatial units. The key-value pair in this dictionary corresponds to
+#         the spatial unit of analysis and the statistical metrics of the tweet complexity scores in all the tweets that are posted
+#         within every spatial unit.
+#         """
+#
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (complexity_unit in ["word", "sentence",
+#                          "syllables"]), "The unit of analysis has to be word, sentence, or syllables"
+#
+#         complexity = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             complexity[location] = []
+#             for tweet in tweets:
+#                 complexity[location] = complexity.get(location, []) + [float(tweet.text_complexity(complexity_unit=complexity_unit))]
+#
+#             scores = complexity[location]
+#             complexity[location] = {}
+#             if len(scores) > 0:
+#                 complexity[location]["average"] = np.nanmean(scores)
+#                 complexity[location]["max"] = np.nanmax(scores)
+#                 complexity[location]["min"] = np.nanmin(scores)
+#                 complexity[location]["stdev"] = np.nanstd(scores)
+#                 complexity[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 complexity[location]["average"] = np.nan
+#                 complexity[location]["max"] = np.nan
+#                 complexity[location]["min"] = np.nan
+#                 complexity[location]["stdev"] = np.nan
+#                 complexity[location]["median"] = np.nan
+#         return complexity
+#
+#     def spatial_tweet_readability(self, spatial_resolution='country', readability_metric="flesch_kincaid_grade"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param readability_metric: The readability metric which can be "flesch_kincaid_grade", "gunning_fog", "smog_index",
+#         "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score".
+#         :return: a dictionary that represents the tweet readability score across the spatial units. The key-value pair in this dictionary corresponds to
+#         the spatial unit of analysis and the statistical metrics of the tweet readability scores in all the tweets that are posted
+#         within every spatial unit.
+#         """
+#
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (readability_metric in ["flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
+#                            "coleman_liau_index", "linsear_write_formula",
+#                            "dale_chall_readability_score", ]), "The metric " \
+#                                                                "has to be flesch_kincaid_grade, gunning_fog, smog_index, " \
+#                                                                "automated_readability_index, coleman_liau_index, linsear_write_formula," \
+#                                                                "or dale_chall_readability_score."
+#
+#         readability = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             readability[location] = []
+#             for tweet in tweets:
+#                 readability[location] = readability.get(location, []) + [float(tweet.readability(readability_metric=readability_metric))]
+#
+#             scores = readability[location]
+#             readability[location] = {}
+#             if len(scores) > 0:
+#                 readability[location]["average"] = np.nanmean(scores)
+#                 readability[location]["max"] = np.nanmax(scores)
+#                 readability[location]["min"] = np.nanmin(scores)
+#                 readability[location]["stdev"] = np.nanstd(scores)
+#                 readability[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 readability[location]["average"] = np.nan
+#                 readability[location]["max"] = np.nan
+#                 readability[location]["min"] = np.nan
+#                 readability[location]["stdev"] = np.nan
+#                 readability[location]["median"] = np.nan
+#         return readability
+#
+#     def spatial_tweet_length(self, spatial_resolution='country', length_unit="word"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param length_unit: the unit of analysis for measuring tweet length. It can be "character", "word", or "sentence".
+#         :return: a dictionary that represents the tweet length across the spatial units. The key-value pair in this dictionary corresponds to
+#         the spatial unit of analysis and the statistical metrics of the tweet length in all the tweets that are posted
+#         within every spatial unit.
+#         """
+#
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (length_unit in ["character", "word", "sentence"]), "The unit has to be character, word, or sentence"
+#
+#         tweet_length = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             tweet_length[location] = []
+#             for tweet in tweets:
+#                 tweet_length[location] = tweet_length.get(location, []) + [float(tweet.text_length(length_unit=length_unit))]
+#
+#             scores = tweet_length[location]
+#             tweet_length[location] = {}
+#             if len(scores) > 0:
+#                 tweet_length[location]["average"] = np.nanmean(scores)
+#                 tweet_length[location]["max"] = np.nanmax(scores)
+#                 tweet_length[location]["min"] = np.nanmin(scores)
+#                 tweet_length[location]["stdev"] = np.nanstd(scores)
+#                 tweet_length[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 tweet_length[location]["average"] = np.nan
+#                 tweet_length[location]["max"] = np.nan
+#                 tweet_length[location]["min"] = np.nan
+#                 tweet_length[location]["stdev"] = np.nan
+#                 tweet_length[location]["median"] = np.nan
+#         return tweet_length
+#
+#     def spatial_tweet_count(self, spatial_resolution='country'):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that represents the tweet count across the spatial units.
+#         The key-value pair in this dictionary corresponds to the spatial unit of analysis and
+#         the the number of the tweets that are posted within every spatial unit.
+#         """
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#
+#         tweet_count = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#
+#         for location, tweets in geotagged_tweets.items():
+#             tweet_count[location] = len(tweets)
+#         return tweet_count
+#
+#     def spatial_sentiment(self, spatial_resolution='country', sentiment_engine="vader"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :param sentiment_engine: sentiment analysis engine which can be "textblob", "vader", "nrc", "hate_speech", or
+#         "vad".
+#         :return: a dictionary that represents the tweet sentiments across the spatial units regarding the selected sentiment engine. The key-value pair in this dictionary corresponds to
+#         the spatial unit of analysis and the statistical metrics of the sentiment scores in all the tweets that are posted within every spatial unit.
+#         """
+#
+#         assert (spatial_resolution in ["country", "place"]), "The spatial unit of analysis has to be country or place"
+#         assert (sentiment_engine in ["textblob", "vader", "nrc", "hate_speech",
+#                                      "vad"]), "The sentiment_engine has to be" \
+#                                               "textblob, vader, nrc," \
+#                                               "hate_speech or vad"
+#
+#         sentiments = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             sentiments[location] = {}
+#             sentiment_results = []
+#             for tweet in tweets:
+#                 sentiment_results.append(tweet.sentiment_analysis(sentiment_engine))
+#             for result in sentiment_results:
+#                 for score in result:
+#                     sentiments[location][score] = sentiments[location].get(score, []) + [float(result[score])]
+#
+#             for score in sentiments[location]:
+#                 scores = sentiments[location][score]
+#                 sentiments[location][score] = {}
+#                 sentiments[location][score]["average"] = np.nanmean(scores)
+#                 sentiments[location][score]["max"] = np.nanmax(scores)
+#                 sentiments[location][score]["min"] = np.nanmin(scores)
+#                 sentiments[location][score]["stdev"] = np.nanstd(scores)
+#                 sentiments[location][score]["median"] = np.nanmedian(scores)
+#         return sentiments
+
+# #TRANSFERRED
+# class TimeIndependentLocationDependentUserMassFeatures(PlaceFeatures):
+#
+#     def spatial_user_role(self, spatial_resolution="country"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that represents user score across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the user role of every account
+#         that has posted at least a tweet within each spatial unit.
+#         """
+#
+#         user_roles = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             user_roles[location] = []
+#             for tweet in tweets:
+#                 user_roles[location] = user_roles.get(location, []) + [float(tweet.get_twitter().get_user_role())]
+#
+#             scores = user_roles[location]
+#             user_roles[location] = {}
+#             if len(scores) > 0:
+#                 user_roles[location]["average"] = np.nanmean(scores)
+#                 user_roles[location]["max"] = np.nanmax(scores)
+#                 user_roles[location]["min"] = np.nanmin(scores)
+#                 user_roles[location]["stdev"] = np.nanstd(scores)
+#                 user_roles[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 user_roles[location]["average"] = np.nan
+#                 user_roles[location]["max"] = np.nan
+#                 user_roles[location]["min"] = np.nan
+#                 user_roles[location]["stdev"] = np.nan
+#                 user_roles[location]["median"] = np.nan
+#         return user_roles
+#
+#     def spatial_user_reputation(self, spatial_resolution="country"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that represents user reputation across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the user reputation of every account
+#         that has posted at least a tweet within each spatial unit.
+#         """
+#
+#         user_reputation = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             user_reputation[location] = []
+#             for tweet in tweets:
+#                 user_reputation[location] = user_reputation.get(location, []) + [float(tweet.get_twitter().get_user_reputation())]
+#
+#             scores = user_reputation[location]
+#             user_reputation[location] = {}
+#             if len(scores) > 0:
+#                 user_reputation[location]["average"] = np.nanmean(scores)
+#                 user_reputation[location]["max"] = np.nanmax(scores)
+#                 user_reputation[location]["min"] = np.nanmin(scores)
+#                 user_reputation[location]["stdev"] = np.nanstd(scores)
+#                 user_reputation[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 user_reputation[location]["average"] = np.nan
+#                 user_reputation[location]["max"] = np.nan
+#                 user_reputation[location]["min"] = np.nan
+#                 user_reputation[location]["stdev"] = np.nan
+#                 user_reputation[location]["median"] = np.nan
+#         return user_reputation
+#
+#     def spatial_followers(self, spatial_resolution="country"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that represents followers count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the followers count of every account
+#         that has posted at least a tweet within each spatial unit.
+#         """
+#
+#         followers_count = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             followers_count[location] = []
+#             for tweet in tweets:
+#                 followers_count[location] = followers_count.get(location, []) + \
+#                                             [float(tweet.get_twitter().get_followers_count())]
+#
+#             scores = followers_count[location]
+#             followers_count[location] = {}
+#             if len(scores) > 0:
+#                 followers_count[location]["average"] = np.nanmean(scores)
+#                 followers_count[location]["max"] = np.nanmax(scores)
+#                 followers_count[location]["min"] = np.nanmin(scores)
+#                 followers_count[location]["stdev"] = np.nanstd(scores)
+#                 followers_count[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 followers_count[location]["average"] = np.nan
+#                 followers_count[location]["max"] = np.nan
+#                 followers_count[location]["min"] = np.nan
+#                 followers_count[location]["stdev"] = np.nan
+#                 followers_count[location]["median"] = np.nan
+#         return followers_count
+#
+#     def spatial_friends(self, spatial_resolution="country"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that represents friends count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the friends count of every account
+#         that has posted at least a tweet within each spatial unit.
+#         """
+#
+#         friends_count = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             friends_count[location] = []
+#             for tweet in tweets:
+#                 friends_count[location] = friends_count.get(location, []) + [float(tweet.get_twitter().get_friends_count())]
+#
+#             scores = friends_count[location]
+#             friends_count[location] = {}
+#             if len(scores) > 0:
+#                 friends_count[location]["average"] = np.nanmean(scores)
+#                 friends_count[location]["max"] = np.nanmax(scores)
+#                 friends_count[location]["min"] = np.nanmin(scores)
+#                 friends_count[location]["stdev"] = np.nanstd(scores)
+#                 friends_count[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 friends_count[location]["average"] = np.nan
+#                 friends_count[location]["max"] = np.nan
+#                 friends_count[location]["min"] = np.nan
+#                 friends_count[location]["stdev"] = np.nan
+#                 friends_count[location]["median"] = np.nan
+#         return friends_count
+#
+#     def spatial_account_age(self, spatial_resolution="country"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that represents account age across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the age of every account
+#         that has posted at least a tweet within each spatial unit.
+#         """
+#
+#         account_age = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             account_age[location] = []
+#             for tweet in tweets:
+#                 account_age[location] = account_age.get(location, []) + [float(tweet.get_twitter().get_account_age())]
+#
+#             scores = account_age[location]
+#             account_age[location] = {}
+#             if len(scores) > 0:
+#                 account_age[location]["average"] = np.nanmean(scores)
+#                 account_age[location]["max"] = np.nanmax(scores)
+#                 account_age[location]["min"] = np.nanmin(scores)
+#                 account_age[location]["stdev"] = np.nanstd(scores)
+#                 account_age[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 account_age[location]["average"] = np.nan
+#                 account_age[location]["max"] = np.nan
+#                 account_age[location]["min"] = np.nan
+#                 account_age[location]["stdev"] = np.nan
+#                 account_age[location]["median"] = np.nan
+#         return account_age
+#
+#     def spatial_total_likes(self, spatial_resolution="country"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that represents total account likes across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the totall likes of every account
+#         that has posted at least a tweet within each spatial unit.
+#         """
+#
+#         total_likes = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             total_likes[location] = []
+#             for tweet in tweets:
+#                 total_likes[location] = total_likes.get(location, []) + [float(tweet.get_twitter().get_user_total_likes_count())]
+#
+#             scores = total_likes[location]
+#             total_likes[location] = {}
+#             if len(scores) > 0:
+#                 total_likes[location]["average"] = np.nanmean(scores)
+#                 total_likes[location]["max"] = np.nanmax(scores)
+#                 total_likes[location]["min"] = np.nanmin(scores)
+#                 total_likes[location]["stdev"] = np.nanstd(scores)
+#                 total_likes[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 total_likes[location]["average"] = np.nan
+#                 total_likes[location]["max"] = np.nan
+#                 total_likes[location]["min"] = np.nan
+#                 total_likes[location]["stdev"] = np.nan
+#                 total_likes[location]["median"] = np.nan
+#         return total_likes
+#
+#     def spatial_status_count(self, spatial_resolution="country"):
+#         """
+#         :param spatial_resolution: The spatial unit of analysis which according to Twitter can be either country or place.
+#         :return: a dictionary that represents status count across spatial units. The key-value pair in this dictionary corresponds to the spatial unit of analysis and statistical metrics of the status count of every account
+#         that has posted at least a tweet within each spatial unit.
+#         """
+#
+#         status_count = {}
+#         geotagged_tweets = self.tweets_with_location(spatial_resolution=spatial_resolution)
+#         for location, tweets in geotagged_tweets.items():
+#             status_count[location] = []
+#             for tweet in tweets:
+#                 status_count[location] = status_count.get(location, []) + [float(tweet.get_twitter().get_statusses_count())]
+#
+#             scores = status_count[location]
+#             status_count[location] = {}
+#             if len(scores) > 0:
+#                 status_count[location]["average"] = np.nanmean(scores)
+#                 status_count[location]["max"] = np.nanmax(scores)
+#                 status_count[location]["min"] = np.nanmin(scores)
+#                 status_count[location]["stdev"] = np.nanstd(scores)
+#                 status_count[location]["median"] = np.nanmedian(scores)
+#             else:
+#                 status_count[location]["average"] = np.nan
+#                 status_count[location]["max"] = np.nan
+#                 status_count[location]["min"] = np.nan
+#                 status_count[location]["stdev"] = np.nan
+#                 status_count[location]["median"] = np.nan
+#         return status_count
 
 ############################################# mass features #############################################
 

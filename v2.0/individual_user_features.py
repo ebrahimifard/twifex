@@ -863,7 +863,7 @@ class IndividualUserFeatures:
                 user_obj = tweet.get_tweet_retweet_object().get_tweet_user()
                 feature_indicator = "quote_" + "user_description_ner_frequency_"
             else:
-                user_obj = tweet.get_tweet_retweet_object().get_tweet_user()
+                user_obj = tweet.get_tweet_user()
                 feature_indicator = "user_description_ner_frequency_"
 
             user_description = user_obj.get_user_description()

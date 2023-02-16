@@ -7,6 +7,10 @@ import numpy as np
 import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from textblob import TextBlob
+from tweet_hashtag import TweetHashtag
+from tweet_mention import TweetMention
+from tweet_url import TweetUrl
+import html
 
 
 class TweetTextAnalysis:
@@ -75,8 +79,35 @@ class TweetTextAnalysis:
         #vad_dimensions
         self._vad_dimensions = ["valence", "arousal", "dominance"]
 
+        self._tweet_length_limit = 280
+
     def parse_tweet_object(self, tweet_obj):
         self._tweet = tweet_obj
+
+    def tweet_html_entities_parsing(self, input_text=None, inplace=False):
+
+        assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
+
+        def inner_tweet_html_entities_parsing(inner_input_text=None):
+            inner_text = inner_input_text
+            # This only works for Python 3.4+
+            # In Python3.3 or older:
+            # import html.parser
+            # html.parser.HTMLParser().unescape('Suzy &amp; John')
+            return html.unescape(inner_text)
+
+        if input_text is not None:
+            return inner_tweet_html_entities_parsing(inner_input_text=input_text)
+        elif input_text is None:
+            if self._tweet is not None:
+                modified_text = inner_tweet_html_entities_parsing(inner_input_text=self._tweet.get_tweet_text())
+                if inplace:
+                    self._tweet.set_tweet_text(modified_text)
+                    return self._tweet
+                else:
+                    return modified_text
+            elif self._tweet is None:
+                return
 
     def tweet_splitter(self, input_text=None, split_unit="word"):
         """
@@ -191,6 +222,7 @@ class TweetTextAnalysis:
         assert (inplace in [True, False]), "inplace is a boolean parameter, so it can be True or False"
 
         ##### self inside the inner function
+        selected_corpus = self._stopwords_dict[stopword_corpus]
         def inner_stopwords_removal(inner_input_text=None, inner_stopword_corpus="stone"):
             if inner_stopword_corpus == "spacy":
                 inner_processed_text = ""
@@ -201,13 +233,12 @@ class TweetTextAnalysis:
                 inner_processed_text = inner_processed_text.strip()
             else:
                 inner_words = self.tweet_splitter(inner_input_text)
-                inner_processed_text = " ".join([inner_word for inner_word in inner_words if inner_word.lower() not in self._stopwords_dict[stopword_corpus]])
+                inner_processed_text = " ".join([inner_word for inner_word in inner_words if inner_word.lower() not in selected_corpus])
             return inner_processed_text
 
         if input_text is not None:
             text = input_text
-            if stopword_corpus == "spacy":
-                return inner_stopwords_removal(inner_input_text=input_text, inner_stopword_corpus=stopword_corpus)
+            return inner_stopwords_removal(inner_input_text=input_text, inner_stopword_corpus=stopword_corpus)
         elif input_text is None:
             if self._tweet is not None:
                 processed_text = inner_stopwords_removal(inner_input_text=self._tweet.get_tweet_text(), inner_stopword_corpus=stopword_corpus)
@@ -293,13 +324,14 @@ class TweetTextAnalysis:
 ########################################################################################################################
 
 
-    def tweet_text_preprocessing(self, input_text=None, url=True, case=True, punctuation=True, hashtag=2, mention=2,
+    def tweet_text_preprocessing(self, input_text=None, html_entities_parsing=True, url=True, case=True, punctuation=True, hashtag=2, mention=2,
                            whitespace=True, control_chars=True, control_chars_list=r'[\r\t\n]', substitute_char=" ",
                            stopword=True, stopword_corpus="stone", hashtag_split=True, mention_replacement=True, inplace=False):
         """
         This function preprocess the tweet text.
         :param input_text: if this parameter is None, then preprocessing is performed on the caller object text field,
         otherwise and in case of a string as an input for this parameter, the preprocessing is applied on the input text.
+        :param html_entities_parsing: Setting this parameter converts all named and numeric character references (e.g. &gt;, &#62;, &#x3e;) to the corresponding Unicode characters.
         :param url: by setting this boolean parameter True, the tweet urls are removed.
         :param case: setting this boolean parameter True, turns the tweet text to lower case.
         :param punctuation: by setting this boolean parameter True, the tweet punctuations are removed.
@@ -338,25 +370,32 @@ class TweetTextAnalysis:
 
         if input_text is not None:
             text = input_text
+            hashtag_obj = TweetHashtag()
+            mention_obj = TweetMention()
+            url_obj = TweetUrl()
+
+            if html_entities_parsing:
+                text = self.tweet_html_entities_parsing(input_text=text)
             #fill this part in, write functions that are independent of tweet object
             if url is True:
-                ###
-            if mention_replacement is True:
-                ###
+                text = url_obj.url_removal(input_text=text)
+            # if mention_replacement is True:
+            #     ###
+            #     pass
             if hashtag_split is True:
-                ###
+                text = hashtag_obj.hashtag_splitter(input_text=text)
             if hashtag == 1:
-                ###
+                pass
             elif hashtag == 2:
-                ###
+                text = hashtag_obj.hashtags_removal(input_text=text, mode=2)
             elif hashtag == 3:
-                ###
+                text = hashtag_obj.hashtags_removal(input_text=text, mode=3)
             if mention == 1:
                 pass
             elif mention == 2:
-                ###
+                text = mention_obj.mentions_removal(input_text=text, mode=2)
             elif mention == 3:
-                ###
+                text = mention_obj.mentions_removal(input_text=text, mode=3)
             if stopword is True:
                 text = self.stopwords_removal(input_text=text, stopword_corpus=stopword_corpus)
             if punctuation is True:
@@ -372,6 +411,8 @@ class TweetTextAnalysis:
         elif input_text is None:
             if self._tweet is not None:
                 text = self._tweet.get_tweet_text()
+                if html_entities_parsing:
+                    text = self.tweet_html_entities_parsing()
                 if url is True:
                     text = self._tweet.get_tweet_urls().url_removal()
                 if mention_replacement is True:
@@ -387,9 +428,9 @@ class TweetTextAnalysis:
                 if mention == 1:
                     pass
                 elif mention == 2:
-                    text = self._tweet.get_tweet_mentions().mentions_removal()
+                    text = self._tweet.get_tweet_mentions().mentions_removal(mode=2)
                 elif mention == 3:
-                    text = self._tweet.get_tweet_mentions().mentions_removal()
+                    text = self._tweet.get_tweet_mentions().mentions_removal(mode=3)
                 if stopword is True:
                     text = self.stopwords_removal(stopword_corpus=stopword_corpus)
                 if punctuation is True:
@@ -431,10 +472,10 @@ class TweetTextAnalysis:
             elif self._tweet is None:
                 return
 
-        text = self.tweet_text_preprocessing(input_text=text)
+        processed_text = self.tweet_text_preprocessing(input_text=text)
 
         pos_text_list = []
-        spacy_text = self._nlp(text)
+        spacy_text = self._nlp(processed_text)
         for token in spacy_text:
             pos_text_list.append(token.pos_)
         return pos_text_list
@@ -476,10 +517,10 @@ class TweetTextAnalysis:
             elif self._tweet is None:
                 return
 
-        text = self.tweet_text_preprocessing(input_text=text)
+        processed_text = self.tweet_text_preprocessing(input_text=text)
 
         ner_text_list = []
-        spacy_text = self._nlp(text)
+        spacy_text = self._nlp(processed_text)
         for token in spacy_text.ents:
             ner_text_list.append(token.label_)
 
@@ -867,6 +908,23 @@ class TweetTextAnalysis:
                 text = self._tweet.get_tweet_text()
             elif self._tweet is None:
                 return
+
+        # This will replace the html entities with their corresponding unicode
+        text = self.tweet_html_entities_parsing(input_text=text)
+
+
+        ### When a tweet is a reply, it can exceeds 280 characters limit since the mentions of the recepeints will be added to the reply.
+        ### It becomes even more complicated if the reply is retweeted because you cannot immediately recognise whther the tweet is a reply or not
+        # if len(text) > 300:
+        #     print()
+        #
+        # if len(text) > self._tweet_length_limit:
+        #     if input_text is None and self._tweet is not None:
+        #         if self._tweet.is_tweet_retweeted():
+        #             retweet_obj = tweet.get_tweet_retweet_object()
+        #             if retweet_obj.is_tweet_a_reply():
+        #                 screen_name = retweet_obj.get_tweet_in_reply_to_screen_name()
+        #                 text = text.replace("@"+screen_name, "")
 
         if length_unit == "character":
             return len(text)

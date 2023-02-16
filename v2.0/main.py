@@ -2,6 +2,10 @@ from tweet import Tweet
 from tweets import Tweets
 from features import Features
 from file_collection import FileCollection
+from tweet_hashtag import TweetHashtag
+from tweet_mention import TweetMention
+from tweet_url import TweetUrl
+
 
 from tqdm import tqdm
 import pickle as pk
@@ -10,7 +14,7 @@ from datetime import datetime
 
 
 # json file collection
-test_folder_path = "./../tests/rt and quote/"
+test_folder_path = "./../tests/Amir_Ahangi/"
 fc = FileCollection()
 fc.collect_json(test_folder_path)
 json_paths = fc.get_all_json()
@@ -138,14 +142,25 @@ if finding_quote_tweets_flag:
 # building a tweets object
 test_tweets = Tweets([i[0] for i in tweet_objects])
 
+tweet_hashtag_flag = False
+tweet_mention_flag = False
+tweet_url_flag = False
 network_building_flag = False
 temporal_tweets_flag = False
 spatial_tweets_flag = False
 features_flag = True
-individual_features_flag = True
+
+individual_features_flag = False
+mass_features_flag = True
+
 individual_content_features_flag = False
-individual_user_features_flag = True
+individual_user_features_flag = False
 individual_meta_features_flag = False
+
+mass_content_features_flag = True
+mass_user_features_flag = True
+mass_meta_features_flag = True
+
 individual_retweet_content_features_flag = False
 individual_retweet_user_features_flag = False
 individual_retweet_meta_features_flag = False
@@ -153,6 +168,26 @@ individual_quote_content_features_flag = False
 individual_quote_user_features_flag = False
 individual_quote_meta_features_flag = False
 
+if tweet_hashtag_flag:
+    hashtag_obj = TweetHashtag()
+    text = "Stay tuned! Santa should have this #cuttingedge #thisishuge #whatisthis remix ready for you by Christmas Eve##a12_1_ ###stackoverflòw ##12_1,-equalsign #army #jhope #this-is-not-a-hashtag #nufsaid ##_asdd  #$ASDsad #asdasd%dsf ##asddd#sadasd#asdasd #سشیشسی_شسیasd🎁"
+    hashtag_list = hashtag_obj.get_tweet_hashtags(input_text=text)
+    text_splitted_hashtags = hashtag_obj.hashtag_splitter(input_text=text)
+    text_removed_hashtags = hashtag_obj.hashtags_removal(input_text=text)
+    print()
+if tweet_mention_flag:
+    mention_obj = TweetMention()
+    text = "hello @realDonaldTrump @elonmusk @NCTsmtown_127 @bayer04_en #test #first_tweets #first @@F1 ##Tweets hello hello"
+    mention_list = mention_obj.get_tweet_mentions(input_text=text)
+    text_removed_mentioned = mention_obj.mentions_removal(input_text=text)
+    print()
+if tweet_url_flag:
+    url_obj = TweetUrl()
+    text = "hello hello www.google.com https://bit.ly/3GxSnfz There is always a Polar Bear plunge to participate in Santa Monica to start your New Year in the cold Pacific Ocean.  Or if you like to stay dry enjoy First Day Hikes which you can find at http://parks.ca.gov or follow this bitly link... http://facebook.com/29078041094225 Left out the part where we agreed on everything. — Musk Scolds Dilbert Creator Scott Adams After Poll On 'Elites' Trying to Reduce Population: 'Run Antivirus Software In Your Brain' https://mediaite.com/a/puzpj I'm reading a book a week in 2023. Classics, sci-fi, nonfiction, or anything people highly recommend. I'll keep adjusting the list. Start on Monday, done by Sunday. Might make lowkey videos of takeaways. If you want to read along, the current list is here: http://lexfridman.com/reading-list"
+    url_list = url_obj.get_tweet_urls(input_text=text)
+    expanded_url_list = url_obj.get_tweet_urls(input_text=text, return_format="expanded_url")
+    text_removed_urls = url_obj.url_removal(input_text=text)
+    print()
 if network_building_flag:
     # First: tweet-level networks
     tweet_level_reply_network = test_tweets.get_tweets_network().get_tweet_network().tweet_level_reply_network_building()
@@ -590,6 +625,19 @@ if features_flag:
                 quote_meta_features.is_this_geotagged_with_polygone_coordinates()
                 quote_meta_features.is_this_a_retweet()
                 quote_meta_features.is_this_a_quote()
+    if mass_features_flag:
+        if mass_content_features_flag:
+            mass_content_features = tweets_features.mass_content_features(temporal=False, spatial=False)
+            mass_content_features.tweets_character_count_statistics()
+            mass_content_features.tweets_word_count_statistics()
+            mass_content_features.tweets_sentence_count_statistics()
+            mass_content_features.tweets_word_length_statistics()
+            mass_content_features.tweets_sentence_length_statistics()
+            print()
+        if mass_user_features_flag:
+            pass
+        if mass_meta_features_flag:
+            pass
 
     features = tweets_features.get_features()
     features_guideline = tweets_features.get_features_names()
