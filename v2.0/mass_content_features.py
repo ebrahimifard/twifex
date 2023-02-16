@@ -615,16 +615,116 @@ class MassContentFeatures:
                 self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_abbreviation_count_statistics(self):
-        pass
+        tweets_abbreviation_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            twt_abbr_count = len(self._text_analysis.abbreviations(input_text=twt_txt))
+            tweets_abbreviation_count_array.append(twt_abbr_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_abbreviation_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_abbreviation_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_abbreviation_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_abbreviation_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_abbreviation_to_all_words_fraction_statistics(self):
-        pass
+        tweets_abbreviation_to_all_words_fraction_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            twt_abbr_count = len(self._text_analysis.abbreviations(input_text=twt_txt))
+            twt_words_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="word")
+            abbreviation_to_all_words_fraction = twt_abbr_count / twt_words_count if twt_words_count != 0 else None
+            tweets_abbreviation_to_all_words_fraction_array.append(abbreviation_to_all_words_fraction)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_abbreviation_to_all_words_fraction_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_abbreviation_to_all_words_fraction_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_abbreviation_to_all_words_fraction_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_abbreviation_to_all_words_fraction_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_vulgar_count_statistics(self):
-        pass
+        tweets_vulgar_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            twt_vulgar_count = len(self._text_analysis.vulgar_words(input_text=twt_txt))
+            tweets_vulgar_count_array.append(twt_vulgar_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_vulgar_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_vulgar_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_vulgar_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_vulgar_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_vulgar_to_all_words_fraction_statistics(self):
-        pass
+        tweets_vulgar_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            twt_vulgar_count = len(self._text_analysis.vulgar_words(input_text=twt_txt))
+            twt_words_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="word")
+            vulgar_to_all_words_fraction = twt_vulgar_count / twt_words_count if twt_words_count != 0 else None
+            tweets_vulgar_count_array.append(vulgar_to_all_words_fraction)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_vulgar_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_vulgar_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_vulgar_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_vulgar_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_pos_tags_count_statistics(self):
         pass
