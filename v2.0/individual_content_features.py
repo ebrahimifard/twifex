@@ -573,6 +573,20 @@ class IndividualContentFeatures:
             self._tweets_features[tweet.get_tweet_id()][feature_id] = twt_vulgar_count / twt_words_count if twt_words_count != 0 else None
 
     def tweet_pos_frequency(self):
+        # pos_tags = self._text_analysis.get_pos_tags()
+        # pos_tags_dict = {}
+        # for tweet in self._tweets_collection:
+        #     if self._retweet_flag:
+        #         twt_obj = tweet.get_tweet_retweet_object()
+        #     elif self._quote_flag:
+        #         twt_obj = tweet.get_quote_status_object()
+        #     else:
+        #         twt_obj = tweet
+        #
+        #     self._text_analysis.parse_tweet_object(twt_obj)
+        #     pos_freq = self._text_analysis.tweet_pos_count()
+        #     pos_tags_dict[tweet.get_tweet_id()] = pos_freq
+
         pos_tags = self._text_analysis.get_pos_tags()
         pos_features_dict = {}
         if self._retweet_flag:
@@ -721,11 +735,11 @@ class IndividualContentFeatures:
     def tweet_second_singular_pronoun_count(self):
         feature_id = max(list(self._features_id_name_dict.keys())) + 1
         if self._retweet_flag:
-            self._features_id_name_dict[feature_id] = "retweet_" + "tweet_pronouns_count"
+            self._features_id_name_dict[feature_id] = "retweet_" + "tweet_second_singular_pronoun_count"
         elif self._quote_flag:
-            self._features_id_name_dict[feature_id] = "quote_" + "tweet_pronouns_count"
+            self._features_id_name_dict[feature_id] = "quote_" + "tweet_second_singular_pronoun_count"
         else:
-            self._features_id_name_dict[feature_id] = "tweet_pronouns_count"
+            self._features_id_name_dict[feature_id] = "tweet_second_singular_pronoun_count"
 
         for tweet in self._tweets_collection:
             if self._retweet_flag:
@@ -735,14 +749,8 @@ class IndividualContentFeatures:
             else:
                 twt_txt = tweet.get_tweet_text()
 
-            first_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_singular")
-            first_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_plural")
             second_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="second_singular")
-            second_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="second_plural")
-            third_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="third_singular")
-            third_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="third_plural")
-            pronouns_count = first_singular_pronoun_count + first_plural_pronoun_count + second_singular_pronoun_count + second_plural_pronoun_count + third_singular_pronoun_count + third_plural_pronoun_count
-            self._tweets_features[tweet.get_tweet_id()][feature_id] = pronouns_count
+            self._tweets_features[tweet.get_tweet_id()][feature_id] = second_singular_pronoun_count
 
     def tweet_second_plural_pronoun_count(self):
         feature_id = max(list(self._features_id_name_dict.keys())) + 1

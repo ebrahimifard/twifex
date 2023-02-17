@@ -349,8 +349,10 @@ class MassContentFeatures:
                 twt_txt = tweet.get_tweet_text()
             twt_lowercase_characters_count = self._text_analysis.lowercase_count(input_text=twt_txt, unit_of_analysis="character")
             twt_uppercase_characters_count = self._text_analysis.uppercase_count(input_text=twt_txt, unit_of_analysis="character")
-            twt_lowercase_to_uppercase_characters_fraction = twt_lowercase_characters_count / twt_uppercase_characters_count if twt_uppercase_characters_count != 0 else None
-            tweets_lowercase_to_uppercase_characters_fraction_array.append(twt_lowercase_to_uppercase_characters_fraction)
+            if twt_uppercase_characters_count != 0:
+                twt_lowercase_to_uppercase_characters_fraction = twt_lowercase_characters_count / twt_uppercase_characters_count
+            # twt_lowercase_to_uppercase_characters_fraction = twt_lowercase_characters_count / twt_uppercase_characters_count if twt_uppercase_characters_count != 0 else np.nan
+                tweets_lowercase_to_uppercase_characters_fraction_array.append(twt_lowercase_to_uppercase_characters_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -377,8 +379,10 @@ class MassContentFeatures:
                 twt_txt = tweet.get_tweet_text()
             twt_lowercase_words_count = self._text_analysis.lowercase_count(input_text=twt_txt, unit_of_analysis="word")
             twt_uppercase_words_count = self._text_analysis.uppercase_count(input_text=twt_txt, unit_of_analysis="word")
-            twt_lowercase_to_uppercase_words_fraction = twt_lowercase_words_count / twt_uppercase_words_count if twt_uppercase_words_count != 0 else None
-            tweets_lowercase_to_uppercase_words_fraction_array.append(twt_lowercase_to_uppercase_words_fraction)
+            if twt_uppercase_words_count != 0:
+                twt_lowercase_to_uppercase_words_fraction = twt_lowercase_words_count / twt_uppercase_words_count
+            # twt_lowercase_to_uppercase_words_fraction = twt_lowercase_words_count / twt_uppercase_words_count if twt_uppercase_words_count != 0 else np.nan
+                tweets_lowercase_to_uppercase_words_fraction_array.append(twt_lowercase_to_uppercase_words_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -405,8 +409,10 @@ class MassContentFeatures:
                 twt_txt = tweet.get_tweet_text()
             twt_lowercase_sentences_count = self._text_analysis.lowercase_count(input_text=twt_txt, unit_of_analysis="sentence")
             twt_uppercase_sentences_count = self._text_analysis.uppercase_count(input_text=twt_txt, unit_of_analysis="sentence")
-            twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_sentences_count / twt_uppercase_sentences_count if twt_uppercase_sentences_count != 0 else None
-            tweets_lowercase_to_uppercase_sentences_fraction_array.append(twt_lowercase_to_uppercase_sentences_fraction)
+            if twt_uppercase_sentences_count != 0:
+                twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_sentences_count / twt_uppercase_sentences_count
+            # twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_sentences_count / twt_uppercase_sentences_count if twt_uppercase_sentences_count != 0 else np.nan
+                tweets_lowercase_to_uppercase_sentences_fraction_array.append(twt_lowercase_to_uppercase_sentences_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -433,8 +439,10 @@ class MassContentFeatures:
                 twt_txt = tweet.get_tweet_text()
             twt_lowercase_characters_count = self._text_analysis.lowercase_count(input_text=twt_txt, unit_of_analysis="character")
             twt_characters_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="character")
-            twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_characters_count / twt_characters_count if twt_characters_count != 0 else None
-            tweets_lowercase_to_all_characters_fraction_array.append(twt_lowercase_to_uppercase_sentences_fraction)
+            if twt_characters_count != 0:
+                twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_characters_count / twt_characters_count
+            # twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_characters_count / twt_characters_count if twt_characters_count != 0 else np.nan
+                tweets_lowercase_to_all_characters_fraction_array.append(twt_lowercase_to_uppercase_sentences_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -461,8 +469,10 @@ class MassContentFeatures:
                 twt_txt = tweet.get_tweet_text()
             twt_lowercase_words_count = self._text_analysis.lowercase_count(input_text=twt_txt, unit_of_analysis="word")
             twt_words_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="word")
-            twt_lowercase_to_uppercase_words_fraction = twt_lowercase_words_count / twt_words_count if twt_words_count != 0 else None
-            tweets_lowercase_to_all_words_fraction_array.append(twt_lowercase_to_uppercase_words_fraction)
+            if twt_words_count != 0:
+                twt_lowercase_to_uppercase_words_fraction = twt_lowercase_words_count / twt_words_count
+            # twt_lowercase_to_uppercase_words_fraction = twt_lowercase_words_count / twt_words_count if twt_words_count != 0 else np.nan
+                tweets_lowercase_to_all_words_fraction_array.append(twt_lowercase_to_uppercase_words_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -489,8 +499,10 @@ class MassContentFeatures:
                 twt_txt = tweet.get_tweet_text()
             twt_lowercase_sentences_count = self._text_analysis.lowercase_count(input_text=twt_txt, unit_of_analysis="sentence")
             twt_sentences_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="sentence")
-            twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_sentences_count / twt_sentences_count if twt_sentences_count != 0 else None
-            tweets_lowercase_to_all_sentences_fraction_array.append(twt_lowercase_to_uppercase_sentences_fraction)
+            if twt_sentences_count != 0:
+                twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_sentences_count / twt_sentences_count
+            # twt_lowercase_to_uppercase_sentences_fraction = twt_lowercase_sentences_count / twt_sentences_count if twt_sentences_count != 0 else np.nan
+                tweets_lowercase_to_all_sentences_fraction_array.append(twt_lowercase_to_uppercase_sentences_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -569,8 +581,10 @@ class MassContentFeatures:
                 twt_txt = tweet.get_tweet_text()
             exclamation_mark_count = self._text_analysis.exclamation_mark_count(input_text=twt_txt)
             twt_characters_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="character")
-            twt_exclamation_mark_to_all_characters_fraction = exclamation_mark_count / twt_characters_count if twt_characters_count != 0 else None
-            tweets_exclamation_mark_to_all_characters_fraction_array.append(twt_exclamation_mark_to_all_characters_fraction)
+            if twt_characters_count != 0:
+                twt_exclamation_mark_to_all_characters_fraction = exclamation_mark_count / twt_characters_count
+            # twt_exclamation_mark_to_all_characters_fraction = exclamation_mark_count / twt_characters_count if twt_characters_count != 0 else np.nan
+                tweets_exclamation_mark_to_all_characters_fraction_array.append(twt_exclamation_mark_to_all_characters_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -597,8 +611,10 @@ class MassContentFeatures:
                 twt_txt = tweet.get_tweet_text()
             question_mark_count = self._text_analysis.question_mark_count(input_text=twt_txt)
             twt_characters_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="character")
-            twt_question_mark_to_all_characters_fraction = question_mark_count / twt_characters_count if twt_characters_count != 0 else None
-            tweets_question_mark_to_all_characters_fraction_array.append(twt_question_mark_to_all_characters_fraction)
+            if twt_characters_count != 0:
+                twt_question_mark_to_all_characters_fraction = question_mark_count / twt_characters_count
+            # twt_question_mark_to_all_characters_fraction = question_mark_count / twt_characters_count if twt_characters_count != 0 else np.nan
+                tweets_question_mark_to_all_characters_fraction_array.append(twt_question_mark_to_all_characters_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -653,8 +669,10 @@ class MassContentFeatures:
 
             twt_abbr_count = len(self._text_analysis.abbreviations(input_text=twt_txt))
             twt_words_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="word")
-            abbreviation_to_all_words_fraction = twt_abbr_count / twt_words_count if twt_words_count != 0 else None
-            tweets_abbreviation_to_all_words_fraction_array.append(abbreviation_to_all_words_fraction)
+            if twt_words_count != 0:
+                abbreviation_to_all_words_fraction = twt_abbr_count / twt_words_count
+            # abbreviation_to_all_words_fraction = twt_abbr_count / twt_words_count if twt_words_count != 0 else np.nan
+                tweets_abbreviation_to_all_words_fraction_array.append(abbreviation_to_all_words_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -709,8 +727,10 @@ class MassContentFeatures:
 
             twt_vulgar_count = len(self._text_analysis.vulgar_words(input_text=twt_txt))
             twt_words_count = self._text_analysis.text_length(input_text=twt_txt, length_unit="word")
-            vulgar_to_all_words_fraction = twt_vulgar_count / twt_words_count if twt_words_count != 0 else None
-            tweets_vulgar_count_array.append(vulgar_to_all_words_fraction)
+            if twt_words_count != 0:
+                vulgar_to_all_words_fraction = twt_vulgar_count / twt_words_count
+            # vulgar_to_all_words_fraction = twt_vulgar_count / twt_words_count if twt_words_count != 0 else np.nan
+                tweets_vulgar_count_array.append(vulgar_to_all_words_fraction)
 
         for metric in self._statistics:
             feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -727,31 +747,263 @@ class MassContentFeatures:
                 self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_pos_tags_count_statistics(self):
-        pass
+        pos_tags = self._text_analysis.get_pos_tags()
+        pos_tags_dict = {tag: [] for tag in pos_tags}
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_obj = tweet.get_tweet_retweet_object()
+            elif self._quote_flag:
+                twt_obj = tweet.get_quote_status_object()
+            else:
+                twt_obj = tweet
+
+            self._text_analysis.parse_tweet_object(twt_obj)
+            pos_freq = self._text_analysis.tweet_pos_count()
+            for tag in pos_freq:
+                pos_tags_dict[tag].append(pos_freq[tag])
+
+        for pos_tag in pos_tags:
+            for metric in self._statistics:
+                feature_id = max(list(self._features_id_name_dict.keys())) + 1
+                if self._retweet_flag:
+                    self._features_id_name_dict[feature_id] = "retweet_" + f"tweets_pos_tags_count_statistics_{pos_tag}_" + metric
+                elif self._quote_flag:
+                    self._features_id_name_dict[feature_id] = "quote_" + f"tweets_pos_tags_count_statistics_{pos_tag}_" + metric
+                else:
+                    self._features_id_name_dict[feature_id] = f"tweets_pos_tags_count_statistics_{pos_tag}_" + metric
+
+                metric_function = self._statistics[metric](pos_tags_dict[pos_tag])
+
+                for tweet in self._tweets_collection:
+                    self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_ner_tags_count_statistics(self):
-        pass
+        ner_tags = self._text_analysis.get_ner_tags()
+        ner_tags_dict = {tag: [] for tag in ner_tags}
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_obj = tweet.get_tweet_retweet_object()
+            elif self._quote_flag:
+                twt_obj = tweet.get_quote_status_object()
+            else:
+                twt_obj = tweet
+
+            self._text_analysis.parse_tweet_object(twt_obj)
+            ner_freq = self._text_analysis.tweet_ner_count()
+            for tag in ner_freq:
+                ner_tags_dict[tag].append(ner_freq[tag])
+
+        for ner_tag in ner_tags:
+            for metric in self._statistics:
+                feature_id = max(list(self._features_id_name_dict.keys())) + 1
+                if self._retweet_flag:
+                    self._features_id_name_dict[
+                        feature_id] = "retweet_" + f"tweets_ner_tags_count_statistics_{ner_tag}_" + metric
+                elif self._quote_flag:
+                    self._features_id_name_dict[
+                        feature_id] = "quote_" + f"tweets_ner_tags_count_statistics_{ner_tag}_" + metric
+                else:
+                    self._features_id_name_dict[feature_id] = f"tweets_ner_tags_count_statistics_{ner_tag}_" + metric
+
+                metric_function = self._statistics[metric](ner_tags_dict[ner_tag])
+
+                for tweet in self._tweets_collection:
+                    self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_pronouns_count_statistics(self):
-        pass
+        tweets_pronouns_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            first_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_singular")
+            first_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_plural")
+            second_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="second_singular")
+            second_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="second_plural")
+            third_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="third_singular")
+            third_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="third_plural")
+            pronouns_count = first_singular_pronoun_count + first_plural_pronoun_count + second_singular_pronoun_count + second_plural_pronoun_count + third_singular_pronoun_count + third_plural_pronoun_count
+            tweets_pronouns_count_array.append(pronouns_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_pronouns_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_pronouns_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_pronouns_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_pronouns_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_first_singular_pronoun_count_statistics(self):
-        pass
+        tweets_first_singular_pronoun_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            first_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_singular")
+            tweets_first_singular_pronoun_count_array.append(first_singular_pronoun_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_first_singular_pronoun_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_first_singular_pronoun_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_first_singular_pronoun_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_first_singular_pronoun_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_first_plural_pronoun_count_statistics(self):
-        pass
+        tweets_first_plural_pronoun_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            first_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="first_plural")
+            tweets_first_plural_pronoun_count_array.append(first_plural_pronoun_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_first_plural_pronoun_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_first_plural_pronoun_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_first_plural_pronoun_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_first_plural_pronoun_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_second_singular_pronoun_count_statistics(self):
-        pass
+        tweets_second_singular_pronoun_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            second_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="second_singular")
+            tweets_second_singular_pronoun_count_array.append(second_singular_pronoun_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_second_singular_pronoun_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_second_singular_pronoun_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_second_singular_pronoun_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_second_singular_pronoun_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_second_plural_pronoun_count_statistics(self):
-        pass
+        tweets_second_plural_pronoun_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            second_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="second_plural")
+            tweets_second_plural_pronoun_count_array.append(second_plural_pronoun_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_second_plural_pronoun_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_second_plural_pronoun_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_second_plural_pronoun_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_second_plural_pronoun_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_third_singular_pronoun_count_statistics(self):
-        pass
+        tweets_third_singular_pronoun_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            third_singular_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="third_singular")
+            tweets_third_singular_pronoun_count_array.append(third_singular_pronoun_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_third_singular_pronoun_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_third_singular_pronoun_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_third_singular_pronoun_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_third_singular_pronoun_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_third_plural_pronoun_count_statistics(self):
-        pass
+        tweets_third_plural_pronoun_count_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            third_plural_pronoun_count = self._text_analysis.text_pronoun_count(input_text=twt_txt, pronoun="third_plural")
+            tweets_third_plural_pronoun_count_array.append(third_plural_pronoun_count)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_third_plural_pronoun_count_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_third_plural_pronoun_count_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_third_plural_pronoun_count_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_third_plural_pronoun_count_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_flesch_reading_ease_readability_score_statistics(self):
         pass
