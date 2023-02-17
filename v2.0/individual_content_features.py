@@ -952,14 +952,14 @@ class IndividualContentFeatures:
             linsear_write_formula_readability_score = self._text_analysis.readability(readability_metric="linsear_write_formula", input_text=twt_txt)
             self._tweets_features[tweet.get_tweet_id()][feature_id] = linsear_write_formula_readability_score
 
-    def tweet_dale_chall_readability_score_readability_score(self):
+    def tweet_dale_chall_readability_score(self):
         feature_id = max(list(self._features_id_name_dict.keys())) + 1
         if self._retweet_flag:
-            self._features_id_name_dict[feature_id] = "retweet_" + "tweet_dale_chall_readability_score_readability_score"
+            self._features_id_name_dict[feature_id] = "retweet_" + "tweet_dale_chall_readability_score"
         elif self._quote_flag:
-            self._features_id_name_dict[feature_id] = "quote_" + "tweet_dale_chall_readability_score_readability_score"
+            self._features_id_name_dict[feature_id] = "quote_" + "tweet_dale_chall_readability_score"
         else:
-            self._features_id_name_dict[feature_id] = "tweet_dale_chall_readability_score_readability_score"
+            self._features_id_name_dict[feature_id] = "tweet_dale_chall_readability_score"
 
         for tweet in self._tweets_collection:
             if self._retweet_flag:
@@ -969,8 +969,48 @@ class IndividualContentFeatures:
             else:
                 twt_txt = tweet.get_tweet_text()
 
-            dale_chall_readability_score_readability_score = self._text_analysis.readability(readability_metric="dale_chall_readability_score", input_text=twt_txt)
-            self._tweets_features[tweet.get_tweet_id()][feature_id] = dale_chall_readability_score_readability_score
+            dale_chall_readability_score = self._text_analysis.readability(readability_metric="dale_chall", input_text=twt_txt)
+            self._tweets_features[tweet.get_tweet_id()][feature_id] = dale_chall_readability_score
+
+    def tweet_spache_readability_score(self):
+        feature_id = max(list(self._features_id_name_dict.keys())) + 1
+        if self._retweet_flag:
+            self._features_id_name_dict[feature_id] = "retweet_" + "tweet_spache_readability_score"
+        elif self._quote_flag:
+            self._features_id_name_dict[feature_id] = "quote_" + "tweet_spache_readability_score"
+        else:
+            self._features_id_name_dict[feature_id] = "tweet_spache_readability_score"
+
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            spache_readability_score = self._text_analysis.readability(readability_metric="spache", input_text=twt_txt)
+            self._tweets_features[tweet.get_tweet_id()][feature_id] = spache_readability_score
+
+    def tweet_mcalpine_eflaw_readability_score(self):
+        feature_id = max(list(self._features_id_name_dict.keys())) + 1
+        if self._retweet_flag:
+            self._features_id_name_dict[feature_id] = "retweet_" + "tweet_mcalpine_eflaw_readability_score"
+        elif self._quote_flag:
+            self._features_id_name_dict[feature_id] = "quote_" + "tweet_mcalpine_eflaw_readability_score"
+        else:
+            self._features_id_name_dict[feature_id] = "tweet_mcalpine_eflaw_readability_score"
+
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            mcalpine_eflaw_readability_score = self._text_analysis.readability(readability_metric="mcalpine_eflaw", input_text=twt_txt)
+            self._tweets_features[tweet.get_tweet_id()][feature_id] = mcalpine_eflaw_readability_score
 
     def tweet_subjectivity_score(self):
         feature_id = max(list(self._features_id_name_dict.keys())) + 1
@@ -1072,14 +1112,14 @@ class IndividualContentFeatures:
             sentiment_score = self._text_analysis.sentiment_analysis(sentiment_engine="vader", input_text=twt_txt)
             self._tweets_features[tweet.get_tweet_id()][feature_id] = sentiment_score["neutrality_score"]
 
-    def tweet_compound_sentiment_score_by_vader(self):
+    def tweet_composite_sentiment_score_by_vader(self):
         feature_id = max(list(self._features_id_name_dict.keys())) + 1
         if self._retweet_flag:
-            self._features_id_name_dict[feature_id] = "retweet_" + "tweet_compound_score_by_vader"
+            self._features_id_name_dict[feature_id] = "retweet_" + "tweet_composite_score_by_vader"
         elif self._quote_flag:
-            self._features_id_name_dict[feature_id] = "quote_" + "tweet_compound_score_by_vader"
+            self._features_id_name_dict[feature_id] = "quote_" + "tweet_composite_score_by_vader"
         else:
-            self._features_id_name_dict[feature_id] = "tweet_compound_score_by_vader"
+            self._features_id_name_dict[feature_id] = "tweet_composite_score_by_vader"
 
         for tweet in self._tweets_collection:
             if self._retweet_flag:

@@ -805,7 +805,8 @@ class TweetTextAnalysis:
         """
         This function measures the readability of the tweet text according to the chosen readbility metric.
         :param readability_metric: the readability metrics can be "flesch_reading_ease", "flesch_kincaid_grade", "gunning_fog", "smog_index",
-        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", or "dale_chall_readability_score"
+        "automated_readability_index", "coleman_liau_index", "linsear_write_formula", "dale_chall",
+        "spache", or "mcalpine_eflaw".
         :param input_text: if this parameter is None, then the function measures the readability of the caller object text field
          , otherwise and in case of a string as an input for this parameter, the function measures the readability of the
          input_text.
@@ -814,7 +815,7 @@ class TweetTextAnalysis:
 
         assert (readability_metric in ["flesch_reading_ease", "flesch_kincaid_grade", "gunning_fog", "smog_index", "automated_readability_index",
                            "coleman_liau_index", "linsear_write_formula",
-                           "dale_chall_readability_score"]), "The metric " \
+                           "dale_chall", "spache", "mcalpine_eflaw"]), "The metric " \
                                                              "has to be flesch_reading_ease, flesch_kincaid_grade, gunning_fog, smog_index, " \
                                                              "automated_readability_index, coleman_liau_index, linsear_write_formula," \
                                                              "or dale_chall_readability_score."
@@ -841,8 +842,12 @@ class TweetTextAnalysis:
             return textstat.coleman_liau_index(text)
         elif readability_metric == "linsear_write_formula":
             return textstat.linsear_write_formula(text)
-        elif readability_metric == "dale_chall_readability_score":
+        elif readability_metric == "dale_chall":
             return textstat.dale_chall_readability_score(text)
+        elif readability_metric == "spache":
+            return textstat.spache_readability(text)
+        elif readability_metric == "mcalpine_eflaw":
+            return textstat.mcalpine_eflaw(text)
 
     def long_words_count(self, threshold=6, input_text=None):
         """

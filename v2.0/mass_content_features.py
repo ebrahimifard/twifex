@@ -1006,52 +1006,508 @@ class MassContentFeatures:
                 self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_flesch_reading_ease_readability_score_statistics(self):
-        pass
+        tweets_flesch_reading_ease_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            flesch_reading_ease_readability_score = self._text_analysis.readability(readability_metric="flesch_reading_ease", input_text=twt_txt)
+            tweets_flesch_reading_ease_readability_score_array.append(flesch_reading_ease_readability_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_flesch_reading_ease_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_flesch_reading_ease_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_flesch_reading_ease_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_flesch_reading_ease_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_flesch_kincaid_grade_readability_score_statistics(self):
-        pass
+        tweets_flesch_kincaid_grade_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            flesch_kincaid_grade_readability_score = self._text_analysis.readability(readability_metric="flesch_kincaid_grade", input_text=twt_txt)
+            tweets_flesch_kincaid_grade_readability_score_array.append(flesch_kincaid_grade_readability_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_flesch_kincaid_grade_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_flesch_kincaid_grade_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_flesch_kincaid_grade_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_flesch_kincaid_grade_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_gunning_fog_readability_score_statistics(self):
-        pass
+        tweets_gunning_fog_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            gunning_fog_readability_score = self._text_analysis.readability(readability_metric="gunning_fog", input_text=twt_txt)
+            tweets_gunning_fog_readability_score_array.append(gunning_fog_readability_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_gunning_fog_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_gunning_fog_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_gunning_fog_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_gunning_fog_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_smog_index_readability_score_statistics(self):
-        pass
+        tweets_smog_index_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            smog_index_readability_score = self._text_analysis.readability(readability_metric="smog_index", input_text=twt_txt)
+            tweets_smog_index_readability_score_array.append(smog_index_readability_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_smog_index_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_smog_index_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_smog_index_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_smog_index_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_automated_readability_index_readability_score_statistics(self):
-        pass
+        tweets_automated_readability_index_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            automated_readability_index_readability_score = self._text_analysis.readability(readability_metric="automated_readability_index", input_text=twt_txt)
+            tweets_automated_readability_index_readability_score_array.append(automated_readability_index_readability_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_automated_readability_index_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_automated_readability_index_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_automated_readability_index_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_smog_index_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_coleman_liau_index_readability_score_statistics(self):
-        pass
+        tweets_coleman_liau_index_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            coleman_liau_index_readability_score = self._text_analysis.readability(readability_metric="coleman_liau_index", input_text=twt_txt)
+            tweets_coleman_liau_index_readability_score_array.append(coleman_liau_index_readability_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_coleman_liau_index_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_coleman_liau_index_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_coleman_liau_index_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_coleman_liau_index_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_linsear_write_formula_readability_score_statistics(self):
-        pass
+        tweets_linsear_write_formula_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
 
-    def tweets_dale_chall_readability_score_readability_score_statistics(self):
-        pass
+            linsear_write_formula_readability_score = self._text_analysis.readability(readability_metric="linsear_write_formula", input_text=twt_txt)
+            tweets_linsear_write_formula_readability_score_array.append(linsear_write_formula_readability_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_linsear_write_formula_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_linsear_write_formula_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_linsear_write_formula_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_linsear_write_formula_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
+
+    def tweets_dale_chall_readability_score_statistics(self):
+        tweets_dale_chall_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            dale_chall_readability_score = self._text_analysis.readability(readability_metric="dale_chall", input_text=twt_txt)
+            tweets_dale_chall_readability_score_array.append(dale_chall_readability_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_dale_chall_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_dale_chall_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_dale_chall_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_dale_chall_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
+
+    def tweets_spache_readability_score_statistics(self):
+        tweets_spache_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            spache_readability_formula = self._text_analysis.readability(readability_metric="spache", input_text=twt_txt)
+            tweets_spache_readability_score_array.append(spache_readability_formula)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_spache_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_spache_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_spache_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_spache_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
+
+    def tweets_mcalpine_eflaw_readability_score_statistics(self):
+        tweets_mcalpine_eflaw_readability_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            mcalpine_eflaw_readability_formula = self._text_analysis.readability(readability_metric="mcalpine_eflaw", input_text=twt_txt)
+            tweets_mcalpine_eflaw_readability_score_array.append(mcalpine_eflaw_readability_formula)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_mcalpine_eflaw_readability_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_mcalpine_eflaw_readability_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_mcalpine_eflaw_readability_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_mcalpine_eflaw_readability_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_subjectivity_score_statistics(self):
-        pass
+        tweets_subjectivity_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            sentiment_score = self._text_analysis.sentiment_analysis(sentiment_engine="textblob", input_text=twt_txt)
+            subjectivity_score = sentiment_score["subjectivity"]
+            tweets_subjectivity_score_array.append(subjectivity_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_subjectivity_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_subjectivity_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_subjectivity_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_subjectivity_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_polarity_score_statistics(self):
-        pass
+        tweets_polarity_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            sentiment_score = self._text_analysis.sentiment_analysis(sentiment_engine="textblob", input_text=twt_txt)
+            polarity_score = sentiment_score["polarity"]
+            tweets_polarity_score_array.append(polarity_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_polarity_score_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_polarity_score_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_polarity_score_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_polarity_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_positivity_score_by_vader_statistics(self):
-        pass
+        tweets_positivity_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            sentiment_score = self._text_analysis.sentiment_analysis(sentiment_engine="vader", input_text=twt_txt)
+            positivity_score = sentiment_score["positivity_score"]
+            tweets_positivity_score_array.append(positivity_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_positivity_score_by_vader_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_positivity_score_by_vader_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_positivity_score_by_vader_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_positivity_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_negativity_score_by_vader_statistics(self):
-        pass
+        tweets_negativity_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            sentiment_score = self._text_analysis.sentiment_analysis(sentiment_engine="vader", input_text=twt_txt)
+            negativity_score = sentiment_score["negativity_score"]
+            tweets_negativity_score_array.append(negativity_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_negativity_score_by_vader_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_negativity_score_by_vader_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_negativity_score_by_vader_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_negativity_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_neutrality_score_by_vader_statistics(self):
-        pass
+        tweets_neutrality_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
 
-    def tweets_compound_sentiment_score_by_vader_statistics(self):
-        pass
+            sentiment_score = self._text_analysis.sentiment_analysis(sentiment_engine="vader", input_text=twt_txt)
+            neutrality_score = sentiment_score["neutrality_score"]
+            tweets_neutrality_score_array.append(neutrality_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_neutrality_score_by_vader_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_neutrality_score_by_vader_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_neutrality_score_by_vader_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_neutrality_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
+
+    def tweets_composite_sentiment_score_by_vader_statistics(self):
+        tweets_composite_score_array = []
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            sentiment_score = self._text_analysis.sentiment_analysis(sentiment_engine="vader", input_text=twt_txt)
+            composite_score = sentiment_score["composite_score"]
+            tweets_composite_score_array.append(composite_score)
+
+        for metric in self._statistics:
+            feature_id = max(list(self._features_id_name_dict.keys())) + 1
+            if self._retweet_flag:
+                self._features_id_name_dict[feature_id] = "retweet_" + "tweets_composite_sentiment_score_by_vader_statistics_" + metric
+            elif self._quote_flag:
+                self._features_id_name_dict[feature_id] = "quote_" + "tweets_composite_sentiment_score_by_vader_statistics_" + metric
+            else:
+                self._features_id_name_dict[feature_id] = "tweets_composite_sentiment_score_by_vader_statistics_" + metric
+
+            metric_function = self._statistics[metric](tweets_composite_score_array)
+
+            for tweet in self._tweets_collection:
+                self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_nrc_emotions_score_statistics(self):
-        pass
+        vader_emotions = self._text_analysis.get_vader_emotional_dimensions()
+        vader_emotions_dict = {tag: [] for tag in vader_emotions}
+
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            twt_vader_emotions = self._text_analysis.sentiment_analysis(sentiment_engine="nrc", input_text=twt_txt)
+            for emotion in twt_vader_emotions:
+                vader_emotions_dict[emotion.replace("_score", "")].append(twt_vader_emotions[emotion])
+
+        for vader_emotion in vader_emotions:
+            for metric in self._statistics:
+                feature_id = max(list(self._features_id_name_dict.keys())) + 1
+                if self._retweet_flag:
+                    self._features_id_name_dict[
+                        feature_id] = "retweet_" + f"tweets_nrc_emotions_score_statistics_{vader_emotion}_" + metric
+                elif self._quote_flag:
+                    self._features_id_name_dict[
+                        feature_id] = "quote_" + f"tweets_nrc_emotions_score_statistics_{vader_emotion}_" + metric
+                else:
+                    self._features_id_name_dict[feature_id] = f"tweets_nrc_emotions_score_statistics_{vader_emotion}_" + metric
+
+                metric_function = self._statistics[metric](vader_emotions_dict[vader_emotion])
+
+                for tweet in self._tweets_collection:
+                    self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
     def tweets_vad_sentiment_score_statistics(self):
-        pass
+        vad_emotions = self._text_analysis.get_vad_emotional_dimensions()
+        vad_emotions_dict = {tag: [] for tag in vad_emotions}
+
+        for tweet in self._tweets_collection:
+            if self._retweet_flag:
+                twt_txt = tweet.get_tweet_retweet_object().get_tweet_text()
+            elif self._quote_flag:
+                twt_txt = tweet.get_quote_status_object().get_tweet_text()
+            else:
+                twt_txt = tweet.get_tweet_text()
+
+            twt_vad_emotions = self._text_analysis.sentiment_analysis(sentiment_engine="vad", input_text=twt_txt)
+            for emotion in twt_vad_emotions:
+                vad_emotions_dict[emotion.replace("_score", "")].append(twt_vad_emotions[emotion])
+
+        for vad_emotion in vad_emotions:
+            for metric in self._statistics:
+                feature_id = max(list(self._features_id_name_dict.keys())) + 1
+                if self._retweet_flag:
+                    self._features_id_name_dict[
+                        feature_id] = "retweet_" + f"tweets_vad_sentiment_score_statistics_{vad_emotion}_" + metric
+                elif self._quote_flag:
+                    self._features_id_name_dict[
+                        feature_id] = "quote_" + f"tweets_vad_sentiment_score_statistics_{vad_emotion}_" + metric
+                else:
+                    self._features_id_name_dict[feature_id] = f"tweets_vad_sentiment_score_statistics_{vad_emotion}_" + metric
+
+                metric_function = self._statistics[metric](vad_emotions_dict[vad_emotion])
+
+                for tweet in self._tweets_collection:
+                    self._tweets_features[tweet.get_tweet_id()][feature_id] = eval(metric_function)
 
 
 
